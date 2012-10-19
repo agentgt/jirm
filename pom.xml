@@ -3,7 +3,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>co.jirm</groupId>
-  <artifactId>jirm</artifactId>
+  <artifactId>jirm-parent</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -21,6 +21,9 @@
     <license>
       <name>The Apache Software License, Version 2.0</name>
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <comments>
+            This product includes software developed by Adam Gent (http://adamgent.com).
+      </comments>
     </license>
   </licenses>
 
@@ -143,14 +146,22 @@
         <groupId>com.mycila.maven-license-plugin</groupId>
         <artifactId>maven-license-plugin</artifactId>
         <version>1.10.b1</version>
-        <configuration>
-          <header>LICENSE</header>
-          <strictCheck>true</strictCheck>
-          <skipExistingHeaders>true</skipExistingHeaders>
-          <includes>
-            <include>src/main/java/**/*.java</include>
-          </includes>
-        </configuration>
+		<configuration>
+			<header>src/etc/header.txt</header>
+			<quiet>false</quiet>
+			<failIfMissing>true</failIfMissing>
+			<aggregate>false</aggregate>
+			<strictCheck>true</strictCheck>
+			<includes>
+				<include>src/main/java/**/*.java</include>
+				<include>src/test/java/**/*.java</include>
+			</includes>
+            <properties>
+                <name>the original author or authors</name>
+                <year>2012</year>
+            </properties>
+            <encoding>UTF-8</encoding>
+		</configuration>
         <executions>
           <execution>
             <phase>verify</phase>

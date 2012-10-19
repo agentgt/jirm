@@ -2,7 +2,7 @@
 
   <parent>
     <groupId>co.jirm</groupId>
-    <artifactId>jirm</artifactId>
+    <artifactId>jirm-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
