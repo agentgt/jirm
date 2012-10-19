@@ -97,6 +97,11 @@
 
 
 
+      <dependency>
+      	<groupId>com.google.guava</groupId>
+      	<artifactId>guava</artifactId>
+      	<version>11.0.2</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -132,28 +137,6 @@
         <configuration>
           <downloadSources>true</downloadSources>
         </configuration>
-      </plugin>
-
-      <!-- Checkstyle -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.9.1</version>
-        <configuration>
-          <consoleOutput>true</consoleOutput>
-          <configLocation>checkstyle.xml</configLocation>
-          <failsOnError>true</failsOnError>
-          <excludes>**/Parser*,**/Parboiled*,**/HbsServer*</excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>checkstyle</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>checkstyle</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -194,24 +177,6 @@
   </build>
 
   <profiles>
-    <profile>
-      <id>bench</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.12.3</version>
-            <inherited>false</inherited>
-            <configuration>
-              <includes>
-                <include>**/*BenchTest.java</include>
-              </includes>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
 
     <profile>
       <id>sonatype-oss-release</id>
