@@ -34,7 +34,20 @@ public class SqlPlaceholderParserTest {
 
 	@Before
 	public void setUp() throws Exception {}
-
+	
+	
+	@Test
+	public void testBasic() throws Exception {
+	
+		PlainSql sql = PlainSql.fromResource(getClass(), "select-test-bean.sql")
+				.set("name", "Adam")
+				.set("limit", 1);
+		assertEquals(ImmutableList.<Object>of("Adam", 1), sql.mergedParameters());
+		assertEquals(
+				"SELECT * from test_bean\n" + 
+				"WHERE stringProp like ? \n" + 
+				"LIMIT ? ", sql.getSql());
+	}
 	
 	@Test
 	public void test() throws Exception {
@@ -114,7 +127,7 @@ public class SqlPlaceholderParserTest {
 	public void testPerformanceFromClasspath() throws Exception {
 		Stopwatch sw = new Stopwatch().start();
 		for (int i = 0; i < 300000; i++) {
-			new PlainSql("").fromResource(getClass(), "search-recruiting-name.sql");
+			PlainSql.fromResource(getClass(), "search-recruiting-name.sql");
 		}
 		
 		assertTrue("Should be faster",sw.stop().elapsedMillis() < 3000);
@@ -122,9 +135,12 @@ public class SqlPlaceholderParserTest {
 	
 	@Test
 	public void testApos() throws Exception {
-		PlainSql sql = new PlainSql("").fromResource(getClass(), "/co/jirm/core/sql/select-test-bean.sql");
-		String result = sql.set("name", "Adam").set("limit", 1).getSql();
-		assertEquals("SELECT * from test_bean\n" + 
+		PlainSql sql = PlainSql.fromResource(getClass(), "select-test-bean.sql");
+		String result = sql
+				.set("name", "Adam")
+				.set("limit", 1).getSql();
+		assertEquals(
+				"SELECT * from test_bean\n" + 
 				"WHERE stringProp like ? \n" + 
 				"LIMIT ? ", result);
 	}

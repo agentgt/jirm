@@ -33,4 +33,9 @@ public class PlainSql extends MutableParameterizedSql<PlainSql>{
 				+ getNameParameters() + "]";
 	}
 	
+	
+	public static PlainSql fromResource(Class<?> k, String sql) {
+		return new PlainSql("").useResource(k, sql);
+	}
+	
 }

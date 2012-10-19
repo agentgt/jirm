@@ -46,7 +46,7 @@ public abstract class MutableParameterizedSql<T> extends MutableParameterized<T>
 		return parsedSql.getOriginalSql();
 	}
 	
-	public T fromResource(Class<?> k, String resource) {
+	public T useResource(Class<?> k, String resource) {
 		try {
 			return setSql(ResourceUtils.getClasspathResourceAsString(k, resource));
 		} catch (IOException e) {
