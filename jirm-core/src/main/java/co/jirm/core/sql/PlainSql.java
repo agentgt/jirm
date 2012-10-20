@@ -18,7 +18,7 @@ package co.jirm.core.sql;
 
 public class PlainSql extends MutableParameterizedSql<PlainSql>{
 
-	public PlainSql(String sql) {
+	private PlainSql(String sql) {
 		super(sql);
 	}
 
@@ -33,6 +33,9 @@ public class PlainSql extends MutableParameterizedSql<PlainSql>{
 				+ getNameParameters() + "]";
 	}
 	
+	public static PlainSql parse(String sql) {
+		return new PlainSql(sql);
+	}
 	
 	public static PlainSql fromResource(Class<?> k, String sql) {
 		return new PlainSql("").useResource(k, sql);

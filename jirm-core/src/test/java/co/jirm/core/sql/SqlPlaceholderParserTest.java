@@ -101,10 +101,10 @@ public class SqlPlaceholderParserTest {
 	
 	@Test
 	public void testNameParameters() throws Exception {
-		PlainSql sql = new PlainSql(ResourceUtils.getClasspathResourceAsString(getClass(), "search-recruiting-name.sql"));
+		PlainSql sql = PlainSql.parse(ResourceUtils.getClasspathResourceAsString(getClass(), "search-recruiting-name.sql"));
 		sql.with("1", "2", "3", "4");
 		assertEquals(ImmutableList.<Object>of("1","2","3", "4"), sql.mergedParameters());
-		sql = new PlainSql(ResourceUtils.getClasspathResourceAsString(getClass(), "search-recruiting-name.sql"));
+		sql = PlainSql.parse(ResourceUtils.getClasspathResourceAsString(getClass(), "search-recruiting-name.sql"));
 		sql
 			.set("now", "1")
 			.set("limit", "10")
@@ -117,7 +117,7 @@ public class SqlPlaceholderParserTest {
 		Stopwatch sw = new Stopwatch().start();
 		String sql = ResourceUtils.getClasspathResourceAsString(getClass(), "search-recruiting-name.sql");
 		for (int i = 0; i < 300000; i++) {
-			new PlainSql(sql);
+			PlainSql.parse(sql);
 		}
 		
 		assertTrue("Should be faster",sw.stop().elapsedMillis() < 3000);
