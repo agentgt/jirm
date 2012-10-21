@@ -9,31 +9,23 @@ import co.jirm.core.execute.SqlExecutorRowMapper;
 import co.jirm.core.sql.ParametersSql;
 
 
-public class SqlTypedQueryFor<T> implements TypedQueryFor<T> {
-	private final SqlExecutor sqlExecutor;
+public class SqlTypedQueryFor<T> extends SqlQueryFor implements TypedQueryFor<T> {
+
 	private final SqlExecutorRowMapper<T> rowMapper;
-	private final ParametersSql parametersSql;
 	
 	private SqlTypedQueryFor(
 			SqlExecutor sqlExecutor, 
 			SqlExecutorRowMapper<T> rowMapper,
 			ParametersSql parametersSql) {
-		super();
-		this.sqlExecutor = sqlExecutor;
+		super(sqlExecutor, parametersSql);
 		this.rowMapper = rowMapper;
-		this.parametersSql = parametersSql;
 	}
-
-	@Override
-	public int forInt() {
-		return sqlExecutor.queryForInt(parametersSql.getSql(), 
-				parametersSql.mergedParameters().toArray());
-	}
-
-	@Override
-	public long forLong() {
-		return sqlExecutor.queryForLong(parametersSql.getSql(), 
-				parametersSql.mergedParameters().toArray());
+	
+	public static <T> SqlTypedQueryFor<T> newTypedQueryFor(
+			SqlExecutor sqlExecutor, 
+			SqlExecutorRowMapper<T> rowMapper,
+			ParametersSql parametersSq) {
+		return new SqlTypedQueryFor<T>(sqlExecutor, rowMapper, parametersSq);
 	}
 
 	@Override
