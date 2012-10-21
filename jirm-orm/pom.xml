@@ -12,6 +12,11 @@
   <name>ORM Module</name>
 
 	<dependencies>
+	  	<dependency>
+	  		<groupId>co.jirm</groupId>
+	  		<artifactId>jirm-core</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+	  	</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -24,6 +29,25 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+		<dependency>
+        	<groupId>org.codehaus.jackson</groupId>
+        	<artifactId>jackson-mapper-asl</artifactId>
+        </dependency>
+		<dependency>
+		  <groupId>com.fasterxml.jackson</groupId>
+		  <artifactId>jackson-datatype-guava</artifactId>
+		  <version>1.9.1</version>
+		</dependency>
+        <dependency>
+        	<groupId>joda-time</groupId>
+        	<artifactId>joda-time</artifactId>
+        	<version>2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>1.0.1.Final</version>
+        </dependency>
 	</dependencies>
 
 </project>
