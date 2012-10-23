@@ -22,6 +22,11 @@
   		<artifactId>jirm-core</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   	</dependency>
+  	<dependency>
+  		<groupId>co.jirm</groupId>
+  		<artifactId>jirm-orm</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
   </dependencies>
 
 </project>

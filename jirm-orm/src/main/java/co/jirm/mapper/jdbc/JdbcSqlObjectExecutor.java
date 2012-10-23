@@ -19,7 +19,7 @@ public abstract class JdbcSqlObjectExecutor implements SqlQueryExecutor {
 	private final SqlObjectConfig objectConfig;
 	private final JdbcResultSetMapperHelper helper = new JdbcResultSetMapperHelper();
 	
-	private JdbcSqlObjectExecutor(SqlObjectConfig objectConfig) {
+	protected JdbcSqlObjectExecutor(SqlObjectConfig objectConfig) {
 		super();
 		this.objectConfig = objectConfig;
 	}
