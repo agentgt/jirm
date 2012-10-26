@@ -11,11 +11,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import co.jirm.core.util.ObjectMapUtils;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 
 public class JdbcResultSetMapperHelper {
@@ -33,7 +33,7 @@ public class JdbcResultSetMapperHelper {
 			if ( (columnName = rsmd.getColumnLabel(i)) != null && columnName.contains(".")) {
 				Object value = getColumnValue(definition, rs, i);
 				List<String> names = Lists.newArrayList(splitter.split(columnName));
-				pushPath(mapOfColValues, names, value);
+				ObjectMapUtils.pushPath(mapOfColValues, names, value);
 			}
 			//else if ( (columnName = rsmd.getColumnName(i)) != null && columnName.contains(".")) {
 				//TODO make this work.
@@ -106,29 +106,5 @@ public class JdbcResultSetMapperHelper {
 		return obj;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static void pushPath(final Map<String, Object> m, List<String> names, Object value) {
-		Map<String,Object> current = m;
-		int j = 0;
-		for (String n : names) {
-			j++;
-			if (j == names.size()) {
-				current.put(n, value);
-				break;
-			}
-			Object o = current.get(n);
-			if (o == null) {
-				Map<String, Object> sub = Maps.newLinkedHashMap();
-				current.put(n, sub);
-				current = sub;
-			}
-			else if (o instanceof Map) {
-				current = (Map<String,Object>) o;
-			}
-			else {
-				throw new IllegalArgumentException("Cannot set value to " + names);
-			}
-		}
-	}
 
 }

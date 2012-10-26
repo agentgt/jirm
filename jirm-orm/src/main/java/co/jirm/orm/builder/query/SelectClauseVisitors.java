@@ -1,18 +1,19 @@
-package co.jirm.orm.builder;
+package co.jirm.orm.builder.query;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import co.jirm.core.sql.Parameters;
 import co.jirm.core.util.SafeAppendable;
-import co.jirm.orm.builder.ClauseVisitor.SimpleClauseVisitor;
-import co.jirm.orm.builder.query.WhereClauseBuilder;
+import co.jirm.orm.builder.ConditionVisitor;
+import co.jirm.orm.builder.ImmutableCondition;
+import co.jirm.orm.builder.query.SelectClauseVisitor.SimpleClauseVisitor;
 
 import com.google.common.collect.ImmutableList;
 
 
-public class Visitors {
+public class SelectClauseVisitors {
 	
-	public static ClauseVisitor clauseVisitor(final Appendable appendable) {
+	public static SelectClauseVisitor clauseVisitor(final Appendable appendable) {
 
 		final SafeAppendable sb = new SafeAppendable(appendable);
 		
@@ -25,7 +26,7 @@ public class Visitors {
 			 */
 			
 			@Override
-			protected void doVisit(SqlClause<?> clause) {
+			protected void doVisit(SqlSelectClause<?> clause) {
 				if (! appendStart(clause)) return;
 				sb.append(clause.getSql());
 			}
@@ -36,7 +37,7 @@ public class Visitors {
 				whereClauseBuilder.getCondition().accept(conditionVisitor(sb.getAppendable()));
 			}
 			
-			private boolean appendStart(Clause<?> k) {
+			private boolean appendStart(SelectClause<?> k) {
 				if (k.isNoOp()) return false;
 				if (first.get() ) {
 					first.set(false);
@@ -44,7 +45,7 @@ public class Visitors {
 				else {
 					sb.append(" ");
 				}
-				if (k.getType() != ClauseType.CUSTOM)
+				if (k.getType() != SelectClauseType.CUSTOM)
 					sb.append(k.getType().getSql()).append(" ");
 				return true;
 			}

@@ -1,20 +1,12 @@
-package co.jirm.orm.builder;
+package co.jirm.orm.builder.query;
 
 import co.jirm.core.sql.MutableParameters;
 import co.jirm.core.sql.Parameters;
 import co.jirm.orm.builder.ConditionVisitor.ParametersConditionVisitor;
-import co.jirm.orm.builder.query.LimitClauseBuilder;
-import co.jirm.orm.builder.query.OffsetClauseBuilder;
-import co.jirm.orm.builder.query.OrderByClauseBuilder;
-import co.jirm.orm.builder.query.WhereClauseBuilder;
 
 
-public abstract class ClauseVisitor {
+public abstract class SelectClauseVisitor {
 	
-	public interface Acceptor {
-		public <C extends ClauseVisitor> C accept(C visitor);
-	}
-
 	public abstract void visit(WhereClauseBuilder<?> whereClauseBuilder);
 	public abstract void visit(OrderByClauseBuilder<?> clauseBuilder);
 	public abstract void visit(LimitClauseBuilder<?> limitClauseBuilder);
@@ -23,15 +15,15 @@ public abstract class ClauseVisitor {
 
 	
 	
-	public Object startOn(Clause<?> klause) {
+	public Object startOn(SelectVisitorAcceptor klause) {
 		klause.accept(this);
 		return this;
 	}
 	
 	
-	public abstract static class SimpleClauseVisitor extends ClauseVisitor {
+	public abstract static class SimpleClauseVisitor extends SelectClauseVisitor {
 
-		protected abstract void doVisit(SqlClause<?> clause);
+		protected abstract void doVisit(SqlSelectClause<?> clause);
 		
 		@Override
 		public abstract void visit(WhereClauseBuilder<?> whereClauseBuilder);
@@ -58,7 +50,7 @@ public abstract class ClauseVisitor {
 		
 	}
 	
-	public abstract static class ParametersClauseVisitor extends ClauseVisitor {
+	public abstract static class ParametersClauseVisitor extends SelectClauseVisitor {
 
 		private final ParametersConditionVisitor conditionVisitor = new ParametersConditionVisitor() {
 			@Override
@@ -96,7 +88,7 @@ public abstract class ClauseVisitor {
 		
 	}
 	
-	public static MutableParameters getParameters(Clause<?> k) {
+	public static MutableParameters getParameters(SelectVisitorAcceptor k) {
 		final MutableParameters mp = new MutableParameters();
 		new ParametersClauseVisitor() {
 			@Override

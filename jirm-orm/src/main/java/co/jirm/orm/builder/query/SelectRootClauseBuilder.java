@@ -2,10 +2,6 @@ package co.jirm.orm.builder.query;
 
 import java.util.List;
 
-import co.jirm.orm.builder.Clause;
-import co.jirm.orm.builder.ClauseType;
-import co.jirm.orm.builder.ClauseVisitor;
-import co.jirm.orm.builder.CustomClauseBuilder;
 import co.jirm.orm.builder.ImmutableCondition;
 
 import com.google.common.collect.ImmutableList;
@@ -13,13 +9,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 
-public class SelectRootClauseBuilder<I> implements Clause<I> {
+public class SelectRootClauseBuilder<I> implements SelectClause<I> {
 	
-	private final ClauseTransform<SelectRootClauseBuilder<I>, I> factory;
-	protected final List<Clause<I>> children = Lists.newArrayList();
+	private final SelectClauseTransform<SelectRootClauseBuilder<I>, I> factory;
+	protected final List<SelectClause<I>> children = Lists.newArrayList();
 	
 	
-	private SelectRootClauseBuilder(ClauseTransform<SelectRootClauseBuilder<I>, I> factory) {
+	private SelectRootClauseBuilder(SelectClauseTransform<SelectRootClauseBuilder<I>, I> factory) {
 		super();
 		this.factory = factory;
 	}
@@ -36,7 +32,7 @@ public class SelectRootClauseBuilder<I> implements Clause<I> {
 		throw new UnsupportedOperationException("Cannot do that yet");
 	}
 	@Override
-	public ClauseType getType() {
+	public SelectClauseType getType() {
 		throw new UnsupportedOperationException("Cannot do that yet");
 	}
 	@Override
@@ -61,7 +57,7 @@ public class SelectRootClauseBuilder<I> implements Clause<I> {
 		return this;
 	}
 
-	public static <I> SelectRootClauseBuilder<I> using(ClauseTransform<SelectRootClauseBuilder<I>, I> factory) {
+	public static <I> SelectRootClauseBuilder<I> using(SelectClauseTransform<SelectRootClauseBuilder<I>, I> factory) {
 		return new SelectRootClauseBuilder<I>(factory);
 	}
 	
@@ -73,18 +69,18 @@ public class SelectRootClauseBuilder<I> implements Clause<I> {
 		return addClause(CustomClauseBuilder.newCustomClause(this, "").useResource(k, resource));
 	}
 	
-	protected <K extends Clause<I>> K addClause(K k) {
+	protected <K extends SelectClause<I>> K addClause(K k) {
 		children.add(k);
 		return k;
 	}
-	protected <K extends Clause<I>> K addFirstClause(K k) {
+	protected <K extends SelectClause<I>> K addFirstClause(K k) {
 		children.add(0, k);
 		return k;
 	}
 	
 	@Override
-	public <C extends ClauseVisitor> C accept(C visitor) {
-		for (Clause<I> k : children) {
+	public <C extends SelectClauseVisitor> C accept(C visitor) {
+		for (SelectClause<I> k : children) {
 			k.accept(visitor);
 		}
 		return visitor;

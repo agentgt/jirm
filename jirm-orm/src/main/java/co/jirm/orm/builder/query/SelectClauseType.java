@@ -1,7 +1,7 @@
-package co.jirm.orm.builder;
+package co.jirm.orm.builder.query;
 
 
-public enum ClauseType {
+public enum SelectClauseType {
 	
 	ROOT(null),
 	CUSTOM(""),
@@ -12,7 +12,7 @@ public enum ClauseType {
 	
 	private final String sql;
 	
-	private ClauseType(String sql) {
+	private SelectClauseType(String sql) {
 		this.sql = sql;
 	}
 	

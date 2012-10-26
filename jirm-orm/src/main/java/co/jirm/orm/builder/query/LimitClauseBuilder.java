@@ -1,23 +1,19 @@
 package co.jirm.orm.builder.query;
 
-import co.jirm.orm.builder.AbstractSqlParameterizedClause;
-import co.jirm.orm.builder.Clause;
-import co.jirm.orm.builder.ClauseType;
-import co.jirm.orm.builder.ClauseVisitor;
 
 
 
-public class LimitClauseBuilder<I> extends AbstractSqlParameterizedClause<LimitClauseBuilder<I>, I> {
+public class LimitClauseBuilder<I> extends AbstractSqlParameterizedSelectClause<LimitClauseBuilder<I>, I> implements SelectVisitorAcceptor {
 	
-	private LimitClauseBuilder(Clause<I> parent, String sql) {
-		super(parent, ClauseType.LIMIT, sql);
+	private LimitClauseBuilder(SelectClause<I> parent, String sql) {
+		super(parent, SelectClauseType.LIMIT, sql);
 	}
 	
-	static <I> LimitClauseBuilder<I> newInstance(Clause<I> parent, String sql) {
+	static <I> LimitClauseBuilder<I> newInstance(SelectClause<I> parent, String sql) {
 		return new LimitClauseBuilder<I>(parent, sql);
 	}
 	
-	static <I> LimitClauseBuilder<I> newInstanceWithLimit(Clause<I> parent, Number i) {
+	static <I> LimitClauseBuilder<I> newInstanceWithLimit(SelectClause<I> parent, Number i) {
 		return new LimitClauseBuilder<I>(parent, "?").with(i.longValue());
 	}
 
@@ -34,9 +30,9 @@ public class LimitClauseBuilder<I> extends AbstractSqlParameterizedClause<LimitC
 	}
 	
 	@Override
-	public <C extends ClauseVisitor> C accept(C visitor) {
+	public <C extends SelectClauseVisitor> C accept(C visitor) {
 		visitor.visit(this);
-		for (Clause<I> k : children) {
+		for (SelectClause<I> k : children) {
 			k.accept(visitor);
 		}
 		return visitor;

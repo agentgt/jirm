@@ -1,19 +1,15 @@
 package co.jirm.orm.builder.query;
 
-import co.jirm.orm.builder.AbstractSqlParameterizedClause;
-import co.jirm.orm.builder.Clause;
-import co.jirm.orm.builder.ClauseType;
-import co.jirm.orm.builder.ClauseVisitor;
 
 
 
-public class OrderByClauseBuilder<I> extends AbstractSqlParameterizedClause<OrderByClauseBuilder<I>, I> {
+public class OrderByClauseBuilder<I> extends AbstractSqlParameterizedSelectClause<OrderByClauseBuilder<I>, I> {
 	
-	private OrderByClauseBuilder(Clause<I> parent, String sql) {
-		super(parent, ClauseType.ORDERBY, sql);
+	private OrderByClauseBuilder(SelectClause<I> parent, String sql) {
+		super(parent, SelectClauseType.ORDERBY, sql);
 	}
 	
-	public static <I> OrderByClauseBuilder<I> newInstance(Clause<I> parent, String sql) {
+	public static <I> OrderByClauseBuilder<I> newInstance(SelectClause<I> parent, String sql) {
 		return new OrderByClauseBuilder<I>(parent, sql);
 	}
 	
@@ -24,9 +20,9 @@ public class OrderByClauseBuilder<I> extends AbstractSqlParameterizedClause<Orde
 	}
 	
 	@Override
-	public <C extends ClauseVisitor> C accept(C visitor) {
+	public <C extends SelectClauseVisitor> C accept(C visitor) {
 		visitor.visit(this);
-		for (Clause<I> k : children) {
+		for (SelectClause<I> k : children) {
 			k.accept(visitor);
 		}
 		return visitor;
