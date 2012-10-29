@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import co.jirm.core.execute.SqlExecutor;
-import co.jirm.core.execute.SqlExecutorRowMapper;
 import co.jirm.core.util.JirmPrecondition;
 import co.jirm.core.util.ObjectMapUtils;
 import co.jirm.core.util.ObjectMapUtils.NestedKeyValue;
@@ -20,6 +19,7 @@ import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
 import co.jirm.orm.builder.query.SelectRootClauseBuilder;
+import co.jirm.orm.builder.update.UpdateBuilderFactory;
 import co.jirm.orm.query.QueryObjectTemplate;
 import co.jirm.orm.query.QueryObjectTemplate.CountBuilder;
 import co.jirm.orm.query.QueryObjectTemplate.SelectBuilder;
@@ -28,7 +28,6 @@ import co.jirm.orm.writer.SqlWriterStrategy;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
@@ -40,16 +39,23 @@ public class DaoTemplate<T> {
 	private final SqlObjectConfig config;
 	private final SqlObjectDefinition<T> definition;
 	private final QueryObjectTemplate<T> queryTemplate;
+	private final UpdateBuilderFactory<T> updateBuilderFactory;
 	private final SqlWriterStrategy writerStrategy;
 	
-	private DaoTemplate(SqlExecutor sqlExecutor, SqlObjectConfig config, SqlObjectDefinition<T> definition,
-			SqlWriterStrategy writerStrategy, QueryObjectTemplate<T> queryTemplate) {
+	private DaoTemplate(
+			SqlExecutor sqlExecutor, 
+			SqlObjectConfig config, 
+			SqlObjectDefinition<T> definition,
+			SqlWriterStrategy writerStrategy, 
+			QueryObjectTemplate<T> queryTemplate,
+			UpdateBuilderFactory<T> updateBuilderFactory) {
 		super();
 		this.sqlExecutor = sqlExecutor;
 		this.config = config;
 		this.definition = definition;
 		this.writerStrategy = writerStrategy;
 		this.queryTemplate = queryTemplate;
+		this.updateBuilderFactory = updateBuilderFactory;
 	}
 
 	private LinkedHashMap<String, Object> toLinkedHashMap(T t, boolean bulkInsert) {
@@ -137,25 +143,14 @@ public class DaoTemplate<T> {
 		}
 		checkState(! where.isEmpty());
 		JirmPrecondition.check.state(!where.isEmpty(), "where should not be empty");
-		return update(m, ImmutableMap.<String,Object>of(), where);
+		return update(m, where);
 	}
 	
-	public int update(Map<String,Object> setValues, Map<String,Object> addValues, Map<String, Object> filters) {
-		KeysAndValues<T> kv = keysAndValues(setValues);
-		KeysAndValues<T> kvAdd = keysAndValues(addValues);
-		KeysAndValues<T> kvFilters = keysAndValues(filters);
-		
-		StringBuilder qb = new StringBuilder();
-		qb.append("UPDATE ")
-			.append(definition.getSqlName())
-			.append(" SET");
-		if ( ! kv.isEmpty())
-			qb.append(" ").append(kv.updateClause());
-		if ( ! kvAdd.isEmpty())
-			qb.append(" ").append(kvAdd.addClause());
-		if (! kvFilters.isEmpty())
-			qb.append(" ").append("WHERE ").append(kvFilters.andClause());
-		return template.update(qb.toString(), kv.toUpdateValues().moreValues(kvAdd).whereValues(kvFilters).values());
+	public int update(Map<String,Object> setValues, Map<String, Object> filters) {
+		return updateBuilderFactory.update()
+			.setAll(setValues)
+			.where().propertyAll(filters)
+			.execute();
 	}
 	
 	public T reload(T t) {

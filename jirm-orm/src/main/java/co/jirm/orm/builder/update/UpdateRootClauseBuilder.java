@@ -1,6 +1,7 @@
 package co.jirm.orm.builder.update;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -24,6 +25,10 @@ public class UpdateRootClauseBuilder<I> implements UpdateClause<I> {
 	
 	public SetClauseBuilder<I> set(String property, Object value) {
 		return addClause(SetClauseBuilder.newInstance(this).set(property, value));
+	}
+	
+	public SetClauseBuilder<I> setAll(Map<String,Object> m) {
+		return addClause(SetClauseBuilder.newInstance(this).setAll(m));
 	}
 	
 	public UpdateRootClauseBuilder<I> header(String sql) {

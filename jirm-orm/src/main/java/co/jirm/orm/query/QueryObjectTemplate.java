@@ -180,7 +180,7 @@ public class QueryObjectTemplate<T> {
 			String result = replace(sb);
 			
 			B b = createBuilder(result);
-			b.addAll(SelectClauseVisitor.getParameters(clause));
+			b.addAll(SelectClauseVisitors.getParameters(clause));
 			return b;
 		}
 		

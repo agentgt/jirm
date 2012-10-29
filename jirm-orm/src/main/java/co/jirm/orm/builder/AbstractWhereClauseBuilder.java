@@ -1,5 +1,8 @@
 package co.jirm.orm.builder;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -56,6 +59,13 @@ public abstract class AbstractWhereClauseBuilder<B extends Condition<B>, I> impl
 	
 	public B property(String property, Object o) {
 		return andProperty(property).eq(o);
+	}
+	
+	public B propertyAll(Map<String, Object> m) {
+		for(Entry<String,Object> e : m.entrySet()) {
+			andProperty(e.getKey()).eq(e.getValue());
+		}
+		return getSelf();
 	}
 	
 	public PropertyPath<B> andProperty(String property) {

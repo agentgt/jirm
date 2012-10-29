@@ -59,6 +59,11 @@ public abstract class MutableParameterized<T> implements ParametersBuilder<T> {
 		return getSelf();
 	}
 	
+	public T bindAll(Map<String,Object> m) {
+		this.nameParameters.putAll(m);
+		return getSelf();
+	}
+	
 	@Override
 	public String toString() {
 		return "MutableParameterized [parameters=" + parameters + ", nameParameters=" + nameParameters + "]";
