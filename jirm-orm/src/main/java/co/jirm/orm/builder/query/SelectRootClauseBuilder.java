@@ -44,12 +44,12 @@ public class SelectRootClauseBuilder<I> implements SelectClause<I> {
 		return factory.transform(this);
 	}
 	
-	public WhereClauseBuilder<I> where() {
-		return addClause(WhereClauseBuilder.newWhereClauseBuilder(this, ImmutableCondition.where()));
+	public SelectWhereClauseBuilder<I> where() {
+		return addClause(SelectWhereClauseBuilder.newWhereClauseBuilder(this, ImmutableCondition.where()));
 	}
 	
-	public WhereClauseBuilder<I> where(String sql) {
-		return addClause(WhereClauseBuilder.newWhereClauseBuilder(this, ImmutableCondition.where(sql)));
+	public SelectWhereClauseBuilder<I> where(String sql) {
+		return addClause(SelectWhereClauseBuilder.newWhereClauseBuilder(this, ImmutableCondition.where(sql)));
 	}
 	
 	public SelectRootClauseBuilder<I> header(String sql) {

@@ -8,18 +8,18 @@ import co.jirm.orm.builder.ImmutableCondition;
 import com.google.common.collect.Lists;
 
 
-public class WhereClauseBuilder<I> extends AbstractWhereClauseBuilder<WhereClauseBuilder<I>, I> implements SelectClause<I> {
+public class SelectWhereClauseBuilder<I> extends AbstractWhereClauseBuilder<SelectWhereClauseBuilder<I>, I> implements SelectClause<I> {
 	
 	private final SelectClause<I> parent;
 	private final List<SelectClause<I>> children = Lists.newArrayList();
 	
-	private WhereClauseBuilder(SelectClause<I> parent, ImmutableCondition condition) {
+	private SelectWhereClauseBuilder(SelectClause<I> parent, ImmutableCondition condition) {
 		super(condition);
 		this.parent = parent;
 	}
 	
-	static <I> WhereClauseBuilder<I> newWhereClauseBuilder(SelectClause<I> parent, ImmutableCondition condition) {
-		return new WhereClauseBuilder<I>(parent, condition);
+	static <I> SelectWhereClauseBuilder<I> newWhereClauseBuilder(SelectClause<I> parent, ImmutableCondition condition) {
+		return new SelectWhereClauseBuilder<I>(parent, condition);
 	}
 	
 	public OrderByClauseBuilder<I> orderBy(String sql) {
@@ -39,7 +39,7 @@ public class WhereClauseBuilder<I> extends AbstractWhereClauseBuilder<WhereClaus
 	}
 
 	@Override
-	protected WhereClauseBuilder<I> getSelf() {
+	protected SelectWhereClauseBuilder<I> getSelf() {
 		return this;
 	}
 	

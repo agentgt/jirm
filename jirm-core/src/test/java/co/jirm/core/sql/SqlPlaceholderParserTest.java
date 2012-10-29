@@ -40,8 +40,8 @@ public class SqlPlaceholderParserTest {
 	public void testBasic() throws Exception {
 	
 		PlainSql sql = PlainSql.fromResource(getClass(), "select-test-bean.sql")
-				.set("name", "Adam")
-				.set("limit", 1);
+				.bind("name", "Adam")
+				.bind("limit", 1);
 		assertEquals(ImmutableList.<Object>of("Adam", 1), sql.mergedParameters());
 		assertEquals(
 				"SELECT * from test_bean\n" + 
@@ -106,9 +106,9 @@ public class SqlPlaceholderParserTest {
 		assertEquals(ImmutableList.<Object>of("1","2","3", "4"), sql.mergedParameters());
 		sql = PlainSql.parse(ResourceUtils.getClasspathResourceAsString(getClass(), "search-recruiting-name.sql"));
 		sql
-			.set("now", "1")
-			.set("limit", "10")
-			.set("offset", "100");
+			.bind("now", "1")
+			.bind("limit", "10")
+			.bind("offset", "100");
 		assertEquals(ImmutableList.<Object>of("1","1","10", "100"), sql.mergedParameters());
 	}
 	
@@ -137,8 +137,8 @@ public class SqlPlaceholderParserTest {
 	public void testApos() throws Exception {
 		PlainSql sql = PlainSql.fromResource(getClass(), "select-test-bean.sql");
 		String result = sql
-				.set("name", "Adam")
-				.set("limit", 1).getSql();
+				.bind("name", "Adam")
+				.bind("limit", 1).getSql();
 		assertEquals(
 				"SELECT * from test_bean\n" + 
 				"WHERE stringProp like ? \n" + 

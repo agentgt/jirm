@@ -10,7 +10,7 @@ import co.jirm.core.sql.SqlSupplier;
 import com.google.common.collect.Lists;
 
 
-public abstract class AbstractSqlParameterizedUpdateClause<B, I> extends MutableParameterizedSql<B> implements UpdateClause<I>, SqlSupplier{
+public abstract class AbstractSqlParameterizedUpdateClause<B, I> extends MutableParameterizedSql<B> implements SqlUpdateClause<I>, SqlSupplier{
 
 	protected final List<UpdateClause<I>> children = Lists.newArrayList();
 	private final UpdateClause<I> parent;
@@ -37,8 +37,8 @@ public abstract class AbstractSqlParameterizedUpdateClause<B, I> extends Mutable
 	}
 	
 	@Override
-	public I query() {
-		return parent.query();
+	public I execute() {
+		return parent.execute();
 	}
 
 }

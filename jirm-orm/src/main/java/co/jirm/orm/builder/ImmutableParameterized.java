@@ -54,7 +54,7 @@ public abstract class ImmutableParameterized<T> implements ParametersBuilder<T> 
 		return nameParameters;
 	}
 	
-	public abstract T set(String key, Object value);
+	public abstract T bind(String key, Object value);
 	public abstract T with(Object ... value);
 	
 	public ImmutableList<Object> mergedParameters() {

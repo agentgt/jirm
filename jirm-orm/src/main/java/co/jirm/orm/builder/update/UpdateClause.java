@@ -9,7 +9,7 @@ public interface UpdateClause<I> extends Parameters, UpdateVisitorAcceptor {
 	
 	public boolean isNoOp();
 	
-	public I query();
+	public I execute();
 	
 	public interface UpdateClauseTransform<K extends UpdateClause<I>, I> {
 		I transform(K clause);

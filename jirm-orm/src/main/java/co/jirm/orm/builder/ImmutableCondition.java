@@ -119,7 +119,7 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
 		}
 		
 		@Override
-		public ImmutableCondition set(String key, Object value) {
+		public ImmutableCondition bind(String key, Object value) {
 			return new CombinedCondition(this, key, value);
 		}
 
@@ -184,7 +184,7 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
 		}
 		
 		@Override
-		public ImmutableCondition set(String key, Object value) {
+		public ImmutableCondition bind(String key, Object value) {
 			return new CustomCondition(this, key, value);
 		}
 
@@ -245,7 +245,7 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
 		}
 		
 		@Override
-		public NotCondition set(String key, Object value) {
+		public NotCondition bind(String key, Object value) {
 			return new NotCondition(this, key, value);
 		}
 
@@ -305,7 +305,7 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
 		}
 
 		@Override
-		public ImmutableCondition set(String key, Object value) {
+		public ImmutableCondition bind(String key, Object value) {
 			throw JirmPrecondition.check.stateInvalid("Cannot set parameters on this condition.");
 		}
 

@@ -89,8 +89,8 @@ public abstract class AbstractWhereClauseBuilder<B extends Condition<B>, I> impl
 	
 	
 	@Override
-	public B set(String key, Object value) {
-		this.condition = this.condition.set(key, value);
+	public B bind(String key, Object value) {
+		this.condition = this.condition.bind(key, value);
 		return getSelf();
 	}
 	

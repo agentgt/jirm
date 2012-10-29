@@ -2,16 +2,92 @@ package co.jirm.orm.builder.query;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import co.jirm.core.sql.MutableParameters;
 import co.jirm.core.sql.Parameters;
 import co.jirm.core.util.SafeAppendable;
-import co.jirm.orm.builder.ConditionVisitor;
-import co.jirm.orm.builder.ImmutableCondition;
-import co.jirm.orm.builder.query.SelectClauseVisitor.SimpleClauseVisitor;
-
-import com.google.common.collect.ImmutableList;
+import co.jirm.orm.builder.ConditionVisitors;
+import co.jirm.orm.builder.ConditionVisitors.ParametersConditionVisitor;
 
 
 public class SelectClauseVisitors {
+	
+	public abstract static class SimpleClauseVisitor extends SelectClauseVisitor {
+
+		protected abstract void doVisit(SqlSelectClause<?> clause);
+		
+		@Override
+		public abstract void visit(SelectWhereClauseBuilder<?> whereClauseBuilder);
+
+		@Override
+		public void visit(OrderByClauseBuilder<?> clauseBuilder) {
+			doVisit(clauseBuilder);
+		}
+
+		@Override
+		public void visit(LimitClauseBuilder<?> limitClauseBuilder) {
+			doVisit(limitClauseBuilder);
+		}
+
+		@Override
+		public void visit(OffsetClauseBuilder<?> clauseBuilder) {
+			doVisit(clauseBuilder);
+		}
+
+		@Override
+		public void visit(CustomClauseBuilder<?> clauseBuilder) {
+			doVisit(clauseBuilder);
+		}
+		
+	}
+	
+	public abstract static class ParametersClauseVisitor extends SelectClauseVisitor {
+
+		private final ParametersConditionVisitor conditionVisitor = new ParametersConditionVisitor() {
+			@Override
+			public void doParameters(Parameters p) {
+				ParametersClauseVisitor.this.doParameters(p);
+			}
+		};
+		
+		@Override
+		public void visit(SelectWhereClauseBuilder<?> whereClauseBuilder) {
+			whereClauseBuilder.getCondition().accept(conditionVisitor);
+		}
+
+		@Override
+		public void visit(LimitClauseBuilder<?> limitClauseBuilder) {
+			doParameters(limitClauseBuilder);
+		}
+		
+		@Override
+		public void visit(OrderByClauseBuilder<?> clauseBuilder) {
+			doParameters(clauseBuilder);
+		}
+
+		@Override
+		public void visit(OffsetClauseBuilder<?> clauseBuilder) {
+			doParameters(clauseBuilder);
+		}
+
+		@Override
+		public void visit(CustomClauseBuilder<?> clauseBuilder) {
+			doParameters(clauseBuilder);
+		}
+
+		public abstract void doParameters(Parameters p);
+		
+	}
+	
+	public static MutableParameters getParameters(SelectVisitorAcceptor k) {
+		final MutableParameters mp = new MutableParameters();
+		new ParametersClauseVisitor() {
+			@Override
+			public void doParameters(Parameters p) {
+				mp.addAll(p);
+			}
+		}.startOn(k);
+		return mp;
+	}
 	
 	public static SelectClauseVisitor clauseVisitor(final Appendable appendable) {
 
@@ -32,9 +108,9 @@ public class SelectClauseVisitors {
 			}
 			
 			@Override
-			public void visit(WhereClauseBuilder<?> whereClauseBuilder) {
+			public void visit(SelectWhereClauseBuilder<?> whereClauseBuilder) {
 				if (! appendStart(whereClauseBuilder)) return;
-				whereClauseBuilder.getCondition().accept(conditionVisitor(sb.getAppendable()));
+				whereClauseBuilder.getCondition().accept(ConditionVisitors.conditionVisitor(sb.getAppendable()));
 			}
 			
 			private boolean appendStart(SelectClause<?> k) {
@@ -53,57 +129,5 @@ public class SelectClauseVisitors {
 		};
 		return cv;
 	}
-	public static ConditionVisitor conditionVisitor(final Appendable appendable) {
-		
-		final SafeAppendable sb = new SafeAppendable(appendable);
-		
-		ConditionVisitor v = new ConditionVisitor() {
-			private int depth = 0;
-			
-			@Override
-			public void visitAnd(ImmutableList<ImmutableCondition> conditions, Parameters parameters) {
-				depth++;
-				doCondition(" AND ", conditions, parameters);
-				
-			}
-			@Override
-			public void visitOr(ImmutableList<ImmutableCondition> conditions, Parameters parameters) {
-				depth++;
-				doCondition(" OR ", conditions, parameters);
-			}
-			
-			private void doCondition(String op, ImmutableList<ImmutableCondition> conditions, Parameters parameters) {
-				if (conditions.size() == 1) {
-					sb.append(op);
-					conditions.get(0).accept(this);
-					
-				}
-				else {
-					boolean top = depth == 1;
-					if (! top)
-						sb.append("( ");
-					boolean first = true;
-					for (ImmutableCondition c : conditions) {
-						if (first) { 
-							first = false; 
-							c.accept(this);
-						}
-						else {
-							sb.append(op);
-							c.accept(this);
-						}
-						
-					}
-					if (! top)
-						sb.append(" )");
-				}
-			}
 
-			@Override
-			public void visitSql(String sql, Parameters parameters) {
-				sb.append(sql);
-			}
-		};
-		return v;
-	}
 }

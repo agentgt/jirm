@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.text.StrLookup;
+import org.apache.commons.lang3.text.StrSubstitutor;
+
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
 
@@ -57,7 +60,17 @@ public class SqlWriterStrategy {
 		return marks;
 	}
 	
-
+	public String replacePropertyPaths(final SqlObjectDefinition<?> definition, final String sql) {
+		StrLookup<String> lookup = new StrLookup<String>() {
+			@Override
+			public String lookup(String key) {
+				return definition.parameterPathToSql(key).orNull();
+			}
+		};
+		StrSubstitutor s = new StrSubstitutor(lookup, "{{", "}}", '$');
+		String result = s.replace(sql);
+		return result;
+	}
 	
 	
 //	public String selectConjuntionQuery() {

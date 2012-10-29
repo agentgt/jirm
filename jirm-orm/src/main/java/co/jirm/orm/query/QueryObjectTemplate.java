@@ -15,6 +15,7 @@ import co.jirm.orm.builder.query.CustomClauseBuilder;
 import co.jirm.orm.builder.query.SelectRootClauseBuilder;
 import co.jirm.orm.builder.query.SelectClauseVisitors;
 import co.jirm.orm.builder.query.SelectClause.SelectClauseTransform;
+import co.jirm.orm.writer.SqlWriterStrategy;
 
 import com.google.common.base.Optional;
 
@@ -24,14 +25,18 @@ public class QueryObjectTemplate<T> {
 	private final SqlQueryExecutor queryExecutor;
 	private final SqlObjectDefinition<T> definition;
 	private final SqlExecutorRowMapper<T> objectRowMapper;
+	private final SqlWriterStrategy writerStrategy;
 	
-	
-	private QueryObjectTemplate(SqlQueryExecutor queryExecutor, SqlObjectDefinition<T> definition,
-			SqlExecutorRowMapper<T> objectRowMapper) {
+	private QueryObjectTemplate(
+			SqlQueryExecutor queryExecutor, 
+			SqlObjectDefinition<T> definition,
+			SqlExecutorRowMapper<T> objectRowMapper,
+			SqlWriterStrategy writerStrategy) {
 		super();
 		this.queryExecutor = queryExecutor;
 		this.definition = definition;
 		this.objectRowMapper = objectRowMapper;
+		this.writerStrategy = writerStrategy;
 	}
 
 	public Long queryForLong(ParametersSql sql) {
@@ -182,14 +187,7 @@ public class QueryObjectTemplate<T> {
 		protected abstract B createBuilder(String sql);
 
 		private String replace(StringBuilder sb) {
-			StrLookup<String> lookup = new StrLookup<String>() {
-				@Override
-				public String lookup(String key) {
-					return definition.parameterPathToSql(key).orNull();
-				}
-			};
-			StrSubstitutor s = new StrSubstitutor(lookup, "{{", "}}", '$');
-			String result = s.replace(sb.toString());
+			String result = writerStrategy.replacePropertyPaths(definition, sb.toString());
 			return result;
 		}
 	}

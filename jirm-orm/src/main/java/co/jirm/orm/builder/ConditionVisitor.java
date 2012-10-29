@@ -25,28 +25,5 @@ public abstract class ConditionVisitor {
 		condition.accept(this);
 	}
 	
-	public static abstract class ParametersConditionVisitor extends ConditionVisitor {
-
-		@Override
-		public void visitAnd(ImmutableList<ImmutableCondition> conditions, Parameters parameters) {
-			super.visitAnd(conditions, parameters);
-			doParameters(parameters);
-		}
-
-		@Override
-		public void visitOr(ImmutableList<ImmutableCondition> conditions, Parameters parameters) {
-			super.visitOr(conditions, parameters);
-			doParameters(parameters);
-		}
-
-		@Override
-		public void visitSql(String sql, Parameters parameters) {
-			doParameters(parameters);
-		}
-		
-		public abstract void doParameters(Parameters p);
-		
-	}
-	
 	
 }

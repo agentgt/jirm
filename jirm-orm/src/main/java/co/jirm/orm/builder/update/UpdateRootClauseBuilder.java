@@ -18,6 +18,24 @@ public class UpdateRootClauseBuilder<I> implements UpdateClause<I> {
 		this.handoff = handoff;
 	}
 	
+	public static <I> UpdateRootClauseBuilder<I> newInstance(UpdateClauseTransform<UpdateRootClauseBuilder<I>, I> factory) {
+		return new UpdateRootClauseBuilder<I>(factory);
+	}
+	
+	public SetClauseBuilder<I> set(String property, Object value) {
+		return addClause(SetClauseBuilder.newInstance(this).set(property, value));
+	}
+	
+	public UpdateRootClauseBuilder<I> header(String sql) {
+		addFirstClause(UpdateCustomClauseBuilder.newInstance(this, sql));
+		return this;
+	}
+	
+	protected <K extends UpdateClause<I>> K addFirstClause(K k) {
+		children.add(0, k);
+		return k;
+	}
+	
 	@Override
 	public ImmutableList<Object> getParameters() {
 		throw new UnsupportedOperationException("Cannot do that yet");
@@ -40,7 +58,7 @@ public class UpdateRootClauseBuilder<I> implements UpdateClause<I> {
 		return true;
 	}
 	@Override
-	public I query() {
+	public I execute() {
 		return handoff.transform(this);
 	}
 
@@ -50,6 +68,11 @@ public class UpdateRootClauseBuilder<I> implements UpdateClause<I> {
 			k.accept(visitor);
 		}
 		return visitor;
+	}
+	
+	protected <K extends UpdateClause<I>> K addClause(K k) {
+		children.add(k);
+		return k;
 	}
 
 }

@@ -38,7 +38,7 @@ public abstract class MutableParameterized<T> implements ParametersBuilder<T> {
 		return ImmutableMap.copyOf(nameParameters);
 	}
 	@Override
-	public T set(String key, Object value) {
+	public T bind(String key, Object value) {
 		nameParameters.put(key, value);
 		return getSelf();
 	}
