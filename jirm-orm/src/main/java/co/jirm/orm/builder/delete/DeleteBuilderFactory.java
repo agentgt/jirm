@@ -3,6 +3,7 @@ package co.jirm.orm.builder.delete;
 import co.jirm.core.execute.SqlUpdateExecutor;
 import co.jirm.core.sql.Parameters;
 import co.jirm.mapper.definition.SqlObjectDefinition;
+import co.jirm.orm.OrmConfig;
 import co.jirm.orm.builder.delete.DeleteClause.DeleteClauseTransform;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
@@ -21,9 +22,14 @@ public class DeleteBuilderFactory<T> {
 		this.definition = definition;
 		this.writerStrategy = writerStrategy;
 	}
+	
+	public static <T> DeleteBuilderFactory<T> newInstance(SqlObjectDefinition<T> definition, OrmConfig ormConfig) {
+		return new DeleteBuilderFactory<T>(ormConfig.getSqlExecutor(), definition, ormConfig.getSqlWriterStrategy());
+	}
+	
 	public DeleteRootClauseBuilder<Integer> delete() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("DELETE ").append(definition.getSqlName()).append(" ");
+		writerStrategy.deleteStatementBeforeWhere(sb, definition);
 		return DeleteRootClauseBuilder.newInstance(new RootClauseHandoff(sb.toString()) {
 			@Override
 			protected Integer execute(String sql, Object[] values) {

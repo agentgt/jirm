@@ -18,11 +18,15 @@ import co.jirm.core.util.ObjectMapUtils.NestedKeyValue;
 import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
+import co.jirm.orm.OrmConfig;
+import co.jirm.orm.builder.delete.DeleteBuilderFactory;
+import co.jirm.orm.builder.delete.DeleteRootClauseBuilder;
 import co.jirm.orm.builder.query.SelectBuilderFactory;
 import co.jirm.orm.builder.query.SelectRootClauseBuilder;
 import co.jirm.orm.builder.query.SelectBuilderFactory.CountBuilder;
 import co.jirm.orm.builder.query.SelectBuilderFactory.SelectBuilder;
 import co.jirm.orm.builder.update.UpdateBuilderFactory;
+import co.jirm.orm.builder.update.UpdateRootClauseBuilder;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
 import com.google.common.base.Function;
@@ -33,22 +37,24 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 
 
-public class DaoTemplate<T> {
+public final class JirmDao<T> {
 
 	private final SqlExecutor sqlExecutor;
 	private final SqlObjectConfig config;
 	private final SqlObjectDefinition<T> definition;
 	private final SelectBuilderFactory<T> selectBuilderFactory;
 	private final UpdateBuilderFactory<T> updateBuilderFactory;
+	private final DeleteBuilderFactory<T> deleteBuilderFactory;
 	private final SqlWriterStrategy writerStrategy;
 	
-	private DaoTemplate(
+	private JirmDao(
 			SqlExecutor sqlExecutor, 
 			SqlObjectConfig config, 
 			SqlObjectDefinition<T> definition,
 			SqlWriterStrategy writerStrategy, 
 			SelectBuilderFactory<T> queryTemplate,
-			UpdateBuilderFactory<T> updateBuilderFactory) {
+			UpdateBuilderFactory<T> updateBuilderFactory,
+			DeleteBuilderFactory<T> deleteBuilderFactory) {
 		super();
 		this.sqlExecutor = sqlExecutor;
 		this.config = config;
@@ -56,6 +62,20 @@ public class DaoTemplate<T> {
 		this.writerStrategy = writerStrategy;
 		this.selectBuilderFactory = queryTemplate;
 		this.updateBuilderFactory = updateBuilderFactory;
+		this.deleteBuilderFactory = deleteBuilderFactory;
+	}
+	
+	public static <T> JirmDao<T> newInstance(Class<T> type, OrmConfig config) {
+		SqlObjectDefinition<T> definition = config.getSqlObjectConfig().resolveObjectDefinition(type);
+		SelectBuilderFactory<T> selectBuilderFactory = SelectBuilderFactory.newInstance(definition, config);
+		UpdateBuilderFactory<T> updateBuilderFactory = UpdateBuilderFactory.newInstance(definition, config);
+		DeleteBuilderFactory<T> deleteBuilderFactory = DeleteBuilderFactory.newInstance(definition, config);
+		
+		return new JirmDao<T>(
+				config.getSqlExecutor(), 
+				config.getSqlObjectConfig(), 
+				definition, config.getSqlWriterStrategy(), 
+				selectBuilderFactory, updateBuilderFactory, deleteBuilderFactory);
 	}
 
 	private LinkedHashMap<String, Object> toLinkedHashMap(T t, boolean bulkInsert) {
@@ -113,6 +133,14 @@ public class DaoTemplate<T> {
 		return selectBuilderFactory.count();
 	}
 	
+	public UpdateRootClauseBuilder<Integer> update() {
+		return updateBuilderFactory.update();
+	}
+	
+	public DeleteRootClauseBuilder<Integer> delete() {
+		return deleteBuilderFactory.delete();
+	}
+	
 	public Optional<T> findOptionalById(Object id) {
 		return select().where()
 				.property(idParameter().getParameterName()).eq(id)
@@ -132,6 +160,13 @@ public class DaoTemplate<T> {
 		insert(m);
 	}
 	
+	public int deleteById(Object id) {
+		return deleteBuilderFactory
+			.delete()
+			.where().property(idParameter().getParameterName()).eq(id)
+			.execute();
+	}
+	
 	public int update(T t) {
 		
 		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false);
@@ -146,7 +181,7 @@ public class DaoTemplate<T> {
 		return update(m, where);
 	}
 	
-	public int update(Map<String,Object> setValues, Map<String, Object> filters) {
+	private int update(Map<String,Object> setValues, Map<String, Object> filters) {
 		return updateBuilderFactory
 				.update()
 				.setAll(setValues)

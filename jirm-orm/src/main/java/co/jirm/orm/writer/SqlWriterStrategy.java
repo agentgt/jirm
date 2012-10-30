@@ -26,6 +26,16 @@ public class SqlWriterStrategy {
 		return qb;
 	}
 	
+	public StringBuilder deleteStatementBeforeWhere(StringBuilder sb, final SqlObjectDefinition<?> definition) {
+		sb.append("DELETE ").append(definition.getSqlName()).append(" ");
+		return sb;
+	}
+	
+	public StringBuilder updateStatementBeforeSet(StringBuilder sb, final SqlObjectDefinition<?> definition) {
+		sb.append("UPDATE ").append(definition.getSqlName()).append(" ");
+		return sb;
+	}
+	
 	protected List<String> insertColumns(SqlObjectDefinition<?> definition, Map<String, Object> m) {
 		List<String> equalsKeys = new ArrayList<String>();
 		for (Entry<String, Object> e : m.entrySet()) {

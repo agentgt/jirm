@@ -21,6 +21,10 @@ public class SqlObjectExecutorRowMapper<T> implements SqlExecutorRowMapper<T> {
 		this.objectDefinition = objectDefinition;
 		this.objectConverter = objectConverter;
 	}
+	
+	public static <T> SqlObjectExecutorRowMapper<T> newInstance(SqlObjectDefinition<T> definition, SqlObjectConverter objectConverter) {
+		return new SqlObjectExecutorRowMapper<T>(definition, objectConverter);
+	}
 
 	@Override
 	public Class<T> getObjectType() {

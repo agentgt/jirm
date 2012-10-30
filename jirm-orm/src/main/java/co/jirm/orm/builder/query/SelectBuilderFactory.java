@@ -6,7 +6,9 @@ import co.jirm.core.execute.SqlExecutorRowMapper;
 import co.jirm.core.execute.SqlQueryExecutor;
 import co.jirm.core.sql.MutableParameterizedSql;
 import co.jirm.core.sql.ParametersSql;
+import co.jirm.mapper.SqlObjectExecutorRowMapper;
 import co.jirm.mapper.definition.SqlObjectDefinition;
+import co.jirm.orm.OrmConfig;
 import co.jirm.orm.builder.query.SelectClause.SelectClauseTransform;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
@@ -30,6 +32,13 @@ public class SelectBuilderFactory<T> {
 		this.definition = definition;
 		this.objectRowMapper = objectRowMapper;
 		this.writerStrategy = writerStrategy;
+	}
+	
+	public static <T> SelectBuilderFactory<T> newInstance(SqlObjectDefinition<T> definition, OrmConfig ormConfig) {
+		SqlExecutorRowMapper<T> objectRowMapper = 
+				SqlObjectExecutorRowMapper.newInstance(definition, ormConfig.getSqlObjectConfig().getObjectMapper());
+		SelectBuilderFactory<T> bf = new SelectBuilderFactory<T>(ormConfig.getSqlExecutor(), definition, objectRowMapper, ormConfig.getSqlWriterStrategy());
+		return bf;
 	}
 
 	public Long queryForLong(ParametersSql sql) {
