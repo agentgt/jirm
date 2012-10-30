@@ -345,6 +345,13 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
 			return false;
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		ConditionVisitors.conditionVisitor(sb).startOn(this);
+		return sb.toString();
+	}
     
     
 }

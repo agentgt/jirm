@@ -26,12 +26,6 @@ public class PlainSql extends MutableParameterizedSql<PlainSql>{
 	protected PlainSql getSelf() {
 		return this;
 	}
-
-	@Override
-	public String toString() {
-		return "PlainSql [getSql()=" + getSql() + ", getParameters()=" + getParameters() + ", getNameParameters()="
-				+ getNameParameters() + "]";
-	}
 	
 	public static PlainSql parse(String sql) {
 		return new PlainSql(sql);

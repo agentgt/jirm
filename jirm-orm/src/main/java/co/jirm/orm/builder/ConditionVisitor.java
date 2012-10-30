@@ -25,5 +25,10 @@ public abstract class ConditionVisitor {
 		condition.accept(this);
 	}
 	
+	public ConditionVisitor startOn(ImmutableCondition condition) {
+		condition.accept(this);
+		return this;
+	}
+	
 	
 }

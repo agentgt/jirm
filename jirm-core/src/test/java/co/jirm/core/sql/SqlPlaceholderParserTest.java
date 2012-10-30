@@ -42,6 +42,7 @@ public class SqlPlaceholderParserTest {
 		PlainSql sql = PlainSql.fromResource(getClass(), "select-test-bean.sql")
 				.bind("name", "Adam")
 				.bind("limit", 1);
+		System.out.println(sql.toString());
 		assertEquals(ImmutableList.<Object>of("Adam", 1), sql.mergedParameters());
 		assertEquals(
 				"SELECT * from test_bean\n" + 

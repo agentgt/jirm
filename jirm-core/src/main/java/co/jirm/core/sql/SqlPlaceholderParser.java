@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import co.jirm.core.util.JirmPrecondition;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -176,8 +177,10 @@ public class SqlPlaceholderParser {
 		}
 		@Override
 		public String toString() {
-			return "ParsedSql [resultSql=" + resultSql + ", originalSql=" + originalSql + ", placeHolders="
-					+ placeHolders + "]";
+			return Objects.toStringHelper(this)
+				.add("resultSql", resultSql)
+				.add("originalSql", originalSql)
+				.add("placeHolders", placeHolders).toString();
 		}
 		
 		@Override
@@ -358,8 +361,7 @@ public class SqlPlaceholderParser {
 		}
 		@Override
 		public String toString() {
-			return "NamePlaceHolder [name=" + name + ", namePosition=" + namePosition + ", getPosition()="
-					+ getPosition() + "]";
+			return "NamePlaceHolder{name=" + name + "}";
 		}
 		@Override
 		public int hashCode() {
@@ -411,8 +413,7 @@ public class SqlPlaceholderParser {
 		}
 		@Override
 		public String toString() {
-			return "PositionPlaceHolder [parameterPosition=" + parameterPosition + ", getParameterPosition()="
-					+ getParameterPosition() + "]";
+			return "PositionPlaceHolder{parameterPosition=" + parameterPosition + "}";
 		}
 		@Override
 		public int hashCode() {
