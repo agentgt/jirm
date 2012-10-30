@@ -2,8 +2,8 @@ package co.jirm;
 
 import co.jirm.core.execute.SqlExecutor;
 import co.jirm.mapper.SqlObjectConfig;
+import co.jirm.orm.builder.query.SelectBuilderFactory;
 import co.jirm.orm.dao.DaoTemplate;
-import co.jirm.orm.query.SelectBuilderFactory;
 
 
 public class Jirm {

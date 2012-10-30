@@ -1,19 +1,12 @@
-package co.jirm.orm.query;
+package co.jirm.orm.builder.query;
 
 import java.util.List;
-
-import org.apache.commons.lang3.text.StrLookup;
-import org.apache.commons.lang3.text.StrSubstitutor;
 
 import co.jirm.core.execute.SqlExecutorRowMapper;
 import co.jirm.core.execute.SqlQueryExecutor;
 import co.jirm.core.sql.MutableParameterizedSql;
 import co.jirm.core.sql.ParametersSql;
 import co.jirm.mapper.definition.SqlObjectDefinition;
-import co.jirm.orm.builder.query.SelectClauseVisitor;
-import co.jirm.orm.builder.query.CustomClauseBuilder;
-import co.jirm.orm.builder.query.SelectRootClauseBuilder;
-import co.jirm.orm.builder.query.SelectClauseVisitors;
 import co.jirm.orm.builder.query.SelectClause.SelectClauseTransform;
 import co.jirm.orm.writer.SqlWriterStrategy;
 

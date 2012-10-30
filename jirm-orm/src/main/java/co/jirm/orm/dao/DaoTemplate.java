@@ -18,11 +18,11 @@ import co.jirm.core.util.ObjectMapUtils.NestedKeyValue;
 import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
+import co.jirm.orm.builder.query.SelectBuilderFactory;
 import co.jirm.orm.builder.query.SelectRootClauseBuilder;
+import co.jirm.orm.builder.query.SelectBuilderFactory.CountBuilder;
+import co.jirm.orm.builder.query.SelectBuilderFactory.SelectBuilder;
 import co.jirm.orm.builder.update.UpdateBuilderFactory;
-import co.jirm.orm.query.SelectBuilderFactory;
-import co.jirm.orm.query.SelectBuilderFactory.CountBuilder;
-import co.jirm.orm.query.SelectBuilderFactory.SelectBuilder;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
 import com.google.common.base.Function;
