@@ -60,16 +60,12 @@ public class SelectBuilderFactory<T> {
 	
 	public SelectRootClauseBuilder<SelectObjectBuilder<T>> select() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT ");
-		definition.selectParameters(sb);
-		sb.append(" FROM ").append(definition.getSqlName());
-		definition.innerJoin(sb);
+		writerStrategy.selectStatementBeforeWhere(sb, definition);
 		return SelectRootClauseBuilder.using(new RootClauseHandoff<SelectObjectBuilder<T>>(sb.toString()) {
 			@Override
 			protected SelectObjectBuilder<T> createBuilder(String sql) {
 				return new SelectObjectBuilder<T>(SelectBuilderFactory.this, sql);
 			}
-			
 		});
 	}
 	
@@ -93,11 +89,13 @@ public class SelectBuilderFactory<T> {
 		return root.sqlFromResource(definition.getObjectType(), resource);
 	}
 	
+	//FIXME This may not work.
 	public SelectRootClauseBuilder<CountBuilder<T>> count() {
+		//TODO its hard to know whether or not to innerjoin to get an accurate count here.
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT count(*)");
 		sb.append(" FROM ").append(definition.getSqlName());
-		definition.innerJoin(sb);
+		//definition.innerJoin(sb);
 		return SelectRootClauseBuilder.using(new RootClauseHandoff<CountBuilder<T>>(sb.toString()) {
 			@Override
 			protected CountBuilder<T> createBuilder(String sql) {

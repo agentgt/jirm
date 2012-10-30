@@ -26,6 +26,14 @@ public class SqlWriterStrategy {
 		return qb;
 	}
 	
+	public StringBuilder selectStatementBeforeWhere(StringBuilder sb, final SqlObjectDefinition<?> definition) {
+		sb.append("SELECT ");
+		definition.selectParameters(sb);
+		sb.append(" FROM ").append(definition.getSqlName());
+		definition.innerJoin(sb);
+		return sb;
+	}
+	
 	public StringBuilder deleteStatementBeforeWhere(StringBuilder sb, final SqlObjectDefinition<?> definition) {
 		sb.append("DELETE ").append(definition.getSqlName()).append(" ");
 		return sb;

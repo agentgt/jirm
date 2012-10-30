@@ -8,14 +8,15 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
 
+import co.jirm.core.execute.SqlExecutor;
 import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.jdbc.JdbcResultSetRowMapper;
-import co.jirm.mapper.jdbc.JdbcSqlObjectExecutor;
+import co.jirm.mapper.jdbc.JdbcSqlObjectQueryExecutor;
 
 import com.google.common.base.Optional;
 
 
-public class JdbcTemplateSqlExecutor extends JdbcSqlObjectExecutor {
+public class JdbcTemplateSqlExecutor extends JdbcSqlObjectQueryExecutor implements SqlExecutor {
 	
 	private final JdbcOperations jdbcTemplate;
 
@@ -68,7 +69,15 @@ public class JdbcTemplateSqlExecutor extends JdbcSqlObjectExecutor {
 			}		
 		}, objects);
 	}
-	
-	
+
+	@Override
+	public int[] batchUpdate(String sql, List<Object[]> objects) {
+		return jdbcTemplate.batchUpdate(sql, objects);
+	}
+
+	@Override
+	public int update(String sql, Object[] objects) {
+		return jdbcTemplate.update(sql, objects);
+	}
 
 }

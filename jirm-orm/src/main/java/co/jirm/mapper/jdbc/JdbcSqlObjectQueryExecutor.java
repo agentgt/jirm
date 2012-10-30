@@ -13,13 +13,13 @@ import co.jirm.mapper.definition.SqlObjectDefinition;
 import com.google.common.base.Optional;
 
 
-public abstract class JdbcSqlObjectExecutor implements SqlQueryExecutor {
+public abstract class JdbcSqlObjectQueryExecutor implements SqlQueryExecutor {
 
 	
 	private final SqlObjectConfig objectConfig;
 	private final JdbcResultSetMapperHelper helper = new JdbcResultSetMapperHelper();
 	
-	protected JdbcSqlObjectExecutor(SqlObjectConfig objectConfig) {
+	protected JdbcSqlObjectQueryExecutor(SqlObjectConfig objectConfig) {
 		super();
 		this.objectConfig = objectConfig;
 	}
