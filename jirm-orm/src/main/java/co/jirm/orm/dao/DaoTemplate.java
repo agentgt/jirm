@@ -20,9 +20,9 @@ import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
 import co.jirm.orm.builder.query.SelectRootClauseBuilder;
 import co.jirm.orm.builder.update.UpdateBuilderFactory;
-import co.jirm.orm.query.QueryObjectTemplate;
-import co.jirm.orm.query.QueryObjectTemplate.CountBuilder;
-import co.jirm.orm.query.QueryObjectTemplate.SelectBuilder;
+import co.jirm.orm.query.SelectBuilderFactory;
+import co.jirm.orm.query.SelectBuilderFactory.CountBuilder;
+import co.jirm.orm.query.SelectBuilderFactory.SelectBuilder;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
 import com.google.common.base.Function;
@@ -38,7 +38,7 @@ public class DaoTemplate<T> {
 	private final SqlExecutor sqlExecutor;
 	private final SqlObjectConfig config;
 	private final SqlObjectDefinition<T> definition;
-	private final QueryObjectTemplate<T> queryTemplate;
+	private final SelectBuilderFactory<T> selectBuilderFactory;
 	private final UpdateBuilderFactory<T> updateBuilderFactory;
 	private final SqlWriterStrategy writerStrategy;
 	
@@ -47,14 +47,14 @@ public class DaoTemplate<T> {
 			SqlObjectConfig config, 
 			SqlObjectDefinition<T> definition,
 			SqlWriterStrategy writerStrategy, 
-			QueryObjectTemplate<T> queryTemplate,
+			SelectBuilderFactory<T> queryTemplate,
 			UpdateBuilderFactory<T> updateBuilderFactory) {
 		super();
 		this.sqlExecutor = sqlExecutor;
 		this.config = config;
 		this.definition = definition;
 		this.writerStrategy = writerStrategy;
-		this.queryTemplate = queryTemplate;
+		this.selectBuilderFactory = queryTemplate;
 		this.updateBuilderFactory = updateBuilderFactory;
 	}
 
@@ -106,11 +106,11 @@ public class DaoTemplate<T> {
 	}
 	
 	public SelectRootClauseBuilder<SelectBuilder<T>> select() {
-		return queryTemplate.select();
+		return selectBuilderFactory.select();
 	}
 	
 	public SelectRootClauseBuilder<CountBuilder<T>> count() {
-		return queryTemplate.count();
+		return selectBuilderFactory.count();
 	}
 	
 	public Optional<T> findOptionalById(Object id) {
@@ -147,10 +147,11 @@ public class DaoTemplate<T> {
 	}
 	
 	public int update(Map<String,Object> setValues, Map<String, Object> filters) {
-		return updateBuilderFactory.update()
-			.setAll(setValues)
-			.where().propertyAll(filters)
-			.execute();
+		return updateBuilderFactory
+				.update()
+				.setAll(setValues)
+				.where().propertyAll(filters)
+				.execute();
 	}
 	
 	public T reload(T t) {

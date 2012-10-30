@@ -20,14 +20,14 @@ import co.jirm.orm.writer.SqlWriterStrategy;
 import com.google.common.base.Optional;
 
 
-public class QueryObjectTemplate<T> {
+public class SelectBuilderFactory<T> {
 	
 	private final SqlQueryExecutor queryExecutor;
 	private final SqlObjectDefinition<T> definition;
 	private final SqlExecutorRowMapper<T> objectRowMapper;
 	private final SqlWriterStrategy writerStrategy;
 	
-	private QueryObjectTemplate(
+	private SelectBuilderFactory(
 			SqlQueryExecutor queryExecutor, 
 			SqlObjectDefinition<T> definition,
 			SqlExecutorRowMapper<T> objectRowMapper,
@@ -64,7 +64,7 @@ public class QueryObjectTemplate<T> {
 		return SelectRootClauseBuilder.using(new RootClauseHandoff<SelectBuilder<T>>(sb.toString()) {
 			@Override
 			protected SelectBuilder<T> createBuilder(String sql) {
-				return new SelectBuilder<T>(QueryObjectTemplate.this, sql);
+				return new SelectBuilder<T>(SelectBuilderFactory.this, sql);
 			}
 			
 		});
@@ -74,7 +74,7 @@ public class QueryObjectTemplate<T> {
 		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.using(new RootClauseHandoff<SelectBuilder<T>>(null) {
 			@Override
 			protected SelectBuilder<T> createBuilder(String sql) {
-				return new SelectBuilder<T>(QueryObjectTemplate.this, sql);
+				return new SelectBuilder<T>(SelectBuilderFactory.this, sql);
 			}
 		});
 		return root.sql(sql);
@@ -84,7 +84,7 @@ public class QueryObjectTemplate<T> {
 		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.using(new RootClauseHandoff<SelectBuilder<T>>(null) {
 			@Override
 			protected SelectBuilder<T> createBuilder(String sql) {
-				return new SelectBuilder<T>(QueryObjectTemplate.this, sql);
+				return new SelectBuilder<T>(SelectBuilderFactory.this, sql);
 			}
 		});
 		return root.sqlFromResource(definition.getObjectType(), resource);
@@ -98,7 +98,7 @@ public class QueryObjectTemplate<T> {
 		return SelectRootClauseBuilder.using(new RootClauseHandoff<CountBuilder<T>>(sb.toString()) {
 			@Override
 			protected CountBuilder<T> createBuilder(String sql) {
-				return new CountBuilder<T>(QueryObjectTemplate.this, sql);
+				return new CountBuilder<T>(SelectBuilderFactory.this, sql);
 			}
 			
 			@Override
@@ -113,9 +113,9 @@ public class QueryObjectTemplate<T> {
 
 	
 	public static class SelectBuilder<T> extends MutableParameterizedSql<SelectBuilder<T>> {
-		private final QueryObjectTemplate<T> queryTemplate;
+		private final SelectBuilderFactory<T> queryTemplate;
 
-		private SelectBuilder(QueryObjectTemplate<T> queryTemplate, String sql) {
+		private SelectBuilder(SelectBuilderFactory<T> queryTemplate, String sql) {
 			super(sql);
 			this.queryTemplate = queryTemplate;
 		}
@@ -141,9 +141,9 @@ public class QueryObjectTemplate<T> {
 	
 	public static class CountBuilder<T> extends MutableParameterizedSql<CountBuilder<T>> {
 		
-		private final QueryObjectTemplate<T> queryTemplate;
+		private final SelectBuilderFactory<T> queryTemplate;
 		
-		private CountBuilder(QueryObjectTemplate<T> queryTemplate, String sql) {
+		private CountBuilder(SelectBuilderFactory<T> queryTemplate, String sql) {
 			super(sql);
 			this.queryTemplate = queryTemplate;
 		}

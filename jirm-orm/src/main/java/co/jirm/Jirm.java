@@ -3,7 +3,7 @@ package co.jirm;
 import co.jirm.core.execute.SqlExecutor;
 import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.orm.dao.DaoTemplate;
-import co.jirm.orm.query.QueryObjectTemplate;
+import co.jirm.orm.query.SelectBuilderFactory;
 
 
 public class Jirm {
@@ -23,7 +23,7 @@ public class Jirm {
 		
 	}
 	
-	public static <T> QueryObjectTemplate<T> queryTemplate() {
+	public static <T> SelectBuilderFactory<T> queryTemplate() {
 		return null;
 	}
 	
