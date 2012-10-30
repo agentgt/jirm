@@ -24,7 +24,7 @@ import co.jirm.orm.builder.delete.DeleteRootClauseBuilder;
 import co.jirm.orm.builder.query.SelectBuilderFactory;
 import co.jirm.orm.builder.query.SelectRootClauseBuilder;
 import co.jirm.orm.builder.query.SelectBuilderFactory.CountBuilder;
-import co.jirm.orm.builder.query.SelectBuilderFactory.SelectBuilder;
+import co.jirm.orm.builder.query.SelectBuilderFactory.SelectObjectBuilder;
 import co.jirm.orm.builder.update.UpdateBuilderFactory;
 import co.jirm.orm.builder.update.UpdateRootClauseBuilder;
 import co.jirm.orm.writer.SqlWriterStrategy;
@@ -125,7 +125,7 @@ public final class JirmDao<T> {
 		return this.definition.idParameter().get();
 	}
 	
-	public SelectRootClauseBuilder<SelectBuilder<T>> select() {
+	public SelectRootClauseBuilder<SelectObjectBuilder<T>> select() {
 		return selectBuilderFactory.select();
 	}
 	

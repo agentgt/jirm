@@ -17,6 +17,10 @@ public class OrmConfig {
 		this.sqlWriterStrategy = sqlWriterStrategy;
 	}
 	
+	public static OrmConfig newInstance(SqlExecutor sqlExecutor) {
+		return new OrmConfig(sqlExecutor, SqlObjectConfig.DEFAULT, new SqlWriterStrategy());
+	}
+	
 	public SqlWriterStrategy getSqlWriterStrategy() {
 		return sqlWriterStrategy;
 	}

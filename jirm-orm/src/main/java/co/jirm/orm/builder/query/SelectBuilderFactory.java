@@ -2,6 +2,7 @@ package co.jirm.orm.builder.query;
 
 import java.util.List;
 
+import co.jirm.core.builder.QueryFor;
 import co.jirm.core.execute.SqlExecutorRowMapper;
 import co.jirm.core.execute.SqlQueryExecutor;
 import co.jirm.core.sql.MutableParameterizedSql;
@@ -57,16 +58,16 @@ public class SelectBuilderFactory<T> {
 		return queryExecutor.queryForOptional(sql.getSql(), getObjectRowMapper(), sql.getParameters().toArray());
 	}
 	
-	public SelectRootClauseBuilder<SelectBuilder<T>> select() {
+	public SelectRootClauseBuilder<SelectObjectBuilder<T>> select() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT ");
 		definition.selectParameters(sb);
 		sb.append(" FROM ").append(definition.getSqlName());
 		definition.innerJoin(sb);
-		return SelectRootClauseBuilder.using(new RootClauseHandoff<SelectBuilder<T>>(sb.toString()) {
+		return SelectRootClauseBuilder.using(new RootClauseHandoff<SelectObjectBuilder<T>>(sb.toString()) {
 			@Override
-			protected SelectBuilder<T> createBuilder(String sql) {
-				return new SelectBuilder<T>(SelectBuilderFactory.this, sql);
+			protected SelectObjectBuilder<T> createBuilder(String sql) {
+				return new SelectObjectBuilder<T>(SelectBuilderFactory.this, sql);
 			}
 			
 		});
@@ -114,17 +115,12 @@ public class SelectBuilderFactory<T> {
 	
 
 	
-	public static class SelectBuilder<T> extends MutableParameterizedSql<SelectBuilder<T>> {
-		private final SelectBuilderFactory<T> queryTemplate;
+	static abstract class AbstractSelectObjectBuilder<B, T> extends MutableParameterizedSql<B> {
+		protected final SelectBuilderFactory<T> queryTemplate;
 
-		private SelectBuilder(SelectBuilderFactory<T> queryTemplate, String sql) {
+		protected AbstractSelectObjectBuilder(SelectBuilderFactory<T> queryTemplate, String sql) {
 			super(sql);
 			this.queryTemplate = queryTemplate;
-		}
-
-		@Override
-		protected SelectBuilder<T> getSelf() {
-			return this;
 		}
 		
 		public List<T> forList() { 
@@ -137,6 +133,37 @@ public class SelectBuilderFactory<T> {
 		
 		public Optional<T> forOptional() {
 			return queryTemplate.queryForOptional(this);
+		}
+	}
+	
+	public final static class SelectObjectBuilder<T> extends AbstractSelectObjectBuilder<SelectObjectBuilder<T>, T> {
+
+		private SelectObjectBuilder(SelectBuilderFactory<T> queryTemplate, String sql) {
+			super(queryTemplate, sql);
+		}
+		@Override
+		protected SelectObjectBuilder<T> getSelf() {
+			return this;
+		}
+	}
+	
+	public final static class SelectBuilder<T> extends AbstractSelectObjectBuilder<SelectBuilder<T>, T> implements QueryFor {
+		
+		private SelectBuilder(SelectBuilderFactory<T> queryTemplate, String sql) {
+			super(queryTemplate, sql);
+		}
+		@Override
+		protected SelectBuilder<T> getSelf() {
+			return this;
+		}
+		
+		@Override
+		public int forInt() {
+			throw new UnsupportedOperationException("forInt is not yet supported");
+		}
+		@Override
+		public long forLong() {
+			return queryTemplate.queryForLong(getSelf());
 		}
 		
 	}
