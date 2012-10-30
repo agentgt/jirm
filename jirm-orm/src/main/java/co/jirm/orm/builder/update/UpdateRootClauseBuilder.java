@@ -31,6 +31,10 @@ public class UpdateRootClauseBuilder<I> implements UpdateClause<I> {
 		return addClause(SetClauseBuilder.newInstance(this).setAll(m));
 	}
 	
+	public SetClauseBuilder<I> plus(String property, Number value) {
+		return addClause(SetClauseBuilder.newInstance(this).plus(property, value));
+	}
+	
 	public UpdateRootClauseBuilder<I> header(String sql) {
 		addFirstClause(UpdateCustomClauseBuilder.newInstance(this, sql));
 		return this;

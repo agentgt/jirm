@@ -41,6 +41,7 @@ public class SelectBuilderFactory<T> {
 		SelectBuilderFactory<T> bf = new SelectBuilderFactory<T>(ormConfig.getSqlExecutor(), definition, objectRowMapper, ormConfig.getSqlWriterStrategy());
 		return bf;
 	}
+	
 
 	public Long queryForLong(ParametersSql sql) {
 		return queryExecutor.queryForLong(sql.getSql(), sql.getParameters().toArray());

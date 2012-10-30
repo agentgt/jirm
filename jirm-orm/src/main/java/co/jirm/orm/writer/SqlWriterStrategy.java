@@ -8,10 +8,12 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
+import co.jirm.core.util.JirmPrecondition;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 
@@ -19,9 +21,9 @@ public class SqlWriterStrategy {
 	
 	public StringBuilder insertStatement(StringBuilder qb, final SqlObjectDefinition<?> definition, Map<String, Object> m) {
 		qb.append("INSERT INTO ").append(definition.getSqlName()).append(" (");
-		Joiner.on(",").appendTo(qb, insertColumns(definition, m));
+		Joiner.on(", ").appendTo(qb, insertColumns(definition, m));
 		qb.append(") VALUES (");
-		Joiner.on(",").appendTo(qb, valueMarks(m.values()));
+		Joiner.on(", ").appendTo(qb, valueMarks(m.values()));
 		qb.append(")");
 		return qb;
 	}
@@ -35,19 +37,22 @@ public class SqlWriterStrategy {
 	}
 	
 	public StringBuilder deleteStatementBeforeWhere(StringBuilder sb, final SqlObjectDefinition<?> definition) {
-		sb.append("DELETE ").append(definition.getSqlName()).append(" ");
+		sb.append("DELETE ").append(definition.getSqlName());
 		return sb;
 	}
 	
 	public StringBuilder updateStatementBeforeSet(StringBuilder sb, final SqlObjectDefinition<?> definition) {
-		sb.append("UPDATE ").append(definition.getSqlName()).append(" ");
+		sb.append("UPDATE ").append(definition.getSqlName());
 		return sb;
 	}
 	
 	protected List<String> insertColumns(SqlObjectDefinition<?> definition, Map<String, Object> m) {
 		List<String> equalsKeys = new ArrayList<String>();
 		for (Entry<String, Object> e : m.entrySet()) {
-			equalsKeys.add(definition.parameterNameToSql(e.getKey()));
+			Optional<String> sqlName = definition.parameterNameToSql(e.getKey());
+			JirmPrecondition.check.state(sqlName.isPresent(), 
+					"Property: {} not found in object.", e.getKey());
+			equalsKeys.add(sqlName.get());
 		}
 		return equalsKeys;
 	}
@@ -83,6 +88,20 @@ public class SqlWriterStrategy {
 			@Override
 			public String lookup(String key) {
 				return definition.parameterPathToSql(key).orNull();
+			}
+		};
+		StrSubstitutor s = new StrSubstitutor(lookup, "{{", "}}", '$');
+		String result = s.replace(sql);
+		return result;
+	}
+	
+	public String replaceProperties(final SqlObjectDefinition<?> definition, final String sql) {
+		StrLookup<String> lookup = new StrLookup<String>() {
+			@Override
+			public String lookup(String key) {
+				Optional<String> sqlName = definition.parameterNameToSql(key);
+				JirmPrecondition.check.state(sqlName.isPresent(), "Property: {} not found in object.", key);
+				return sqlName.get();
 			}
 		};
 		StrSubstitutor s = new StrSubstitutor(lookup, "{{", "}}", '$');

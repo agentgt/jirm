@@ -20,6 +20,17 @@ public class SetClauseBuilder<I> extends AbstractSqlParameterizedUpdateClause<Se
 		return setProperty(property, value);
 	}
 	
+	public SetClauseBuilder<I> plus(String property, Number value) {
+		StringBuilder sb = new StringBuilder();
+		if (! nullToEmpty(getSql()).isEmpty()) {
+			sb.append(getSql()).append(", ");
+		}
+		sb.append("{{").append(property).append("}} = ( {{").append(property).append("}} + ").append("?").append(" )");
+		with(value);
+		setSql(sb.toString());
+		return getSelf();
+	}
+	
 	public SetClauseBuilder<I> setAll(Map<String,Object> m) {
 		boolean first = true;
 		StringBuilder sb = new StringBuilder();
@@ -35,6 +46,7 @@ public class SetClauseBuilder<I> extends AbstractSqlParameterizedUpdateClause<Se
 				sb.append(", ");
 			}
 			_writeProperty(sb, e.getKey(), e.getValue());
+			with(e.getValue());
 		}
 		setSql(sb.toString());
 		return getSelf();
@@ -46,6 +58,7 @@ public class SetClauseBuilder<I> extends AbstractSqlParameterizedUpdateClause<Se
 			sb.append(getSql()).append(", ");
 		}
 		_writeProperty(sb, property, value);
+		with(value);
 		setSql(sb.toString());
 		return getSelf();
 	}
@@ -65,11 +78,12 @@ public class SetClauseBuilder<I> extends AbstractSqlParameterizedUpdateClause<Se
 	}
 	
 	public UpdateWhereClauseBuilder<I> where() {
-		return UpdateWhereClauseBuilder.newInstance(getSelf());
+		return addClause(UpdateWhereClauseBuilder.newInstance(getSelf()));
 	}
 
 	@Override
 	public <C extends UpdateClauseVisitor> C accept(C visitor) {
+		visitor.visit(getSelf());
 		for (UpdateClause<I> k : children) {
 			k.accept(visitor);
 		}

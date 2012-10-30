@@ -1,7 +1,10 @@
 package co.jirm.orm;
 
 import co.jirm.core.execute.SqlExecutor;
+import co.jirm.core.execute.SqlExecutorRowMapper;
 import co.jirm.mapper.SqlObjectConfig;
+import co.jirm.mapper.SqlObjectExecutorRowMapper;
+import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
 
@@ -32,5 +35,4 @@ public class OrmConfig {
 	public SqlExecutor getSqlExecutor() {
 		return sqlExecutor;
 	}
-
 }

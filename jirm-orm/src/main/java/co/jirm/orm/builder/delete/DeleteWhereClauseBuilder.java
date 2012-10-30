@@ -44,6 +44,7 @@ public class DeleteWhereClauseBuilder<I> extends AbstractWhereClauseBuilder<Dele
 
 	@Override
 	public <C extends DeleteClauseVisitor> C accept(C visitor) {
+		visitor.visit(getSelf());
 		for (DeleteClause<I> k : children) {
 			k.accept(visitor);
 		}

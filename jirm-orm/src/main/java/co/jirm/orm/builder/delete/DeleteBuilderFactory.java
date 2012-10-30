@@ -63,7 +63,7 @@ public class DeleteBuilderFactory<T> {
 		protected abstract Integer execute(String sql, Object[] values);
 
 		private String replace(StringBuilder sb) {
-			String result = writerStrategy.replacePropertyPaths(definition, sb.toString());
+			String result = writerStrategy.replaceProperties(definition, sb.toString());
 			return result;
 		}
 	}

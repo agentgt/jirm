@@ -123,8 +123,10 @@ public class SqlObjectDefinition<T> {
 		return Optional.absent();
 	}
 	
-	public String parameterNameToSql(String parameter) {
-		return getParameters().get(parameter).sqlName();
+	public Optional<String> parameterNameToSql(String parameter) {
+		SqlParameterDefinition d = getParameters().get(parameter);
+		if (d == null) return Optional.absent();
+		return Optional.of(d.sqlName());
 	}
 	
 	public Optional<String> parameterPathToSql(String parameterDotPath) {

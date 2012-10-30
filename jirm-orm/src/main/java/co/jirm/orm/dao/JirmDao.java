@@ -52,7 +52,7 @@ public final class JirmDao<T> {
 			SqlObjectConfig config, 
 			SqlObjectDefinition<T> definition,
 			SqlWriterStrategy writerStrategy, 
-			SelectBuilderFactory<T> queryTemplate,
+			SelectBuilderFactory<T> selectBuilderFactory,
 			UpdateBuilderFactory<T> updateBuilderFactory,
 			DeleteBuilderFactory<T> deleteBuilderFactory) {
 		super();
@@ -60,7 +60,7 @@ public final class JirmDao<T> {
 		this.config = config;
 		this.definition = definition;
 		this.writerStrategy = writerStrategy;
-		this.selectBuilderFactory = queryTemplate;
+		this.selectBuilderFactory = selectBuilderFactory;
 		this.updateBuilderFactory = updateBuilderFactory;
 		this.deleteBuilderFactory = deleteBuilderFactory;
 	}
@@ -200,7 +200,7 @@ public final class JirmDao<T> {
 	public void insert(Map<String,Object> values) {
 		StringBuilder qb = new StringBuilder();
 		writerStrategy.insertStatement(qb, definition, values);
-		sqlExecutor.update(qb.toString(), values.values().toArray());
+		sqlExecutor.update(qb.toString(), writerStrategy.fillValues(definition, values).toArray());
 	}
 	
 	public void insert(Iterator<T> values, int batchSize) {
@@ -236,5 +236,10 @@ public final class JirmDao<T> {
 			sqlExecutor.batchUpdate(sql, batchValues);
 		}
 		
+	}
+	
+	
+	public SelectBuilderFactory<T> getSelectBuilderFactory() {
+		return selectBuilderFactory;
 	}
 }

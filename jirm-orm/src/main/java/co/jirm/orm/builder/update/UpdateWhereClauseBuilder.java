@@ -44,6 +44,7 @@ public class UpdateWhereClauseBuilder<I> extends AbstractWhereClauseBuilder<Upda
 
 	@Override
 	public <C extends UpdateClauseVisitor> C accept(C visitor) {
+		visitor.visit(getSelf());
 		for (UpdateClause<I> k : children) {
 			k.accept(visitor);
 		}
