@@ -77,6 +77,8 @@ Lets see some Selecting of our Test Bean
 
 ```java
 
+JirmDao<TestBean> dao = daoFactory.daoFor(TestBean.class);
+
 List<TestBean> list = 
     dao.select().where()
     .property("longProp", 1L)
@@ -87,7 +89,7 @@ List<TestBean> list =
     .forList();
 
 // You can also insert, delete, update, etc...
-
+TestBean testBean = new TestBean(randomId(), 1L, Calendar.getInstance());
 dao.insert(testBean);
 
 ```
@@ -113,8 +115,8 @@ Yes those comments at the end of the lines are special:
 
 ```java
 PlainSql sql = PlainSql.fromResource(TestBean.class, "select-test-bean.sql")
-		.set("name", "Adam")
-		.set("limit", 1);
+		.bind("name", "Adam")
+		.bind("limit", 1);
 assertEquals(ImmutableList.<Object>of("Adam", 1), sql.mergedParameters());
 assertEquals(
 		"SELECT * from test_bean\n" + 
@@ -129,7 +131,7 @@ So in spring you could do something like:
 ```java
 JdbcTemplate template = new JdbcTemplate(dataSource)
 PlainSql sql = PlainSql.fromResource(TestBean.class, "select-test-bean.sql")
-  	.with("Adam")
+    .with("Adam")
     .with(1);
 
 template.queryForList(sql.getSql(), sql.mergedParameters());
@@ -137,7 +139,3 @@ template.queryForList(sql.getSql(), sql.mergedParameters());
 
 Notice in the above I set the parameters by position (`with` as opposed to `set`). 
 In some cases that might be more convenient.
-
-
-More to come
-------------
