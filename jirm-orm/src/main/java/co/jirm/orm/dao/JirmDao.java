@@ -20,10 +20,10 @@ import co.jirm.mapper.definition.SqlParameterDefinition;
 import co.jirm.orm.OrmConfig;
 import co.jirm.orm.builder.delete.DeleteBuilderFactory;
 import co.jirm.orm.builder.delete.DeleteRootClauseBuilder;
-import co.jirm.orm.builder.query.SelectBuilderFactory;
-import co.jirm.orm.builder.query.SelectBuilderFactory.CountBuilder;
-import co.jirm.orm.builder.query.SelectBuilderFactory.SelectObjectBuilder;
-import co.jirm.orm.builder.query.SelectRootClauseBuilder;
+import co.jirm.orm.builder.select.SelectBuilderFactory;
+import co.jirm.orm.builder.select.SelectRootClauseBuilder;
+import co.jirm.orm.builder.select.SelectBuilderFactory.CountBuilder;
+import co.jirm.orm.builder.select.SelectBuilderFactory.SelectObjectBuilder;
 import co.jirm.orm.builder.update.UpdateBuilderFactory;
 import co.jirm.orm.builder.update.UpdateRootClauseBuilder;
 import co.jirm.orm.writer.SqlWriterStrategy;
@@ -274,5 +274,9 @@ public final class JirmDao<T> {
 	
 	public SelectBuilderFactory<T> getSelectBuilderFactory() {
 		return selectBuilderFactory;
+	}
+	
+	public UpdateBuilderFactory<T> getUpdateBuilderFactory() {
+		return updateBuilderFactory;
 	}
 }

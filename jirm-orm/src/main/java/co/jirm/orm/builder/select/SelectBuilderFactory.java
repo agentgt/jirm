@@ -1,4 +1,4 @@
-package co.jirm.orm.builder.query;
+package co.jirm.orm.builder.select;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import co.jirm.core.sql.ParametersSql;
 import co.jirm.mapper.SqlObjectExecutorRowMapper;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.orm.OrmConfig;
-import co.jirm.orm.builder.query.SelectClause.SelectClauseTransform;
+import co.jirm.orm.builder.select.SelectClause.SelectClauseTransform;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
 import com.google.common.base.Optional;

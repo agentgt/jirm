@@ -1,4 +1,4 @@
-package co.jirm.orm.builder.query;
+package co.jirm.orm.builder.select;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
