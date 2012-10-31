@@ -178,6 +178,7 @@ public class ParentBean {
     private final TestBean test;
     //... snip ...
 }
+```
 
 Now we can select `ParentBean` using plain SQL by making a SQL file in the classpath we'll call it `select-parent-bean.sql`.
 
@@ -192,7 +193,7 @@ WHERE test.string_prop = 'test' -- {testName}
 AND test.long_prop = 100 -- {testAmount}
 ```
 
-Yes the above is real SQL with out any placeholders thats would break normal SQL parsing.
+Yes the above is real SQL with out any placeholders that would break normal SQL parsing.
 We use comments on the end of the line to indicate a place holder. You can read more about it
 [here](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md).
 
