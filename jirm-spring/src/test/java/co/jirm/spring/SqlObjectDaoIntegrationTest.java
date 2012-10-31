@@ -7,8 +7,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,10 +14,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import co.jirm.orm.JirmFactory;
 import co.jirm.orm.dao.JirmDao;
+import co.jirm.orm.dao.JirmOpportunisticLockException;
 
 import com.google.common.collect.Lists;
 
@@ -119,51 +117,24 @@ public class SqlObjectDaoIntegrationTest {
 		}
 	}
 	
-	
-	@Ignore
 	@Test
-	public void testJooq() throws Exception {
-		crap();
-	}
-
-	@Transactional
-	public void crap() {
-//		Settings s = new Settings();
-//		s.getExecuteListeners().add("com.snaphop.jooq.SpringExceptionTranslationExecuteListener");
-//		PublicFactory p = new PublicFactory(ds, s);
-//		
-//		JobRecord jr = p.newRecord(JOB);
-//		jr.setBatchId("FAIL");
-//		jr.setCreatets(new Timestamp(new LocalDateTime().toDateTime().getMillis()));
-//		jr.setEndts(new Timestamp(new LocalDateTime().toDateTime().getMillis()));
-//		jr.setId("FAIL");
-//		jr.setObjectId("FAIL");
-//		jr.setTriggerts(new Timestamp(new LocalDateTime().toDateTime().getMillis()));
-//		jr.setUpdatets(new Timestamp(new LocalDateTime().toDateTime().getMillis()));
-//		jr.setStatus("STARTED");
-//		jr.setType("CRAP");
-//		jr.store();
-//		
-//		//PublicFactory a = new PublicFactory(ds, s);
-//
-//		p.select(JOB.BATCH_ID, JOB.CREATETS).from(JOB).where("s = 'shit'").fetch();
+	public void testVersion() throws Exception {
+		JirmDao<LockBean> dao = jirmFactory.daoFor(LockBean.class);
+		LockBean lockBean = new LockBean(randomId(), 100L, Calendar.getInstance(), 0);
+		dao.insert(lockBean);
+		lockBean = new LockBean(lockBean.getId(), 300L, Calendar.getInstance(), lockBean.getVersion());
+		dao.update(lockBean);
 	}
 	
-	public static class Crap {
-		
-		private final String name;
-
-		@JsonCreator
-		public Crap(@JsonProperty ("name") String name) {
-			super();
-			this.name = name;
-		}
-		
-		public String getName() {
-			return name;
-		}
-		
-	
+	@Test(expected=JirmOpportunisticLockException.class)
+	public void testVersionFail() throws Exception {
+		JirmDao<LockBean> dao = jirmFactory.daoFor(LockBean.class);
+		LockBean lockBean = new LockBean(randomId(), 100L, Calendar.getInstance(), 0);
+		dao.insert(lockBean);
+		lockBean = new LockBean(lockBean.getId(), 300L, Calendar.getInstance(), lockBean.getVersion());
+		dao.update(lockBean);
+		//This will fail because we have to reload.
+		dao.update(lockBean);
 	}
 	
 	public static String randomId() {

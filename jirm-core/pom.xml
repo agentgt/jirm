@@ -24,6 +24,16 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+        	<groupId>joda-time</groupId>
+        	<artifactId>joda-time</artifactId>
+        </dependency>
 	</dependencies>
 
 </project>

@@ -1,12 +1,18 @@
 package co.jirm.mapper.jdbc;
 
+import static java.util.Arrays.asList;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import co.jirm.core.execute.SqlExecutorRowMapper;
 import co.jirm.core.execute.SqlQueryExecutor;
+import co.jirm.core.util.ObjectMapUtils;
 import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 
@@ -39,24 +45,51 @@ public abstract class JdbcSqlObjectQueryExecutor implements SqlQueryExecutor {
 
 	@Override
 	public <T> T queryForObject(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects) {
+		logSql(sql, objects);
 		return queryForObject(sql, createJdbcMapper(rowMapper), objects);
+	}
+
+	protected void logSql(String sql, Object[] objects) {
+		if (log.isDebugEnabled()) {
+			log.debug("sql: {}; values: {}", sql, ObjectMapUtils.toStringList(new StringBuilder(), asList(objects), 100));
+		}
 	}
 
 	@Override
 	public <T> Optional<T> queryForOptional(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects) {
+		logSql(sql, objects);
 		return queryForOptional(sql, createJdbcMapper(rowMapper), objects);
 	}
 	
 	@Override
 	public <T> List<T> queryForList(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects) {
+		logSql(sql, objects);
 		return queryForList(sql, createJdbcMapper(rowMapper), objects);
 	}
 	
-	
-	public abstract <T> T queryForObject(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects);
+	public <T> T queryForObject(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
+		logSql(sql, objects);
+		return doQueryForObject(sql, rowMapper, objects);
+	}
 
-	public abstract <T> Optional<T> queryForOptional(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects);
+	public <T> Optional<T> queryForOptional(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
+		logSql(sql, objects);
+		return doQueryForOptional(sql, rowMapper, objects);
+	}
 	
-	public abstract <T> List<T> queryForList(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects);
+	public <T> List<T> queryForList(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
+		logSql(sql, objects);
+		return doQueryForList(sql, rowMapper, objects);
+	}
+
+	
+	public abstract <T> T doQueryForObject(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects);
+
+	public abstract <T> Optional<T> doQueryForOptional(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects);
+	
+	public abstract <T> List<T> doQueryForList(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects);
+	
+	
+	private static final Logger log = LoggerFactory.getLogger(JdbcSqlObjectQueryExecutor.class);
 	
 }

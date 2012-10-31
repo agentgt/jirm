@@ -40,3 +40,15 @@ CREATE TABLE grand_parent_bean
 WITH (
   OIDS=FALSE
 );
+
+CREATE TABLE lock_bean
+(
+  id text NOT NULL,
+  long_prop bigint,
+  timets timestamp without time zone,
+  version integer,
+  CONSTRAINT lock_bean_key PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);

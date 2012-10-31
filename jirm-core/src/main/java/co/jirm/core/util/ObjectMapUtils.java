@@ -2,14 +2,43 @@ package co.jirm.core.util;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+
+import org.joda.time.DateTime;
 
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
 
 
 public class ObjectMapUtils {
+	
+	public static StringBuilder toStringList(StringBuilder sb, List<?> objects, int length) {
+		sb.append("[");
+		boolean first = true;
+		for(Object o : objects) {
+			if (first) {
+				first = false;
+			}
+			else {
+				sb.append(", ");
+			}
+			final String s;
+			if (o instanceof Calendar) {
+				s = new DateTime(o).toString();
+			}
+			else {
+				s = o.toString();
+			}
+			if (length < s.length())
+				sb.append(s, 0, length).append("...");
+			else
+				sb.append(s);
+		}
+		sb.append("]");
+		return sb;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public static void pushPath(final Map<String, Object> m, List<String> names, Object value) {

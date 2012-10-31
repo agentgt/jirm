@@ -40,7 +40,7 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 	}
 
 	@Override
-	public <T> T queryForObject(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
+	public <T> T doQueryForObject(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
 		return jdbcTemplate.queryForObject(sql, new RowMapper<T> () {
 			@Override
 			public T mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -50,7 +50,7 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 	}
 
 	@Override
-	public <T> Optional<T> queryForOptional(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
+	public <T> Optional<T> doQueryForOptional(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
 		try {
 			T object = jdbcTemplate.queryForObject(sql, new RowMapper<T> () {
 				@Override
@@ -65,7 +65,7 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 	}
 
 	@Override
-	public <T> List<T> queryForList(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
+	public <T> List<T> doQueryForList(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
 		return jdbcTemplate.query(sql, new RowMapper<T> () {
 			@Override
 			public T mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -81,6 +81,7 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 
 	@Override
 	public int update(String sql, Object[] objects) {
+		logSql(sql, objects);
 		return jdbcTemplate.update(sql, objects);
 	}
 
