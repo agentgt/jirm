@@ -40,6 +40,14 @@ public class UpdateRootClauseBuilder<I> implements UpdateClause<I> {
 		return this;
 	}
 	
+	public UpdateCustomClauseBuilder<I> sql(String sql) {
+		return addClause(UpdateCustomClauseBuilder.newInstance(this, sql));
+	}
+	
+	public UpdateCustomClauseBuilder<I> sqlFromResource(Class<?> k, String resource) {
+		return addClause(UpdateCustomClauseBuilder.newInstance(this, "").useResource(k, resource));
+	}
+	
 	protected <K extends UpdateClause<I>> K addFirstClause(K k) {
 		children.add(0, k);
 		return k;

@@ -53,7 +53,7 @@ public class SelectRootClauseBuilder<I> implements SelectClause<I> {
 	}
 	
 	public SelectRootClauseBuilder<I> header(String sql) {
-		addFirstClause(CustomClauseBuilder.newCustomClause(this, sql));
+		addFirstClause(SelectCustomClauseBuilder.newInstance(this, sql));
 		return this;
 	}
 
@@ -61,12 +61,12 @@ public class SelectRootClauseBuilder<I> implements SelectClause<I> {
 		return new SelectRootClauseBuilder<I>(factory);
 	}
 	
-	public CustomClauseBuilder<I> sql(String sql) {
-		return addClause(CustomClauseBuilder.newCustomClause(this, sql));
+	public SelectCustomClauseBuilder<I> sql(String sql) {
+		return addClause(SelectCustomClauseBuilder.newInstance(this, sql));
 	}
 	
-	public CustomClauseBuilder<I> sqlFromResource(Class<?> k, String resource) {
-		return addClause(CustomClauseBuilder.newCustomClause(this, "").useResource(k, resource));
+	public SelectCustomClauseBuilder<I> sqlFromResource(Class<?> k, String resource) {
+		return addClause(SelectCustomClauseBuilder.newInstance(this, "").useResource(k, resource));
 	}
 	
 	protected <K extends SelectClause<I>> K addClause(K k) {

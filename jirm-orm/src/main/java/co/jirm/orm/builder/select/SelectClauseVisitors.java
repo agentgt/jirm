@@ -34,7 +34,7 @@ public class SelectClauseVisitors {
 		}
 
 		@Override
-		public void visit(CustomClauseBuilder<?> clauseBuilder) {
+		public void visit(SelectCustomClauseBuilder<?> clauseBuilder) {
 			doVisit(clauseBuilder);
 		}
 		
@@ -70,7 +70,7 @@ public class SelectClauseVisitors {
 		}
 
 		@Override
-		public void visit(CustomClauseBuilder<?> clauseBuilder) {
+		public void visit(SelectCustomClauseBuilder<?> clauseBuilder) {
 			doParameters(clauseBuilder);
 		}
 

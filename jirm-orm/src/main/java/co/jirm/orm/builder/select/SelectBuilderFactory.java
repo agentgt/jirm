@@ -70,7 +70,7 @@ public class SelectBuilderFactory<T> {
 		});
 	}
 	
-	public CustomClauseBuilder<SelectBuilder<T>> sql(String sql) {
+	public SelectCustomClauseBuilder<SelectBuilder<T>> sql(String sql) {
 		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.using(new RootClauseHandoff<SelectBuilder<T>>(null) {
 			@Override
 			protected SelectBuilder<T> createBuilder(String sql) {
@@ -80,7 +80,7 @@ public class SelectBuilderFactory<T> {
 		return root.sql(sql);
 	}
 	
-	public CustomClauseBuilder<SelectBuilder<T>> sqlFromResource(String resource) {
+	public SelectCustomClauseBuilder<SelectBuilder<T>> sqlFromResource(String resource) {
 		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.using(new RootClauseHandoff<SelectBuilder<T>>(null) {
 			@Override
 			protected SelectBuilder<T> createBuilder(String sql) {
