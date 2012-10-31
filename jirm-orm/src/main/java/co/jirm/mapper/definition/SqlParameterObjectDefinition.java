@@ -1,7 +1,7 @@
 package co.jirm.mapper.definition;
 
 
-public class SqlParameterObjectDefinition {
+public final class SqlParameterObjectDefinition {
 	
 	private final SqlObjectDefinition<?> objectDefintion;
 	private final int maximumLoadDepth;

@@ -26,6 +26,19 @@ Inspiration
 There was also some one looking for one here:
 http://stackoverflow.com/questions/2698665/orm-supporting-immutable-classes
 
+Install
+-------
+
+Right now Spring is the only JDBC Wrapper supported.
+
+```xml
+<dependency>
+    <groupId>co.jirm</groupId>
+    <artifactId>jirm-spring</artifactId>
+    <version>${jirm.version}</version>
+</dependency>
+```
+
 JirmDaoFactory
 --------------
 
@@ -145,48 +158,61 @@ dao.deleteById(id);
 
 ```
 
-SQL Placeholder parser
-----------------------
+JIRM embraces SQL
+-----------------
 
-JIRM has a simple but powerful placeholder parser that allows you to use **REAL** SQL.
-Its best to understand how the parser works by example.
+**When the going gets tough JIRM says write SQL.** 
 
-Lets say we have a SQL file that its in the same Java package as TestBean.class called: `select-test-bean.sql`
+JIRM's select, update, and delete builders (fluent api) are generally for convenience of simply tasks.
+That is because update, delete and insert are pretty simple one table operations.
+Also most selecting only requires inner joining `@ManyToOne` children.
+
+As soon as it gets complicated we recommend you write SQL. Luckily JIRM provides awesome support for that.
+
+Besides `TestBean` mentioned earlier lets say we have another table/object called `ParentBean`.
+```java
+public class ParentBean {
+    @Id
+    private final String id;
+    @ManyToOne(targetEntity=TestBean.class, fetch=FetchType.EAGER)
+    private final TestBean test;
+    //... snip ...
+}
+
+Now we can select `ParentBean` using plain SQL by making a SQL file in the classpath we'll call it `select-parent-bean.sql`.
 
 ```sql
-SELECT * from test_bean
-WHERE stringProp like '%Adam%' -- {name}
-LIMIT 1 -- {limit}
+SELECT parent_bean.id AS "id", 
+test.string_prop AS "test.stringProp", 
+test.long_prop AS "test.longProp",
+test.timets AS "test.timeTS"
+FROM parent_bean 
+INNER JOIN test_bean test ON test.string_prop = parent_bean.test 
+WHERE test.string_prop = 'test' -- {testName}
+AND test.long_prop = 100 -- {testAmount}
 ```
 
-**Notice how thats real SQL.** Its Not SQL with placeholders like `?` or `:name` or `#{}`.
-You can copy and paste it into any SQL query tool and it will work.
+Yes the above is real SQL with out any placeholders thats would break normal SQL parsing.
+We use comments on the end of the line to indicate a place holder. You can read more about it
+[here](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md).
 
-Yes those comments at the end of the lines are special:
+Besides the comment placeholders the other thing to notice is the use of result column labels for property paths.
+By using `AS "dottedPropertyPath"` gives JIRM clues on how to map the *flat* `ResultSet` back to a *hierarchical* object. 
+
+Now here is the Java:
 
 ```java
-PlainSql sql = PlainSql.fromResource(TestBean.class, "select-test-bean.sql")
-		.bind("name", "Adam")
-		.bind("limit", 1);
-assertEquals(ImmutableList.<Object>of("Adam", 1), sql.mergedParameters());
-assertEquals(
-		"SELECT * from test_bean\n" + 
-		"WHERE stringProp like ? \n" + 
-		"LIMIT ? ", sql.getSql());
+JirmDao<ParentBean> dao = jirmFactory.daoFor(ParentBean.class);
+
+List<ParentBean> results = 
+   dao.getSelectBuilderFactory().sqlFromResource("select-parent-bean.sql")
+      .bind("testName", "test")
+      .bind("testAmount", 100)
+      .query()
+      .forList();
 ```
+ 
+JIRM's [SQL Placeholder Parser](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md) 
+can also be used independently of JIRM's ORM functionality.
 
-The generated SQL and parameters can be used with any JDBC library/driver.
 
-So in spring you could do something like:
-
-```java
-JdbcTemplate template = new JdbcTemplate(dataSource)
-PlainSql sql = PlainSql.fromResource(TestBean.class, "select-test-bean.sql")
-    .with("Adam")
-    .with(1);
-
-template.queryForList(sql.getSql(), sql.mergedParameters());
-```
-
-Notice in the above I set the parameters by position (`with` as opposed to `set`). 
-In some cases that might be more convenient.

@@ -12,9 +12,11 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Version;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -30,23 +32,38 @@ public class SqlParameterDefinition {
 	private final Class<?> parameterType;
 	private final int order;
 	private final boolean id;
+	private final boolean version;
+	private final boolean generated;
 	private final Optional<SqlParameterObjectDefinition> objectDefinition;
 	private final SqlParameterConverter parameterConverter;
 	
 	
-	SqlParameterDefinition(SqlParameterConverter parameterConverter, String parameterName, Class<?> parameterType, int order, String sqlName, boolean id) {
+	
+	private SqlParameterDefinition(
+			SqlParameterConverter parameterConverter, String parameterName, String sqlName, Class<?> parameterType, int order,
+			boolean id, boolean version, boolean generated,
+			Optional<SqlParameterObjectDefinition> objectDefinition) {
 		super();
 		this.parameterName = parameterName;
+		this.sqlName = sqlName;
 		this.parameterType = parameterType;
 		this.order = order;
-		this.sqlName = sqlName;
 		this.id = id;
-		this.objectDefinition = Optional.absent();
+		this.version = version;
+		this.objectDefinition = objectDefinition;
 		this.parameterConverter = parameterConverter;
-		
+		this.generated = generated;
 	}
 	
-	SqlParameterDefinition(
+	static SqlParameterDefinition newSimpleInstance(
+			SqlParameterConverter parameterConverter, 
+			String parameterName, Class<?> parameterType, 
+			int order, String sqlName, boolean id, boolean version, boolean generated) {
+		Optional<SqlParameterObjectDefinition> objectDefinition = Optional.absent();
+		return new SqlParameterDefinition(parameterConverter, parameterName, sqlName, parameterType, order, id, version, generated, objectDefinition);
+	}
+	
+	private SqlParameterDefinition(
 			SqlParameterConverter parameterConverter,
 			String parameterName,
 			@Nonnull
@@ -59,7 +76,17 @@ public class SqlParameterDefinition {
 		this.sqlName = sqlName;
 		this.id = false;
 		this.parameterConverter = parameterConverter;
-		
+		this.version = false;
+		this.generated = false;
+	}
+	
+	static SqlParameterDefinition newComplexInstance(
+			SqlParameterConverter parameterConverter,
+			String parameterName,
+			@Nonnull
+			SqlParameterObjectDefinition objDef, 
+			int order, String sqlName) {
+		return new SqlParameterDefinition(parameterConverter, parameterName, objDef, order, sqlName);
 	}
 	
 	public Object convertToSql(Object original) {
@@ -99,7 +126,7 @@ public class SqlParameterDefinition {
 		return objectDefinition;
 	}
 
-	private static SqlParameterDefinition parameterDef(
+	static SqlParameterDefinition parameterDef(
 			SqlObjectConfig config,
 			Class<?> objectType, 
 			String parameterName, 
@@ -127,17 +154,23 @@ public class SqlParameterDefinition {
 				
 			}
 			SqlParameterObjectDefinition sod = new SqlParameterObjectDefinition(od, depth);
-			definition = new SqlParameterDefinition(config.getConverter(), parameterName, sod, order, sn);
+			definition = SqlParameterDefinition.newComplexInstance(config.getConverter(), parameterName, sod, order, sn);
 		}
 		else {
 			Column col = getAnnotation(objectType, parameterName, Column.class);
 			if (col != null)
 				sn = col.name();
 			Id id = getAnnotation(objectType, parameterName, Id.class);
+			Version version = getAnnotation(objectType, parameterName, Version.class);
+			GeneratedValue generated = getAnnotation(objectType, parameterName, GeneratedValue.class);
+			
 			boolean idFlag = id != null;
+			boolean versionFlag = version != null;
+			boolean generatedFlag = generated != null;
 			if (sn == null)
 				sn = config.getNamingStrategy().propertyToColumnName(parameterName);
-			definition = new SqlParameterDefinition(config.getConverter(), parameterName, parameterType, order, sn, idFlag);
+			definition = SqlParameterDefinition.newSimpleInstance(config.getConverter(), parameterName, 
+					parameterType, order, sn, idFlag, versionFlag, generatedFlag);
 		}
 		return definition;
 	}
@@ -176,6 +209,13 @@ public class SqlParameterDefinition {
 	}
 	public boolean isComplex() {
 		return this.getObjectDefinition().isPresent();
+	}
+	
+	public boolean isVersion() {
+		return version;
+	}
+	public boolean isGenerated() {
+		return generated;
 	}
 	
 	//@SuppressWarnings("unchecked")
