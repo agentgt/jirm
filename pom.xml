@@ -242,6 +242,32 @@
         </plugins>
       </build>
     </profile>
+    
+    <profile>
+    	<id>travis</id>
+    	<activation>
+    		<property>
+    			<name>env.TRAVIS</name>
+    			<value>true</value>
+    		</property>
+    	</activation>
+    	<build>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.12</version>
+					<configuration>
+						<systemPropertyVariables>
+							<database.url>jdbc:postgresql://127.0.0.1:5432/myapp_test</database.url>
+							<database.password></database.password>
+						</systemPropertyVariables>
+					</configuration>
+				</plugin>
+			</plugins>
+		</build>
+    </profile>
+    
   </profiles>
 
   <prerequisites>
