@@ -36,7 +36,6 @@ public class JirmDaoTest {
 				, rowMapper, new Object[] {1L, "blah"});
 	}
 
-	@Ignore("For some reason travis does not like this test.")
 	@Test
 	public void testInsertT() {
 		Calendar c = Calendar.getInstance();
