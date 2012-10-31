@@ -1,11 +1,12 @@
 package co.jirm.orm.dao;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
 import java.util.Calendar;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import co.jirm.core.execute.SqlExecutor;
@@ -37,11 +38,15 @@ public class JirmDaoTest {
 	}
 
 	@Test
-	public void testInsertT() {
-		Calendar c = Calendar.getInstance();
-		TestBean t = new TestBean("blah", 1L, c);
-		dao.insert(t);
-		verify(mock).update("INSERT INTO test_bean (string_prop, long_prop, timets) VALUES (?, ?, ?)", new Object[] {"blah", 1L, c});
+	public void testInsert() {
+		String travis = System.getenv("TRAVIS");
+		assumeTrue(travis == null || ! travis.equals("true"));
+		if (travis == null) {
+			Calendar c = Calendar.getInstance();
+			TestBean t = new TestBean("blah", 1L, c);
+			dao.insert(t);
+			verify(mock).update("INSERT INTO test_bean (string_prop, long_prop, timets) VALUES (?, ?, ?)", new Object[] {"blah", 1L, c});
+		}
 	}
 	
 	@Test
