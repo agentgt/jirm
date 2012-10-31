@@ -16,13 +16,17 @@ import co.jirm.mapper.jdbc.JdbcSqlObjectQueryExecutor;
 import com.google.common.base.Optional;
 
 
-public class JdbcTemplateSqlExecutor extends JdbcSqlObjectQueryExecutor implements SqlExecutor {
+public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements SqlExecutor {
 	
 	private final JdbcOperations jdbcTemplate;
 
-	private JdbcTemplateSqlExecutor(SqlObjectConfig config, JdbcOperations jdbcTemplate) {
+	private SpringJdbcSqlExecutor(SqlObjectConfig config, JdbcOperations jdbcTemplate) {
 		super(config);
 		this.jdbcTemplate = jdbcTemplate;
+	}
+	
+	public static SpringJdbcSqlExecutor newInstance(SqlObjectConfig config, JdbcOperations jdbcTemplate) {
+		return new SpringJdbcSqlExecutor(config, jdbcTemplate);
 	}
 
 	@Override

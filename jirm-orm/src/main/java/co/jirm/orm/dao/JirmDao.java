@@ -93,13 +93,19 @@ public final class JirmDao<T> {
 					/*
 					 * TODO: We only set it if the object is actually present. ie do you really want to set null?
 					 */
-					m.put(pd.getParameterName(), nkv.object);
+					m.put(pd.getParameterName(), idDef.convertToSql(nkv.object));
 				}
 				else if (bulkInsert) {
 					//TODO default annotation perhaps here?
 					//http://stackoverflow.com/questions/197045/setting-default-values-for-columns-in-jpa
 					m.put(pd.getParameterName(), null);
 				}
+			}
+		}
+		for(Entry<String,Object> e : m.entrySet()) {
+			Optional<SqlParameterDefinition> d = definition.resolveParameter(e.getKey());
+			if (d.isPresent()) {
+				e.setValue(d.get().convertToSql(e.getValue()));
 			}
 		}
 		if (bulkInsert) {

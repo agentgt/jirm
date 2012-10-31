@@ -37,7 +37,7 @@ public class SqlWriterStrategy {
 	}
 	
 	public StringBuilder deleteStatementBeforeWhere(StringBuilder sb, final SqlObjectDefinition<?> definition) {
-		sb.append("DELETE ").append(definition.getSqlName());
+		sb.append("DELETE FROM ").append(definition.getSqlName());
 		return sb;
 	}
 	

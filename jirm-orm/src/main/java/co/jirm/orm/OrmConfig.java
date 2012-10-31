@@ -1,10 +1,7 @@
 package co.jirm.orm;
 
 import co.jirm.core.execute.SqlExecutor;
-import co.jirm.core.execute.SqlExecutorRowMapper;
 import co.jirm.mapper.SqlObjectConfig;
-import co.jirm.mapper.SqlObjectExecutorRowMapper;
-import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
 
@@ -18,6 +15,10 @@ public class OrmConfig {
 		this.sqlExecutor = sqlExecutor;
 		this.sqlObjectConfig = sqlObjectConfig;
 		this.sqlWriterStrategy = sqlWriterStrategy;
+	}
+	
+	public static OrmConfig newInstance(SqlExecutor sqlExecutor, SqlObjectConfig objectConfig) {
+		return new OrmConfig(sqlExecutor, SqlObjectConfig.DEFAULT, new SqlWriterStrategy());
 	}
 	
 	public static OrmConfig newInstance(SqlExecutor sqlExecutor) {
