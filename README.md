@@ -183,10 +183,10 @@ public class ParentBean {
 Now we can select `ParentBean` using plain SQL by making a SQL file in the classpath we'll call it `select-parent-bean.sql`.
 
 ```sql
-SELECT parent_bean.id AS "id", 
-test.string_prop AS "test.stringProp", 
-test.long_prop AS "test.longProp",
-test.timets AS "test.timeTS"
+SELECT parent_bean.id    AS "id", 
+       test.string_prop  AS "test.stringProp", 
+       test.long_prop    AS "test.longProp",
+       test.timets       AS "test.timeTS"
 FROM parent_bean 
 INNER JOIN test_bean test ON test.string_prop = parent_bean.test 
 WHERE test.string_prop = 'test' -- {testName}
