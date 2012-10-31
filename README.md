@@ -1,7 +1,96 @@
+[![Build Status](https://travis-ci.org/agentgt/jirm.png)](https://travis-ci.org/agentgt/jirm)
+
 JIRM
 ====
 
 A Java Immutable object Relational Mapper focused on convenience, and thread safety. 
+
+Inspiration
+-----------
+
+**What I wanted my ORM to do is**
+
+ 1. CRUD Immutable POJOs (that is all private fields are final with a constructor that fills them)
+ 1. READ hiearchy of POJOs (that is `@ManyToOne` 's are loaded eagerly) but for WRITE only write the top POJO.
+ 1. Once the POJO is loaded there is no magic. It is not "enhanced". It is safe to deserialize or cache. 
+ 1. Manually do One to Many (ie collections) which IMHO is the right way to do it (because there is nothing worse than accidentally pulling 1000 items).
+ 1. Use JPA annotations to help map the SQL ResultSet to your POJOs
+ 1. Threadsafe
+ 1. Stateless (like Ajave EBean... ie no session factory).
+ 1. Fluent API
+ 1. Sits nicely on top of other JDBC wrappers like Spring JDBC
+ 1. Compile time Transaction Support through AspectJ (Through Spring JDBC).
+
+**JIRM does all of this and more!**
+
+There was also some one looking for one here:
+http://stackoverflow.com/questions/2698665/orm-supporting-immutable-classes
+
+
+JirmDao
+-------
+
+The `JirmDao` allows you to CRUD immutable POJO's. Immutable POJO's have all of there member fields 
+`final` and the fields themselves should be immutable objects. Immutable POJO's require a constructor to instantiate
+their member fields.
+
+Because immutable objects require constructor based loading of fields we need to make a constructor with all the 
+fields from table (and/or ManyToOne child tables... more on that later).
+
+Unfortuanately the JVM has some limitations on reflection of constructor based arguments so you will have to annotate
+your constructor with either JDK's `@ConstructorProperties` or Jackson's `@JsonCreator` and `@JsonProperty`
+
+```java
+public class TestBean {
+    
+    @Id
+    private final String stringProp;
+    private final long longProp;
+    @Column(name="timets")
+    @NotNull
+    private final Calendar timeTS;
+    
+    @JsonCreator
+    public TestBean(
+            @JsonProperty("stringProp") String stringProp, 
+            @JsonProperty("longProp") long longProp,
+            @JsonProperty("timeTS") Calendar timeTS ) {
+        super();
+        this.stringProp = stringProp;
+        this.longProp = longProp;
+        this.timeTS = timeTS;
+    }
+    
+    public String getStringProp() {
+        return stringProp;
+    }
+    public long getLongProp() {
+        return longProp;
+    }
+    public Calendar getTimeTS() {
+        return timeTS;
+    }
+}
+```
+
+Lets see some Selecting of our Test Bean
+
+```java
+
+List<TestBean> list = 
+    dao.select().where()
+    .property("longProp", 1L)
+    .property("stringProp").eq("blah")
+    .limit(100)
+    .offset(10)
+    .query()
+    .forList();
+
+// You can also insert, delete, update, etc...
+
+dao.insert(testBean);
+
+```
 
 SQL Placeholder parser
 ----------------------
