@@ -1,6 +1,5 @@
 package co.jirm.orm.dao;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterators.partition;
 import static com.google.common.collect.Iterators.peekingIterator;
 import static com.google.common.collect.Maps.newLinkedHashMap;
@@ -22,9 +21,9 @@ import co.jirm.orm.OrmConfig;
 import co.jirm.orm.builder.delete.DeleteBuilderFactory;
 import co.jirm.orm.builder.delete.DeleteRootClauseBuilder;
 import co.jirm.orm.builder.query.SelectBuilderFactory;
-import co.jirm.orm.builder.query.SelectRootClauseBuilder;
 import co.jirm.orm.builder.query.SelectBuilderFactory.CountBuilder;
 import co.jirm.orm.builder.query.SelectBuilderFactory.SelectObjectBuilder;
+import co.jirm.orm.builder.query.SelectRootClauseBuilder;
 import co.jirm.orm.builder.update.UpdateBuilderFactory;
 import co.jirm.orm.builder.update.UpdateRootClauseBuilder;
 import co.jirm.orm.writer.SqlWriterStrategy;
@@ -163,6 +162,17 @@ public final class JirmDao<T> {
 	
 	public void insert(T t) {
 		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false);
+		Iterator<Entry<String, Object>> it = m.entrySet().iterator();
+		/*
+		 * Remove the null values that are to be generated.
+		 */
+		while(it.hasNext()) {
+			Entry<String, Object> e = it.next();
+			Optional<SqlParameterDefinition> p = definition.resolveParameter(e.getKey());
+			if (p.isPresent() && p.get().isGenerated() && e.getValue() == null) {
+				it.remove();
+			}
+		}
 		insert(m);
 	}
 	
@@ -173,18 +183,35 @@ public final class JirmDao<T> {
 			.execute();
 	}
 	
-	public int update(T t) {
-		
+	public void update(T t) {
 		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false);
 		LinkedHashMap<String, Object> where = newLinkedHashMap();
-		for (Entry<String, Object> e : m.entrySet()) {
-			if (definition.getIdParameters().containsKey(e.getKey())) {
-				where.put(e.getKey(), e.getValue());
+		Iterator<Entry<String, Object>> it = m.entrySet().iterator();
+		while(it.hasNext()) {
+			Entry<String, Object> e = it.next();
+			Optional<SqlParameterDefinition> p = definition.resolveParameter(e.getKey());
+			if (p.isPresent()) {
+				if (p.get().isId()) {
+					where.put(e.getKey(), e.getValue());
+					it.remove();
+				}
+				else if (p.get().isVersion()) {
+					Object o = e.getValue();
+					JirmPrecondition.check.state(o instanceof Number, 
+							"Property: {}, @Version only supports numerics", e.getKey());
+					Number n = (Number) o;
+					where.put(e.getKey(), n.intValue());
+					e.setValue(n.intValue() + 1);
+				}
 			}
 		}
-		checkState(! where.isEmpty());
 		JirmPrecondition.check.state(!where.isEmpty(), "where should not be empty");
-		return update(m, where);
+		int results = update(m, where);
+		if (results < 1) {
+			throw new JirmOpportunisticLockException("Failed to update object: {}, where: {}", 
+					definition.getObjectType(),
+					where);
+		}
 	}
 	
 	private int update(Map<String,Object> setValues, Map<String, Object> filters) {
