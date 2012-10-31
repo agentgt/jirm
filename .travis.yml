@@ -5,5 +5,5 @@ jdk:
 services: postgresql
 before_script:
   - psql -c 'create database myapp_test;' -U postgres
-  - psql -f 'src/test/sql/create-test-db.sql' -U postgres -d 'myapp_test'
+  - psql -f 'jirm-spring/src/test/sql/create-test-db.sql' -U postgres -d 'myapp_test'
 
