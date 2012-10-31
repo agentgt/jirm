@@ -72,8 +72,19 @@ public class TestBean {
     }
 }
 ```
+Our SQL Table for the bean might be something like (Postgres):
 
-Lets see some Selecting of our Test Bean
+```sql
+CREATE TABLE test_bean
+(
+  string_prop text NOT NULL,
+  long_prop bigint,
+  timets timestamp without time zone,
+  CONSTRAINT string_prop_key PRIMARY KEY (string_prop)
+);
+```
+
+Lets see some CRUD of our immutable `TestBean`
 
 ```java
 
@@ -89,8 +100,30 @@ List<TestBean> list =
     .forList();
 
 // You can also insert, delete, update, etc...
-TestBean testBean = new TestBean(randomId(), 1L, Calendar.getInstance());
+String id = randomId();
+TestBean testBean = new TestBean(id, 1L, Calendar.getInstance());
+
+//insert
 dao.insert(testBean);
+//reload
+TestBean reload = dao.findById(id);
+//or
+reload = dao.reload(testBean);
+
+//Explictly update one field.
+dao.update()
+   .set("longProp", 100L)
+   .where().property("stringProp").eq(id)
+   .execute();
+
+//Of course you could update the entire object which will take advantage 
+//of opportunistic locking if you have @Version
+
+TestBean updateBean = new TestBean(testBean.getId(), 2L, Calendar.getInstance());
+dao.update(updateBean);
+
+//delete
+dao.deleteById(id);
 
 ```
 
