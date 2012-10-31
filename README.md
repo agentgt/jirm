@@ -26,6 +26,24 @@ Inspiration
 There was also some one looking for one here:
 http://stackoverflow.com/questions/2698665/orm-supporting-immutable-classes
 
+JirmDaoFactory
+--------------
+
+You need a JirmFactory to use Jirm. Right now Spring JDBC is the only implementation but it is 
+trivial to support other JDBC wrappers.
+
+Spring Config:
+```xml
+<bean class="co.jirm.spring.SpringJirmFactory" id="jirmFactory" />
+```
+
+Now in your Spring components you can simply do:
+
+```java
+@Autowired //or however you do your wiring.
+private JirmFactory jirmFactory;
+```
+
 
 JirmDao
 -------
