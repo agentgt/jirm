@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/agentgt/jirm.png)](https://travis-ci.org/agentgt/jirm)
-
 JIRM
 ====
 
-A Java Immutable object Relational Mapper focused on convenience, and thread safety. 
+**J**ava **I**mmutable object **R**elational **M**apper is a unique Java SQL ORM that allows you 
+to CRUD [**immutable objects**](http://docs.oracle.com/javase/tutorial/essential/concurrency/immutable.html).
 
 Inspiration
 -----------
@@ -11,17 +11,18 @@ Inspiration
 **How JIRM is different**
 
  1. CRUD truly **Immutable** POJOs. That is all fields are final with a constructor that fills them.
- 1. READ's hiearchy of POJOs. That is `@ManyToOne` 's are loaded eagerly, but for WRITE we only write the top POJO.
+ 1. Uses [JPA annotations](https://github.com/agentgt/jirm/tree/master/jirm-orm/README.md) to help map the SQL ResultSet to your POJOs 
+ 1. READ's hiearchy of Immutable POJOs. That is `@ManyToOne` 's are loaded eagerly, but for WRITE we only write the top POJO.
  1. Once the POJO is loaded there is no magic. It is not "enhanced". It is safe to deserialize or cache especially because they are immutable.
  1. Manually do One to Many (ie collections) which IMHO is the right way to do it (because there is nothing worse than accidentally pulling 1000 items).
  1. No hidden lazy loading.
- 1. Uses [JPA annotations](https://github.com/agentgt/jirm/tree/master/jirm-orm/README.md) to help map the SQL ResultSet to your POJOs
  1. Threadsafe - Most of the library is threadsafe.
  1. Stateless (like Ajave EBean... ie no session factory).
  1. Fluent API
- 1. Sits nicely on top of other JDBC wrappers like Spring JDBC
+ 1. Or you can use SQL with IMHO the best [SQL Placeholder templates](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md).
+ 1. Sits nicely on top of other JDBC wrappers like [**Spring JDBC**](http://static.springsource.org/spring/docs/3.0.x/reference/jdbc.html)
  1. Let your JDBC wrapper handle transactions - e.g. compile time Transaction Support through AspectJ (Through Spring JDBC).
- 1. IMHO the best [SQL Placeholder templates](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md)
+ 
  
 **JIRM does all of this and more!**
 
