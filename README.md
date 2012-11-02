@@ -32,7 +32,7 @@ http://stackoverflow.com/questions/2698665/orm-supporting-immutable-classes
 Install
 -------
 
-Right now Spring is the only JDBC Wrapper supported.
+If you would like full usage of the ORM, Spring is *currently* the only JDBC Wrapper supported.
 
 ```xml
 <dependency>
@@ -42,11 +42,17 @@ Right now Spring is the only JDBC Wrapper supported.
 </dependency>
 ```
 
+Alternatively if you want to use only the [SQL Placeholder templates](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md)
+you only need `jirm-core`.
+
 JirmFactory
 -----------
 
 You need a JirmFactory to use Jirm. Right now Spring JDBC is the only implementation but it is 
 trivial to support other JDBC wrappers by implementing `SqlExecutor` interface.
+
+*Why choose Spring JDBC?* - Because its an extremly mature JDBC wrapper that does most things correctly 
+(exception handling and transactions).
 
 Spring Config:
 ```xml
