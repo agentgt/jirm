@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>co.jirm</groupId>
   <artifactId>jirm-parent</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <packaging>pom</packaging>
 
   <name>jirm</name>
@@ -40,7 +40,7 @@
     <connection>scm:git:git@github.com:agentgt/jirm.git</connection>
     <developerConnection>scm:git:git@github.com:agentgt/jirm.git</developerConnection>
     <url>scm:git:git@github.com:agentgt/jirm.git</url>
-    <tag>HEAD</tag>
+    <tag>jirm-parent-0.0.1</tag>
   </scm>
 
   <distributionManagement>
@@ -268,7 +268,7 @@
 					<configuration>
 						<systemPropertyVariables>
 							<database.url>jdbc:postgresql://127.0.0.1:5432/myapp_test</database.url>
-							<database.password></database.password>
+							<database.password />
 						</systemPropertyVariables>
 					</configuration>
 				</plugin>
