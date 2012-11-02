@@ -8,19 +8,21 @@ A Java Immutable object Relational Mapper focused on convenience, and thread saf
 Inspiration
 -----------
 
-**What I wanted my ORM to do is**
+**How JIRM is different**
 
- 1. CRUD Immutable POJOs (that is all private fields are final with a constructor that fills them)
- 1. READ hiearchy of POJOs (that is `@ManyToOne` 's are loaded eagerly) but for WRITE only write the top POJO.
- 1. Once the POJO is loaded there is no magic. It is not "enhanced". It is safe to deserialize or cache. 
+ 1. CRUD truly **Immutable** POJOs. That is all fields are final with a constructor that fills them.
+ 1. READ's hiearchy of POJOs. That is `@ManyToOne` 's are loaded eagerly, but for WRITE we only write the top POJO.
+ 1. Once the POJO is loaded there is no magic. It is not "enhanced". It is safe to deserialize or cache especially because they are immutable.
  1. Manually do One to Many (ie collections) which IMHO is the right way to do it (because there is nothing worse than accidentally pulling 1000 items).
- 1. Use JPA annotations to help map the SQL ResultSet to your POJOs
- 1. Threadsafe
+ 1. No hidden lazy loading.
+ 1. Uses [JPA annotations](https://github.com/agentgt/jirm/tree/master/jirm-orm/README.md) to help map the SQL ResultSet to your POJOs
+ 1. Threadsafe - Most of the library is threadsafe.
  1. Stateless (like Ajave EBean... ie no session factory).
  1. Fluent API
  1. Sits nicely on top of other JDBC wrappers like Spring JDBC
- 1. Compile time Transaction Support through AspectJ (Through Spring JDBC).
-
+ 1. Let your JDBC wrapper handle transactions - e.g. compile time Transaction Support through AspectJ (Through Spring JDBC).
+ 1. IMHO the best [SQL Placeholder templates](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md)
+ 
 **JIRM does all of this and more!**
 
 There was also some one looking for one here:
@@ -43,7 +45,7 @@ JirmDaoFactory
 --------------
 
 You need a JirmFactory to use Jirm. Right now Spring JDBC is the only implementation but it is 
-trivial to support other JDBC wrappers.
+trivial to support other JDBC wrappers by implementing `SqlExecutor` interface.
 
 Spring Config:
 ```xml
