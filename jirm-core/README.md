@@ -31,7 +31,7 @@ LIMIT 1 -- {limit}
 **Notice how thats real SQL.** Its Not SQL with placeholders like `?` or `:name` or `#{}`.
 You can copy and paste it into any SQL query tool and it will work.
 
-Yes those comments at the end of the lines are special:
+*Yes those comments at the end of the lines are special*:
 
 ```java
 PlainSql sql = PlainSql.fromResource(TestBean.class, "select-test-bean.sql")
