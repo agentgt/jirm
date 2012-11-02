@@ -8,7 +8,7 @@
   <packaging>pom</packaging>
 
   <name>jirm</name>
-  <description>Logic-less and semantic templates with Java</description>
+  <description>Java Immutable object Relational Mapper is a unique Java SQL ORM that allows you to CRUD immutable objects.</description>
 
   <url>https://github.com/agentgt/jirm</url>
 
