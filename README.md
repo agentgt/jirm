@@ -42,8 +42,8 @@ Right now Spring is the only JDBC Wrapper supported.
 </dependency>
 ```
 
-JirmDaoFactory
---------------
+JirmFactory
+-----------
 
 You need a JirmFactory to use Jirm. Right now Spring JDBC is the only implementation but it is 
 trivial to support other JDBC wrappers by implementing `SqlExecutor` interface.
@@ -60,6 +60,11 @@ Now in your Spring components you can simply do:
 private JirmFactory jirmFactory;
 ```
 
+Now you can create a *threadsafe* `JirmDao` for your Immutable POJO like:
+
+```java
+   JirmDao<MyBean> dao = jirmFactory.daoFor(MyBean.class);
+```
 
 JirmDao
 -------
