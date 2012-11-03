@@ -11,7 +11,7 @@ Inspiration
 **How JIRM is different**
 
  1. CRUD truly **Immutable** POJOs. That is all fields are final with a constructor that fills them.
- 1. Uses [JPA annotations](https://github.com/agentgt/jirm/tree/master/jirm-orm/README.md) to help map the SQL ResultSet to your POJOs 
+ 1. Uses [JPA annotations](https://github.com/agentgt/jirm/tree/master/jirm-orm#supported-jpa-annotations) to help map the SQL ResultSet to your POJOs 
  1. READ's hiearchy of Immutable POJOs. That is `@ManyToOne` 's are loaded eagerly, but for WRITE we only write the top POJO.
  1. Once the POJO is loaded there is no magic. It is not "enhanced". It is safe to deserialize or cache especially because they are immutable.
  1. Manually do One to Many (ie collections) which IMHO is the right way to do it (because there is nothing worse than accidentally pulling 1000 items).
@@ -19,7 +19,7 @@ Inspiration
  1. Threadsafe - Most of the library is threadsafe.
  1. Stateless (like Ajave EBean... ie no session factory).
  1. Fluent API
- 1. Or you can use SQL with IMHO the best [SQL Placeholder templates](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md).
+ 1. Or you can use SQL with IMHO the best [SQL Placeholder templates](https://github.com/agentgt/jirm/tree/master/jirm-core#sql-placeholder-parser).
  1. Sits nicely on top of other JDBC wrappers like [**Spring JDBC**](http://static.springsource.org/spring/docs/3.0.x/reference/jdbc.html)
  1. Let your JDBC wrapper handle transactions - e.g. compile time Transaction Support through AspectJ (Through Spring JDBC).
  
@@ -211,7 +211,7 @@ AND test.long_prop = 100 -- {testAmount}
 
 Yes the above is real SQL with out any placeholders that would break normal SQL parsing.
 We use comments on the end of the line to indicate a place holder. You can read more about it
-[here](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md).
+[here](https://github.com/agentgt/jirm/tree/master/jirm-core#sql-placeholder-parser).
 
 Besides the comment placeholders the other thing to notice is the use of result column labels for property paths.
 By using `AS "dottedPropertyPath"` gives JIRM clues on how to map the *flat* `ResultSet` back to a *hierarchical* object. 
@@ -229,7 +229,7 @@ List<ParentBean> results =
       .forList();
 ```
  
-JIRM's [SQL Placeholder Parser](https://github.com/agentgt/jirm/tree/master/jirm-core/README.md) 
+JIRM's [SQL Placeholder Parser](https://github.com/agentgt/jirm/tree/master/jirm-core#sql-placeholder-parser) 
 can also be used independently of JIRM's ORM functionality.
 
 
