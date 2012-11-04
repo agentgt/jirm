@@ -92,7 +92,9 @@ VALUES (
 )
 ```
 
-It scales nicely and forces your team to write consistent SQL. The number of lines is the number of placeholders.
+It scales nicely: forces your team to write consistent spacing of SQL, 
+documents an example input for that placeholder and
+number of lines is the number of placeholders (its easier to count lines).
 
 The above in traditional JDBC:
 
