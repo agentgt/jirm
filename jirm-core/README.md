@@ -20,6 +20,8 @@ SQL Placeholder parser
 JIRM has a simple but powerful placeholder parser that allows you to use **REAL** SQL.
 Its best to understand how the parser works by example.
 
+### Examples
+
 Lets say we have a SQL file that its in the same Java package as TestBean.class called: `select-test-bean.sql`
 
 ```sql
@@ -40,7 +42,7 @@ PlainSql sql = PlainSql.fromResource(TestBean.class, "select-test-bean.sql")
 assertEquals(ImmutableList.<Object>of("Adam", 1), sql.mergedParameters());
 assertEquals(
 		"SELECT * from test_bean\n" + 
-		"WHERE stringProp like ? \n" + 
+		"WHERE string_prop like ? \n" + 
 		"LIMIT ? ", sql.getSql());
 ```
 
@@ -59,3 +61,62 @@ template.queryForList(sql.getSql(), sql.mergedParameters());
 
 Notice in the above I set the parameters by position (`with` as opposed to `bind`). 
 In some cases that might be more convenient.
+
+The only bad news is that you will have to format the spacing of your SQL and may end 
+up with more line breaks than you like but I find this generally to be benificial.
+
+For example here is an `INSERT`:
+
+```sql
+INSERT INTO test_bean 
+(string_prop, long_prop, timets)
+VALUES (
+'HELLO' -- {stringProp}
+, 3000 -- {longProp}
+, now() -- {timeTS}
+)
+```
+
+Now if you add several new columns:
+
+```sql
+INSERT INTO test_bean 
+(string_prop, long_prop, int_prop, float_prop, double_prop, timets)
+VALUES (
+'HELLO' -- {stringProp}
+, 3000 -- {longProp}
+, 400 -- {intProp}
+, 500.0 -- {floatProp}
+, 500.0 -- {doubleProp}
+, now() -- {timeTS}
+)
+```
+
+It scales nicely and forces your team to write consistent SQL. The number of lines is the number of placeholders.
+
+The above in traditional JDBC:
+
+```sql
+INSERT INTO test_bean 
+(string_prop, long_prop, int_prop, float_prop, double_prop, timets)
+VALUES (?,?,?,?,?,?)
+```
+
+Better count those '?' carefully :)
+
+
+### Parser Spec
+
+**To formalize what the parser is doing:**
+
+*The last literal or function with out spaces next to a comment 
+at the end of line of the format `-- {}` 
+or `-- {NAME}` is a placeholder*.
+
+ * `-- {}` are positional placeholders
+ * `-- {NAME}` are name based placeholders.
+
+Currently you cannot mix and match positional and name placeholders however name 
+placeholders can be programmatically used as though the were positional placeholders.
+
+
