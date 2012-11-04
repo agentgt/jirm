@@ -38,7 +38,7 @@ import com.google.common.collect.Lists;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:/spring/test-applicationContext.xml")
-public class SqlObjectDaoIntegrationTest {
+public class JirmDaoIntegrationTest {
 
 
 	@Autowired
