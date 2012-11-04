@@ -137,16 +137,7 @@ Lets see some CRUD of our immutable `TestBean`
 
 JirmDao<TestBean> dao = daoFactory.daoFor(TestBean.class);
 
-List<TestBean> list = 
-    dao.select().where()
-    .property("longProp", 1L)
-    .property("stringProp").eq("blah")
-    .limit(100)
-    .offset(10)
-    .query()
-    .forList();
-
-// You can also insert, delete, update, etc...
+// You can insert, delete, update, etc...
 String id = randomId();
 TestBean testBean = new TestBean(id, 1L, Calendar.getInstance());
 
@@ -165,13 +156,25 @@ dao.update()
 
 //Of course you could update the entire object which will take advantage 
 //of opportunistic locking if you have @Version
-
 TestBean updateBean = new TestBean(testBean.getId(), 2L, Calendar.getInstance());
 dao.update(updateBean);
 
 //delete
 dao.deleteById(id);
+//or
+dao.delete()
+   .where().property("stringProp").eq(id)
+   .execute();
 
+//Now lets select some TestBeans.
+List<TestBean> list = 
+    dao.select().where()
+    .property("longProp", 1L)
+    .property("stringProp").eq("blah")
+    .limit(100)
+    .offset(10)
+    .query()
+    .forList();
 ```
 
 JIRM embraces SQL
