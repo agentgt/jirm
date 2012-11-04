@@ -111,7 +111,8 @@ Better count those '?' carefully :)
 
 *The last literal or function with out spaces next to a comment 
 at the end of line of the format `-- {}` 
-or `-- {NAME}` is a placeholder*.
+or `-- {NAME}` is a placeholder. 
+The literal or function will be replaced with a configurable placeholder (default is `?`).*
 
  * `-- {}` are positional placeholders
  * `-- {NAME}` are name based placeholders.
