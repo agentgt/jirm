@@ -77,7 +77,7 @@ public class SelectBuilderFactory<T> {
 	public SelectRootClauseBuilder<SelectObjectBuilder<T>> select() {
 		StringBuilder sb = new StringBuilder();
 		writerStrategy.selectStatementBeforeWhere(sb, definition);
-		return SelectRootClauseBuilder.using(new RootClauseHandoff<SelectObjectBuilder<T>>(sb.toString()) {
+		return SelectRootClauseBuilder.newInstance(new RootClauseHandoff<SelectObjectBuilder<T>>(sb.toString()) {
 			@Override
 			protected SelectObjectBuilder<T> createBuilder(String sql) {
 				return new SelectObjectBuilder<T>(SelectBuilderFactory.this, sql);
@@ -86,7 +86,7 @@ public class SelectBuilderFactory<T> {
 	}
 	
 	public SelectCustomClauseBuilder<SelectBuilder<T>> sql(String sql) {
-		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.using(new RootClauseHandoff<SelectBuilder<T>>(null) {
+		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.newInstance(new RootClauseHandoff<SelectBuilder<T>>(null) {
 			@Override
 			protected SelectBuilder<T> createBuilder(String sql) {
 				return new SelectBuilder<T>(SelectBuilderFactory.this, sql);
@@ -96,7 +96,7 @@ public class SelectBuilderFactory<T> {
 	}
 	
 	public SelectCustomClauseBuilder<SelectBuilder<T>> sqlFromResource(String resource) {
-		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.using(new RootClauseHandoff<SelectBuilder<T>>(null) {
+		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.newInstance(new RootClauseHandoff<SelectBuilder<T>>(null) {
 			@Override
 			protected SelectBuilder<T> createBuilder(String sql) {
 				return new SelectBuilder<T>(SelectBuilderFactory.this, sql);
@@ -112,7 +112,7 @@ public class SelectBuilderFactory<T> {
 		sb.append("SELECT count(*)");
 		sb.append(" FROM ").append(definition.getSqlName());
 		//definition.innerJoin(sb);
-		return SelectRootClauseBuilder.using(new RootClauseHandoff<CountBuilder<T>>(sb.toString()) {
+		return SelectRootClauseBuilder.newInstance(new RootClauseHandoff<CountBuilder<T>>(sb.toString()) {
 			@Override
 			protected CountBuilder<T> createBuilder(String sql) {
 				return new CountBuilder<T>(SelectBuilderFactory.this, sql);

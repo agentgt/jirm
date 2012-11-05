@@ -15,6 +15,7 @@
  */
 package co.jirm.orm.dao;
 
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -247,6 +248,24 @@ public class JirmDaoTest {
 				"LIMIT ? ",  
 				dao.getSelectBuilderFactory().getObjectRowMapper(),
 				new Object[] {"Adam", 1});		
+	}
+	
+	@Test
+	public void testCustomUpdateTemplate() throws Exception {
+		Calendar now = Calendar.getInstance();
+		dao.getUpdateBuilderFactory()
+			.sqlFromResource("insert-test-bean.sql")
+			.bind("timeTS", now)
+			.bind("stringProp", "BLAH")
+			.bind("longProp", 200L)
+			.execute();
+		verify(mock).update("INSERT INTO test_bean \n" + 
+				"(string_prop, long_prop, timets)\n" + 
+				"VALUES (\n" + 
+				"? \n" + 
+				", ? \n" + 
+				", ? \n" + 
+				")", new Object[] {"BLAH", 200L, now});
 	}
 
 

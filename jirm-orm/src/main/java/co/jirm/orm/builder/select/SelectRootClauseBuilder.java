@@ -72,7 +72,7 @@ public class SelectRootClauseBuilder<I> implements SelectClause<I> {
 		return this;
 	}
 
-	public static <I> SelectRootClauseBuilder<I> using(SelectClauseTransform<SelectRootClauseBuilder<I>, I> factory) {
+	public static <I> SelectRootClauseBuilder<I> newInstance(SelectClauseTransform<SelectRootClauseBuilder<I>, I> factory) {
 		return new SelectRootClauseBuilder<I>(factory);
 	}
 	

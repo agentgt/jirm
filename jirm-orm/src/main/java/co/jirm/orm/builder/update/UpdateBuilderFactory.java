@@ -54,6 +54,24 @@ public class UpdateBuilderFactory<T> {
 			}
 		});
 	}
+	public UpdateCustomClauseBuilder<Integer> sql(final String sql) {
+		return UpdateRootClauseBuilder.newInstance(new RootClauseHandoff(sql) {
+			@Override
+			protected Integer execute(String sql, Object[] values) {
+				return updateExecutor.update(sql, values);
+			}
+		}).sql(sql);
+	}
+	
+	public UpdateCustomClauseBuilder<Integer> sqlFromResource(String resource) {
+		return UpdateRootClauseBuilder.newInstance(new RootClauseHandoff(null) {
+			@Override
+			protected Integer execute(String sql, Object[] values) {
+				return updateExecutor.update(sql, values);
+			}
+		}).sqlFromResource(definition.getObjectType(), resource);
+	}
+	
 	private abstract class RootClauseHandoff implements UpdateClauseTransform<UpdateRootClauseBuilder<Integer>, Integer> {
 		private final String startSql;
 		

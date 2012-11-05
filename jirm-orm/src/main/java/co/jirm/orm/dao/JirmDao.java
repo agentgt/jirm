@@ -187,6 +187,9 @@ public final class JirmDao<T> {
 			if (p.isPresent() && p.get().isGenerated() && e.getValue() == null) {
 				it.remove();
 			}
+			else if (p.isPresent() && p.get().isVersion() && e.getValue() == null) {
+				e.setValue(0);
+			}
 		}
 		insert(m);
 	}
