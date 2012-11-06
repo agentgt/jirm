@@ -16,6 +16,7 @@
 package co.jirm.orm.writer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,13 +27,17 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import co.jirm.core.util.JirmPrecondition;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
+import co.jirm.mapper.definition.SqlParameterObjectDefinition;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 
 public class SqlWriterStrategy {
+	protected static final Joiner joiner = Joiner.on(", ");
 	
 	public StringBuilder insertStatement(StringBuilder qb, final SqlObjectDefinition<?> definition, Map<String, Object> m) {
 		qb.append("INSERT INTO ").append(definition.getSqlName()).append(" (");
@@ -45,10 +50,69 @@ public class SqlWriterStrategy {
 	
 	public StringBuilder selectStatementBeforeWhere(StringBuilder sb, final SqlObjectDefinition<?> definition) {
 		sb.append("SELECT ");
-		definition.selectParameters(sb);
+		selectParameters(sb, definition);
 		sb.append(" FROM ").append(definition.getSqlName());
-		definition.innerJoin(sb);
+		innerJoin(sb, definition);
 		return sb;
+	}
+	
+	private Collection<String> sqlParameterNames(final SqlObjectDefinition<?> definition, final String tablePrefix, final String as) {
+		Collection<String> it = Collections2.transform(definition.getSimpleParameters().values(), new Function<SqlParameterDefinition, String>() {
+
+			@Override
+			public String apply(SqlParameterDefinition input) {
+				return input.sqlName(tablePrefix) + ((as == null) ? "" : " AS \"" + as + input.getParameterName() + "\"");
+			}
+			
+		});
+		return it;
+	}
+	
+	private void sqlSelectParameters(
+			List<String> parts, String prefix, 
+			String as, SqlParameterDefinition parameter, 
+			SqlParameterObjectDefinition od, int depth) {
+		parts.addAll(sqlParameterNames(od.getObjectDefintion(),prefix, as));
+		if (depth >= od.getMaximumLoadDepth()) return;
+		for (Entry<String, SqlParameterDefinition> defs : od.getObjectDefintion().getManyToOneParameters().entrySet()) {
+			String childAlias = prefix+"_"+ defs.getValue().getParameterName();
+			String newAs = as + defs.getValue().getParameterName() + ".";
+			sqlSelectParameters(parts, childAlias, newAs, defs.getValue(), defs.getValue().getObjectDefinition().get(), depth + 1);
+		}
+	}
+	
+	public void selectParameters(StringBuilder b, SqlObjectDefinition<?> definition) {
+		
+		List<String> params = Lists.newArrayList(sqlParameterNames(definition, definition.getSqlName(), null));
+		for (Entry<String, SqlParameterDefinition> defs : definition.getManyToOneParameters().entrySet()) {
+			String as = defs.getValue().getParameterName() + ".";
+			sqlSelectParameters(params, "_" + defs.getValue().getParameterName(), as, defs.getValue(), defs.getValue().getObjectDefinition().get(), 1);
+		}
+		joiner.appendTo(b, params);
+	}
+	
+	private void innerJoin(StringBuilder b, String parent, String prefix, SqlParameterDefinition parameter, SqlParameterObjectDefinition od, int depth) {
+		SqlParameterDefinition pd = od.getObjectDefintion().idParameter().get();
+		b.append(" INNER JOIN ").append(od.getObjectDefintion().getSqlName()).append(" ").append(prefix)
+		.append(" ON ")
+		.append(pd.sqlName(prefix))
+		.append(" = ")
+		.append(parameter.sqlName(parent));
+		if (depth >= od.getMaximumLoadDepth()) return;
+		for (Entry<String, SqlParameterDefinition> defs : od.getObjectDefintion().getManyToOneParameters().entrySet()) {
+			String childAlias = prefix+"_"+defs.getValue().getParameterName();
+			SqlParameterDefinition childParameter = defs.getValue();
+			SqlParameterObjectDefinition childObjectDef = defs.getValue().getObjectDefinition().get();
+			
+			innerJoin(b, prefix, childAlias, childParameter, childObjectDef, depth + 1);
+		}
+	}
+	
+	public void innerJoin(StringBuilder b, SqlObjectDefinition<?> definition) {
+		for (Entry<String, SqlParameterDefinition> defs : definition.getManyToOneParameters().entrySet()) {
+			innerJoin(b, definition.getSqlName(), "_" + defs.getValue().getParameterName(), 
+					defs.getValue(), defs.getValue().getObjectDefinition().get(), 1);
+		}
 	}
 	
 	public StringBuilder deleteStatementBeforeWhere(StringBuilder sb, final SqlObjectDefinition<?> definition) {

@@ -18,7 +18,6 @@ package co.jirm.mapper.definition;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Collections.emptyList;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,12 +31,9 @@ import javax.persistence.Table;
 import co.jirm.core.util.JirmPrecondition;
 import co.jirm.mapper.SqlObjectConfig;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -186,147 +182,17 @@ public class SqlObjectDefinition<T> {
 		return r;
 	}
 	
-	
-	
-	
 	public Map<String, SqlParameterDefinition> getIdParameters() {
 		return idParameters;
-	}
-	
-	static final Joiner joiner = Joiner.on(", ");
-	
-	public String sqlParameterNames() {
-		return joiner.join(sqlParameterNames(null, null));
 	}
 	
 	public Map<String, SqlParameterDefinition> getSimpleParameters() {
 		return simpleParameters;
 	}
 	
-	private Collection<String> sqlParameterNames(final String tablePrefix, final String as) {
-		Collection<String> it = Collections2.transform(getSimpleParameters().values(), new Function<SqlParameterDefinition, String>() {
-
-			@Override
-			public String apply(SqlParameterDefinition input) {
-				return input.sqlName(tablePrefix) + ((as == null) ? "" : " AS \"" + as + input.getParameterName() + "\"");
-			}
-			
-		});
-		return it;
-	}
-	
-	private void sqlSelectParameters(List<String> parts, String prefix, 
-			String as, SqlParameterDefinition parameter, SqlParameterObjectDefinition od, int depth) {
-		parts.addAll(od.getObjectDefintion().sqlParameterNames(prefix, as));
-		if (depth >= od.getMaximumLoadDepth()) return;
-		for (Entry<String, SqlParameterDefinition> defs : od.getObjectDefintion().getManyToOneParameters().entrySet()) {
-			String childAlias = prefix+"_"+ defs.getValue().getParameterName();
-			String newAs = as + defs.getValue().getParameterName() + ".";
-			sqlSelectParameters(parts, childAlias, newAs, defs.getValue(), defs.getValue().getObjectDefinition().get(), depth + 1);
-		}
-	}
-	
-	public void selectParameters(StringBuilder b) {
-		
-		List<String> params = Lists.newArrayList(this.sqlParameterNames(this.getSqlName(), null));
-		for (Entry<String, SqlParameterDefinition> defs : this.getManyToOneParameters().entrySet()) {
-			String as = defs.getValue().getParameterName() + ".";
-			sqlSelectParameters(params, "_" + defs.getValue().getParameterName(), as, defs.getValue(), defs.getValue().getObjectDefinition().get(), 1);
-		}
-		joiner.appendTo(b, params);
-	}
-	
-//	protected Map<String, JoinPath> resolveJoinPaths() {
-//		LinkedHashMap<String, JoinPathPart> joinParts = newLinkedHashMap();
-//	}
-//	
-//	protected Map<String, JoinPathPart> addJoinPath(Map<String,JoinPathPart> joinParts, List<String> pathParts) {
-//
-//		String joinColumnAlias = null;
-//		SqlObjectDefinition<?> currentObject = this;
-//		Iterator<String> it = pathParts.iterator();
-//		String dotPath = "";
-//		boolean first = true;
-//		int i = 0;
-//		while(it.hasNext()) {
-//			String pathPart = it.next();
-//			if (first) {
-//				dotPath += pathPart; first = false;
-//				if (isNullOrEmpty(joinColumnAlias)) {
-//					joinColumnAlias = pathPart + i;
-//				}
-//			}
-//			else {
-//				dotPath = dotPath + "." + pathPart;
-//				joinColumnAlias += "_" + pathPart + i;
-//			}
-//			SqlParameterDefinition p = currentObject.getParameters().get(pathPart);
-//			SqlObjects.check.state( ! ( it.hasNext() && ! p.isComplex()), "Bad path parts references a simple parameter: {}", pathParts);
-//			joinParts.put(dotPath, new JoinPathPart(dotPath, joinColumnAlias, p));
-//			if (it.hasNext())
-//				currentObject = p.getObjectDefinition().get();
-//			i++;
-//		}
-//		
-//		return joinParts;
-//		
-//	}
-//	
-//	
-//	
-//	public static class JoinPathPart {
-//		private final String dotPath;
-//		private final String joinColumnAlias;
-//		private final SqlParameterDefinition parameter;
-//		private JoinPathPart(String dotPath, String joinColumnAlias, SqlParameterDefinition parameter) {
-//			super();
-//			this.dotPath = dotPath;
-//			this.joinColumnAlias = joinColumnAlias;
-//			this.parameter = parameter;
-//		}
-//		
-//		public String getDotPath() {
-//			return dotPath;
-//		}
-//		public String getJoinColumnAlias() {
-//			return joinColumnAlias;
-//		}
-//		
-//		public SqlParameterDefinition getParameter() {
-//			return parameter;
-//		}
-//		
-//	}
-	
-	
-	
-	private void innerJoin(StringBuilder b, String parent, String prefix, SqlParameterDefinition parameter, SqlParameterObjectDefinition od, int depth) {
-		SqlParameterDefinition pd = od.getObjectDefintion().idParameter().get();
-		b.append(" INNER JOIN ").append(od.getObjectDefintion().getSqlName()).append(" ").append(prefix)
-		.append(" ON ")
-		.append(pd.sqlName(prefix))
-		.append(" = ")
-		.append(parameter.sqlName(parent));
-		if (depth >= od.getMaximumLoadDepth()) return;
-		for (Entry<String, SqlParameterDefinition> defs : od.getObjectDefintion().getManyToOneParameters().entrySet()) {
-			String childAlias = prefix+"_"+defs.getValue().getParameterName();
-			SqlParameterDefinition childParameter = defs.getValue();
-			SqlParameterObjectDefinition childObjectDef = defs.getValue().getObjectDefinition().get();
-			
-			innerJoin(b, prefix, childAlias, childParameter, childObjectDef, depth + 1);
-		}
-	}
-	
-	public void innerJoin(StringBuilder b) {
-		for (Entry<String, SqlParameterDefinition> defs : this.getManyToOneParameters().entrySet()) {
-			innerJoin(b, getSqlName(), "_" + defs.getValue().getParameterName(), defs.getValue(), defs.getValue().getObjectDefinition().get(), 1);
-		}
-	}
-	
 	public Optional<SqlParameterDefinition> idParameter() {
 		return Optional.fromNullable(Iterators.get(this.getIdParameters().values().iterator(), 0, null));
 	}
-	
 	
 	public String getSqlName() {
 		return sqlName;
