@@ -4,7 +4,7 @@ JIRM
 
 **J**ava **I**mmutable object **R**elational **M**apper is a unique Java SQL ORM that allows you 
 to CRUD [**immutable objects**](http://docs.oracle.com/javase/tutorial/essential/concurrency/immutable.html).
-Thus it is a good match for highly concurrent message driven architectures.
+It is a good match for highly concurrent message driven architectures.
 
 Inspiration
 -----------
