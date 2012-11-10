@@ -110,7 +110,7 @@ public class SqlParameterDefinition {
 	
 	static Map<String, SqlParameterDefinition> getSqlBeanParameters(Class<?> k, SqlObjectConfig config) {
 		Map<String, SqlParameterDefinition> parameters = new LinkedHashMap<String, SqlParameterDefinition>();
-		Constructor<?> cons[] = k.getConstructors();
+		Constructor<?> cons[] = k.getDeclaredConstructors();
 		for (Constructor<?> c : cons) {
 			JsonCreator jc = c.getAnnotation(JsonCreator.class);
 			if (jc == null) continue;
