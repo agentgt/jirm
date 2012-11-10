@@ -17,6 +17,7 @@ package co.jirm.mapper.definition;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -173,7 +174,7 @@ public class SqlParameterDefinition {
 		}
 		else {
 			Column col = getAnnotation(objectType, parameterName, Column.class);
-			if (col != null)
+			if (col != null && ! isNullOrEmpty(col.name()))
 				sn = col.name();
 			Id id = getAnnotation(objectType, parameterName, Id.class);
 			Version version = getAnnotation(objectType, parameterName, Version.class);
