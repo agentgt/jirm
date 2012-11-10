@@ -4,6 +4,7 @@ JIRM
 
 **J**ava **I**mmutable object **R**elational **M**apper is a unique Java SQL ORM that allows you 
 to CRUD [**immutable objects**](http://docs.oracle.com/javase/tutorial/essential/concurrency/immutable.html).
+It is a good match for highly concurrent message driven architectures.
 
 Inspiration
 -----------
@@ -19,7 +20,7 @@ Inspiration
  1. Threadsafe - Most of the library is threadsafe.
  1. Stateless (like Ajave EBean... ie no session factory).
  1. Fluent API
- 1. Or you can use SQL with IMHO the best [SQL Placeholder templates](https://github.com/agentgt/jirm/tree/master/jirm-core#sql-placeholder-parser).
+ 1. Or you can use SQL with IMHO the best [**SQL Placeholder templates**](https://github.com/agentgt/jirm/tree/master/jirm-core#sql-placeholder-parser).
  1. Sits nicely on top of other JDBC wrappers like [**Spring JDBC**](http://static.springsource.org/spring/docs/3.0.x/reference/jdbc.html)
  1. Let your JDBC wrapper handle transactions - e.g. compile time Transaction Support through AspectJ (Through Spring JDBC).
  
