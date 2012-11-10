@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.junit.Before;
 import org.junit.Test;
 
+import co.jirm.core.JirmIllegalArgumentException;
 import co.jirm.mapper.SqlObjectConfig;
 
 
@@ -24,7 +25,11 @@ public class SqlObjectDefinitionTest {
 				SqlObjectDefinition.fromClass(ProtectedConsTest.class, SqlObjectConfig.DEFAULT);
 		assertTrue(d.getIdParameters().containsKey("id"));
 		assertEquals("no_colum_name", d.getParameters().get("noColumName").sqlName());
-		
+	}
+	
+	@Test(expected=JirmIllegalArgumentException.class)
+	public void testNoDefinitionFailure() {
+		SqlObjectDefinition.fromClass(NoDef.class, SqlObjectConfig.DEFAULT);
 	}
 	
 	public static class ProtectedConsTest {
@@ -52,5 +57,7 @@ public class SqlObjectDefinitionTest {
 		}
 		
 	}
+	
+	public static class NoDef {}
 
 }
