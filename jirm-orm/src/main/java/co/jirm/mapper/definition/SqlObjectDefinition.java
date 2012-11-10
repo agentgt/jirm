@@ -31,12 +31,14 @@ import javax.persistence.Table;
 import co.jirm.core.util.JirmPrecondition;
 import co.jirm.mapper.SqlObjectConfig;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 
 public class SqlObjectDefinition<T> {
@@ -106,6 +108,8 @@ public class SqlObjectDefinition<T> {
 			});
 		} catch (ExecutionException e) {
 			throw Throwables.propagate(e);
+		} catch (UncheckedExecutionException e) {
+			throw Throwables.propagate(Objects.firstNonNull(e.getCause(), e));
 		}
 	}
 	

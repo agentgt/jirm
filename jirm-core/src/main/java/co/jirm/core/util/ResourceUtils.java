@@ -21,11 +21,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Resources;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 
 public class ResourceUtils {
@@ -49,6 +52,8 @@ public class ResourceUtils {
 			});
 		} catch (ExecutionException e) {
 			throw new IOException(e);
+		} catch (UncheckedExecutionException e) {
+			throw Throwables.propagate(Objects.firstNonNull(e.getCause(), e));
 		}
 	}
 	
