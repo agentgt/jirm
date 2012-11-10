@@ -144,28 +144,7 @@ public class SqlObjectDefinition<T> {
 		return Optional.of(d.sqlName());
 	}
 	
-	public Optional<String> parameterPathToSql(String parameterDotPath) {
-		List<SqlParameterDefinition> parts = resolveParameterPath(parameterDotPath);
-		if (parts.isEmpty()) return Optional.absent();
-		StringBuilder sb = new StringBuilder();
-		boolean first = true;
-		for (SqlParameterDefinition p : parts) {
-			if (first) {
-				first = false;
-				if ( ! p.isComplex() )
-					sb.append(this.getSqlName());
-			}
-			if (p.isComplex()) {
-				sb.append("_").append(p.sqlName());
-			}
-			else {
-				sb.append(".").append(p.sqlName());
-			}
-			
-		}
-		return Optional.of(sb.toString());
 
-	}
 	
 	private final static Splitter dotSplitter = Splitter.on(".");
 	

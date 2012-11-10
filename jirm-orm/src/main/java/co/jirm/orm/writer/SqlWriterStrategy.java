@@ -37,7 +37,7 @@ import com.google.common.collect.Lists;
 
 
 public class SqlWriterStrategy {
-	protected static final Joiner joiner = Joiner.on(", ");
+	protected static final Joiner joiner = Joiner.on(",\n");
 	
 	public StringBuilder insertStatement(StringBuilder qb, final SqlObjectDefinition<?> definition, Map<String, Object> m) {
 		qb.append("INSERT INTO ").append(definition.getSqlName()).append(" (");
@@ -49,9 +49,10 @@ public class SqlWriterStrategy {
 	}
 	
 	public StringBuilder selectStatementBeforeWhere(StringBuilder sb, final SqlObjectDefinition<?> definition) {
+		sb.append("\n");
 		sb.append("SELECT ");
 		selectParameters(sb, definition);
-		sb.append(" FROM ").append(definition.getSqlName());
+		sb.append("\nFROM ").append(definition.getSqlName());
 		innerJoin(sb, definition);
 		return sb;
 	}
@@ -93,7 +94,7 @@ public class SqlWriterStrategy {
 	
 	private void innerJoin(StringBuilder b, String parent, String prefix, SqlParameterDefinition parameter, SqlParameterObjectDefinition od, int depth) {
 		SqlParameterDefinition pd = od.getObjectDefintion().idParameter().get();
-		b.append(" INNER JOIN ").append(od.getObjectDefintion().getSqlName()).append(" ").append(prefix)
+		b.append("\nINNER JOIN ").append(od.getObjectDefintion().getSqlName()).append(" ").append(prefix)
 		.append(" ON ")
 		.append(pd.sqlName(prefix))
 		.append(" = ")
@@ -166,7 +167,7 @@ public class SqlWriterStrategy {
 		StrLookup<String> lookup = new StrLookup<String>() {
 			@Override
 			public String lookup(String key) {
-				return definition.parameterPathToSql(key).orNull();
+				return parameterPathToSql(definition,key).orNull();
 			}
 		};
 		StrSubstitutor s = new StrSubstitutor(lookup, "{{", "}}", '$');
@@ -186,6 +187,29 @@ public class SqlWriterStrategy {
 		StrSubstitutor s = new StrSubstitutor(lookup, "{{", "}}", '$');
 		String result = s.replace(sql);
 		return result;
+	}
+	
+	public Optional<String> parameterPathToSql(final SqlObjectDefinition<?> definition, String parameterDotPath) {
+		List<SqlParameterDefinition> parts = definition.resolveParameterPath(parameterDotPath);
+		if (parts.isEmpty()) return Optional.absent();
+		StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		for (SqlParameterDefinition p : parts) {
+			if (first) {
+				first = false;
+				if ( ! p.isComplex() )
+					sb.append(definition.getSqlName());
+			}
+			if (p.isComplex()) {
+				sb.append("_").append(p.getParameterName());
+			}
+			else {
+				sb.append(".").append(p.sqlName());
+			}
+			
+		}
+		return Optional.of(sb.toString());
+
 	}
 	
 	
