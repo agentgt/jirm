@@ -37,8 +37,20 @@ import com.google.common.collect.Lists;
 
 
 public class SqlWriterStrategy {
-	protected static final Joiner joiner = Joiner.on(",\n");
+	protected final Joiner commaJoiner;
+	protected final String clauseSpaceSeparator;
 	
+	
+	protected SqlWriterStrategy(Joiner commaJoiner, String clauseSpaceSeparator) {
+		super();
+		this.commaJoiner = commaJoiner;
+		this.clauseSpaceSeparator = clauseSpaceSeparator;
+	}
+
+	public static SqlWriterStrategy newInstance(String sep) {
+		return new SqlWriterStrategy(Joiner.on("," + sep),sep);
+	}
+
 	public StringBuilder insertStatement(StringBuilder qb, final SqlObjectDefinition<?> definition, Map<String, Object> m) {
 		qb.append("INSERT INTO ").append(definition.getSqlName()).append(" (");
 		Joiner.on(", ").appendTo(qb, insertColumns(definition, m));
@@ -49,10 +61,11 @@ public class SqlWriterStrategy {
 	}
 	
 	public StringBuilder selectStatementBeforeWhere(StringBuilder sb, final SqlObjectDefinition<?> definition) {
-		sb.append("\n");
+		//sb.append(clauseSpaceSeparator);
 		sb.append("SELECT ");
 		selectParameters(sb, definition);
-		sb.append("\nFROM ").append(definition.getSqlName());
+		sb.append(clauseSpaceSeparator);
+		sb.append("FROM ").append(definition.getSqlName());
 		innerJoin(sb, definition);
 		return sb;
 	}
@@ -89,12 +102,12 @@ public class SqlWriterStrategy {
 			String as = defs.getValue().getParameterName() + ".";
 			sqlSelectParameters(params, "_" + defs.getValue().getParameterName(), as, defs.getValue(), defs.getValue().getObjectDefinition().get(), 1);
 		}
-		joiner.appendTo(b, params);
+		commaJoiner.appendTo(b, params);
 	}
 	
 	private void innerJoin(StringBuilder b, String parent, String prefix, SqlParameterDefinition parameter, SqlParameterObjectDefinition od, int depth) {
 		SqlParameterDefinition pd = od.getObjectDefintion().idParameter().get();
-		b.append("\nINNER JOIN ").append(od.getObjectDefintion().getSqlName()).append(" ").append(prefix)
+		b.append(clauseSpaceSeparator).append("INNER JOIN ").append(od.getObjectDefintion().getSqlName()).append(" ").append(prefix)
 		.append(" ON ")
 		.append(pd.sqlName(prefix))
 		.append(" = ")

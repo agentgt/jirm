@@ -33,11 +33,11 @@ public class OrmConfig {
 	}
 	
 	public static OrmConfig newInstance(SqlExecutor sqlExecutor, SqlObjectConfig objectConfig) {
-		return new OrmConfig(sqlExecutor, SqlObjectConfig.DEFAULT, new SqlWriterStrategy());
+		return new OrmConfig(sqlExecutor, SqlObjectConfig.DEFAULT, SqlWriterStrategy.newInstance("\n"));
 	}
 	
 	public static OrmConfig newInstance(SqlExecutor sqlExecutor) {
-		return new OrmConfig(sqlExecutor, SqlObjectConfig.DEFAULT, new SqlWriterStrategy());
+		return new OrmConfig(sqlExecutor, SqlObjectConfig.DEFAULT, SqlWriterStrategy.newInstance(" "));
 	}
 	
 	public SqlWriterStrategy getSqlWriterStrategy() {
