@@ -144,6 +144,11 @@ TestBean testBean = new TestBean(id, 1L, Calendar.getInstance());
 
 //insert
 dao.insert(testBean);
+
+//Or batch insert 200 beans at a time
+Iterator<TestBean> testBeanIterator = other.iterator();
+dao.insert(testBeanIterator, 200);
+
 //reload
 TestBean reload = dao.findById(id);
 //or
