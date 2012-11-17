@@ -33,7 +33,7 @@ http://stackoverflow.com/questions/2698665/orm-supporting-immutable-classes
 Install
 -------
 
-The current version of jirm in the maven central repository is: `0.0.1`
+The current version of jirm in the maven central repository is: `0.0.2`
 
 If you would like full usage of the ORM, Spring is *currently* the only JDBC Wrapper supported.
 
@@ -144,6 +144,11 @@ TestBean testBean = new TestBean(id, 1L, Calendar.getInstance());
 
 //insert
 dao.insert(testBean);
+
+//Or batch insert 200 beans at a time
+Iterator<TestBean> testBeanIterator = other.iterator();
+dao.insert(testBeanIterator, 200);
+
 //reload
 TestBean reload = dao.findById(id);
 //or
