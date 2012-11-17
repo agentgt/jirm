@@ -177,6 +177,7 @@ List<TestBean> list =
     dao.select().where()
     .property("longProp", 1L)
     .property("stringProp").eq("blah")
+	.orderBy("longProp").desc()
     .limit(100)
     .offset(10)
     .query()
