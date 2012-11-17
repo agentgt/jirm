@@ -38,8 +38,13 @@ public class SelectWhereClauseBuilder<I> extends AbstractWhereClauseBuilder<Sele
 	}
 	
 	public OrderByClauseBuilder<I> orderBy(String sql) {
-		return addClause(OrderByClauseBuilder.newInstance(this, sql));
+		return addClause(OrderByClauseBuilder.newInstanceForProperty(parent, sql));
 	}
+	
+	public OrderByClauseBuilder<I> orderByCustom(String sql) {
+		return addClause(OrderByClauseBuilder.newInstanceForCustom(parent, sql));
+	}
+	
 	public LimitClauseBuilder<I> limit(String sql) {
 		return addClause(LimitClauseBuilder.newInstance(this, sql));
 	}

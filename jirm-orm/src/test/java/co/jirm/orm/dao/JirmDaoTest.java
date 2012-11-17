@@ -267,6 +267,21 @@ public class JirmDaoTest {
 				", ? \n" + 
 				")", new Object[] {"BLAH", 200L, now});
 	}
+	
+	@Test
+	public void testOrderBy() {
+		
+		dao.select().where()
+			.property("longProp").eq(1L)
+			.orderBy("longProp").asc()
+			.orderBy("stringProp").desc()
+			.query().forObject();
+		
+		verify(mock).queryForObject("SELECT test_bean.string_prop, test_bean.long_prop, test_bean.timets " +
+				"FROM test_bean WHERE test_bean.long_prop = ? " +
+				"ORDER BY test_bean.long_prop ASC, test_bean.string_prop DESC"
+				, rowMapper, new Object[] {1L});
+	}
 
 
 }

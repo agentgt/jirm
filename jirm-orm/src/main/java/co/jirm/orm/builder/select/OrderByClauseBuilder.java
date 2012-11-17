@@ -16,18 +16,36 @@
 package co.jirm.orm.builder.select;
 
 
-
-
-public class OrderByClauseBuilder<I> extends AbstractSqlParameterizedSelectClause<OrderByClauseBuilder<I>, I> {
+public class OrderByClauseBuilder<I> extends AbstractSqlParameterizedSelectClause<OrderByClauseBuilder<I>, I> 
+	implements OrderByPartial<OrderByClauseBuilder<I>> {
+	
+	private ImmutableOrderByPartial orderByPartial;
 	
 	private OrderByClauseBuilder(SelectClause<I> parent, String sql) {
 		super(parent, SelectClauseType.ORDERBY, sql);
 	}
 	
-	public static <I> OrderByClauseBuilder<I> newInstance(SelectClause<I> parent, String sql) {
-		return new OrderByClauseBuilder<I>(parent, sql);
+	public static <I> OrderByClauseBuilder<I> newInstanceForCustom(SelectClause<I> parent, String sql) {
+		OrderByClauseBuilder<I> b = new OrderByClauseBuilder<I>(parent, sql);
+		return b;
 	}
 	
+	public static <I> OrderByClauseBuilder<I> newInstanceForProperty(SelectClause<I> parent, String sql) {
+		OrderByClauseBuilder<I> b = new OrderByClauseBuilder<I>(parent, "");
+		b.orderByPartial = ImmutableOrderByPartial.newInstance("{{" + sql + "}}");
+		return b;
+	}
+	
+	public static <I> OrderByClauseBuilder<I> newInstanceForField(SelectClause<I> parent, String sql) {
+		OrderByClauseBuilder<I> b = new OrderByClauseBuilder<I>(parent, "");
+		b.orderByPartial = ImmutableOrderByPartial.newInstance(sql);
+		return b;
+	}
+
+	@Override
+	public boolean isNoOp() {
+		return super.isNoOp() && orderByPartial == null;
+	}
 
 	@Override
 	protected OrderByClauseBuilder<I> getSelf() {
@@ -55,8 +73,41 @@ public class OrderByClauseBuilder<I> extends AbstractSqlParameterizedSelectClaus
 	public OffsetClauseBuilder<I> offset(Number i) {
 		return addClause(OffsetClauseBuilder.newInstanceWithOffset(getSelf(), i));
 	}
+
+	//@Override
+	public OrderByClauseBuilder<I> asc() {
+		this.orderByPartial = this.orderByPartial.asc();
+		return getSelf();
+	}
+
+	@Override
+	public OrderByClauseBuilder<I> desc() {
+		this.orderByPartial = this.orderByPartial.desc();
+		return getSelf();
+	}
+
+	public OrderByClauseBuilder<I> property(String sql) {
+		this.orderByPartial = this.orderByPartial.orderBy("{{" + sql + "}}");
+		return getSelf();
+	}
 	
+	public OrderByClauseBuilder<I> field(String sql) {
+		this.orderByPartial = this.orderByPartial.orderBy(sql);
+		return getSelf();
+	}
 	
+	@Override
+	public OrderByMode getOrderMode() {
+		return orderByPartial.getOrderMode();
+	}
 	
+	public ImmutableOrderByPartial getOrderByPartial() {
+		return orderByPartial;
+	}
+	
+	@Override
+	public OrderByClauseBuilder<I> orderBy(String sql) {
+		return property(sql);
+	}
 	
 }

@@ -15,6 +15,8 @@
  */
 package co.jirm.orm.builder.select;
 
+import static com.google.common.base.Strings.nullToEmpty;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import co.jirm.core.sql.MutableParameters;
@@ -34,9 +36,7 @@ public class SelectClauseVisitors {
 		public abstract void visit(SelectWhereClauseBuilder<?> whereClauseBuilder);
 
 		@Override
-		public void visit(OrderByClauseBuilder<?> clauseBuilder) {
-			doVisit(clauseBuilder);
-		}
+		public abstract void visit(OrderByClauseBuilder<?> clauseBuilder);
 
 		@Override
 		public void visit(LimitClauseBuilder<?> limitClauseBuilder) {
@@ -104,6 +104,9 @@ public class SelectClauseVisitors {
 		return mp;
 	}
 	
+	/*
+	 * TODO move this to writer package.
+	 */
 	public static SelectClauseVisitor clauseVisitor(final Appendable appendable) {
 
 		final SafeAppendable sb = new SafeAppendable(appendable);
@@ -128,6 +131,15 @@ public class SelectClauseVisitors {
 				whereClauseBuilder.getCondition().accept(ConditionVisitors.conditionVisitor(sb.getAppendable()));
 			}
 			
+			@Override
+			public void visit(OrderByClauseBuilder<?> orderClauseBuilder) {
+				if ( ! appendStart(orderClauseBuilder) ) return;
+				if (nullToEmpty(orderClauseBuilder.getSql()).trim().isEmpty())
+					OrderByPartialVisitors.visitor(sb.getAppendable()).visit(orderClauseBuilder.getOrderByPartial());
+				else
+					sb.append(orderClauseBuilder.getSql());
+			}
+
 			private boolean appendStart(SelectClause<?> k) {
 				if (k.isNoOp()) return false;
 				if (first.get() ) {
