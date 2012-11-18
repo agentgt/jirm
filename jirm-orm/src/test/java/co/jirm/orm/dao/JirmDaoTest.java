@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.Calendar;
 
@@ -205,6 +206,34 @@ public class JirmDaoTest {
 			.execute();
 		verify(mock).update("UPDATE test_bean SET string_prop = ?, long_prop = ? WHERE string_prop = ?"
 				, new Object[] {"crap", 10L, "stuff"});
+	}
+	
+	@Test
+	public void testUpdateExclude() {
+		JirmDao<LockBean> dao = JirmDao.newInstance(LockBean.class, OrmConfig.newInstance(mock));
+		LockBean lb = new LockBean("MYID", 20, Calendar.getInstance(), 0);
+		
+		when(mock.update("UPDATE lock_bean SET long_prop = ?, version = ? WHERE id = ? AND version = ?"
+				, new Object[] {20L, 1, "MYID", 0}))
+				.thenReturn(1);
+		
+		dao.update(lb)
+			.exclude("timeTS")
+			.execute();
+	}
+	
+	@Test
+	public void testUpdateInclude() {
+		JirmDao<LockBean> dao = JirmDao.newInstance(LockBean.class, OrmConfig.newInstance(mock));
+		LockBean lb = new LockBean("MYID", 20, Calendar.getInstance(), 0);
+		
+		when(mock.update("UPDATE lock_bean SET long_prop = ?, version = ? WHERE id = ? AND version = ?"
+				, new Object[] {20L, 1, "MYID", 0}))
+				.thenReturn(1);
+		
+		dao.update(lb)
+			.include("longProp")
+			.execute();
 	}
 	
 	@Test

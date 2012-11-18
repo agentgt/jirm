@@ -163,7 +163,9 @@ dao.update()
 //Of course you could update the entire object which will take advantage 
 //of opportunistic locking if you have @Version
 TestBean updateBean = new TestBean(testBean.getId(), 2L, Calendar.getInstance());
-dao.update(updateBean);
+dao.update(updateBean).execute();
+//Or exclude a field from update
+dao.update(updateBean).exclude("longProp").execute();
 
 //delete
 dao.deleteById(id);

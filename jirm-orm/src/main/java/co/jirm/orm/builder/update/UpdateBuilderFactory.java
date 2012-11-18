@@ -15,6 +15,8 @@
  */
 package co.jirm.orm.builder.update;
 
+import java.util.LinkedHashMap;
+
 import co.jirm.core.execute.SqlUpdateExecutor;
 import co.jirm.core.sql.Parameters;
 import co.jirm.mapper.definition.SqlObjectDefinition;
@@ -72,6 +74,10 @@ public class UpdateBuilderFactory<T> {
 		}).sqlFromResource(definition.getObjectType(), resource);
 	}
 	
+	public UpdateObjectBuilder<T> update(LinkedHashMap<String, Object> object) {
+		return UpdateObjectBuilder.newInstance(this, object);
+	}
+	
 	private abstract class RootClauseHandoff implements UpdateClauseTransform<UpdateRootClauseBuilder<Integer>, Integer> {
 		private final String startSql;
 		
@@ -101,5 +107,9 @@ public class UpdateBuilderFactory<T> {
 			String result = writerStrategy.replaceProperties(definition, sb.toString());
 			return result;
 		}
+	}
+	
+	public SqlObjectDefinition<T> getDefinition() {
+		return definition;
 	}
 }

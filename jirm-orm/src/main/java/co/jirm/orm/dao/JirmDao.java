@@ -17,7 +17,6 @@ package co.jirm.orm.dao;
 
 import static com.google.common.collect.Iterators.partition;
 import static com.google.common.collect.Iterators.peekingIterator;
-import static com.google.common.collect.Maps.newLinkedHashMap;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -30,16 +29,18 @@ import co.jirm.core.util.JirmPrecondition;
 import co.jirm.core.util.ObjectMapUtils;
 import co.jirm.core.util.ObjectMapUtils.NestedKeyValue;
 import co.jirm.mapper.SqlObjectConfig;
+import co.jirm.mapper.copy.CopyBuilder;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
 import co.jirm.orm.OrmConfig;
 import co.jirm.orm.builder.delete.DeleteBuilderFactory;
 import co.jirm.orm.builder.delete.DeleteRootClauseBuilder;
 import co.jirm.orm.builder.select.SelectBuilderFactory;
-import co.jirm.orm.builder.select.SelectRootClauseBuilder;
 import co.jirm.orm.builder.select.SelectBuilderFactory.CountBuilder;
 import co.jirm.orm.builder.select.SelectBuilderFactory.SelectObjectBuilder;
+import co.jirm.orm.builder.select.SelectRootClauseBuilder;
 import co.jirm.orm.builder.update.UpdateBuilderFactory;
+import co.jirm.orm.builder.update.UpdateObjectBuilder;
 import co.jirm.orm.builder.update.UpdateRootClauseBuilder;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
@@ -139,6 +140,10 @@ public final class JirmDao<T> {
 				
 	}
 	
+	public CopyBuilder<T> copyBuilder() {
+		return CopyBuilder.newInstance(definition.getObjectType(), config.getObjectMapper());
+	}
+	
 	protected SqlParameterDefinition idParameter() {
 		JirmPrecondition.check.state(definition.idParameter().isPresent(), "No id parameter for : {}", 
 				definition.getObjectType());
@@ -201,45 +206,11 @@ public final class JirmDao<T> {
 			.execute();
 	}
 	
-	public void update(T t) {
+	public UpdateObjectBuilder<T> update(T t) {
 		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false);
-		LinkedHashMap<String, Object> where = newLinkedHashMap();
-		Iterator<Entry<String, Object>> it = m.entrySet().iterator();
-		while(it.hasNext()) {
-			Entry<String, Object> e = it.next();
-			Optional<SqlParameterDefinition> p = definition.resolveParameter(e.getKey());
-			if (p.isPresent()) {
-				if (p.get().isId()) {
-					where.put(e.getKey(), e.getValue());
-					it.remove();
-				}
-				else if (p.get().isVersion()) {
-					Object o = e.getValue();
-					JirmPrecondition.check.state(o instanceof Number, 
-							"Property: {}, @Version only supports numerics", e.getKey());
-					Number n = (Number) o;
-					where.put(e.getKey(), n.intValue());
-					e.setValue(n.intValue() + 1);
-				}
-			}
-		}
-		JirmPrecondition.check.state(!where.isEmpty(), "where should not be empty");
-		int results = update(m, where);
-		if (results < 1) {
-			throw new JirmOpportunisticLockException("Failed to update object: {}, where: {}", 
-					definition.getObjectType(),
-					where);
-		}
+		return updateBuilderFactory.update(m);
 	}
-	
-	private int update(Map<String,Object> setValues, Map<String, Object> filters) {
-		return updateBuilderFactory
-				.update()
-				.setAll(setValues)
-				.where().propertyAll(filters)
-				.execute();
-	}
-	
+
 	public T reload(T t) {
 		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false);
 		Optional<SqlParameterDefinition> id = definition.idParameter();

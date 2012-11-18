@@ -13,7 +13,7 @@ Supported JPA annotations
  * `@Column` - Allows you to specify the database column name.
  * `@ManyToOne` - Jirm supports many to one 
  * `@Table` - Allows you to specify the database table name.
- * `@Version` - For opportunistic locking. Only numbers (`Long` and `Integer`) are supported.
+ * `@Version` - For optimistic locking. Only numbers (`Long` and `Integer`) are supported.
 
 
 

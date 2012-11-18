@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import co.jirm.orm.JirmFactory;
 import co.jirm.orm.dao.JirmDao;
-import co.jirm.orm.dao.JirmOpportunisticLockException;
+import co.jirm.orm.dao.JirmOptimisticLockException;
 
 import com.google.common.collect.Lists;
 
@@ -63,7 +63,7 @@ public class JirmDaoIntegrationTest {
 		assertTrue(count > 0);
 		
 		TestBean newT = new TestBean(t.getStringProp(), 50, Calendar.getInstance());
-		dao.update(newT);
+		dao.update(newT).execute();
 		TestBean reloaded = dao.reload(newT);
 		assertTrue(reloaded != newT);
 		assertTrue(reloaded.getStringProp().equals(newT.getStringProp()));
@@ -138,18 +138,18 @@ public class JirmDaoIntegrationTest {
 		LockBean lockBean = new LockBean(randomId(), 100L, Calendar.getInstance(), 0);
 		dao.insert(lockBean);
 		lockBean = new LockBean(lockBean.getId(), 300L, Calendar.getInstance(), lockBean.getVersion());
-		dao.update(lockBean);
+		dao.update(lockBean).execute();
 	}
 	
-	@Test(expected=JirmOpportunisticLockException.class)
+	@Test(expected=JirmOptimisticLockException.class)
 	public void testVersionFail() throws Exception {
 		JirmDao<LockBean> dao = jirmFactory.daoFor(LockBean.class);
 		LockBean lockBean = new LockBean(randomId(), 100L, Calendar.getInstance(), 0);
 		dao.insert(lockBean);
 		lockBean = new LockBean(lockBean.getId(), 300L, Calendar.getInstance(), lockBean.getVersion());
-		dao.update(lockBean);
+		dao.update(lockBean).execute();
 		//This will fail because we have to reload.
-		dao.update(lockBean);
+		dao.update(lockBean).execute();
 	}
 	
 	public static String randomId() {
