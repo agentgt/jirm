@@ -61,6 +61,7 @@ public abstract class JdbcSqlObjectQueryExecutor implements SqlQueryExecutor {
 	@Override
 	public <T> T queryForObject(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects) {
 		logSql(sql, objects);
+		nullify(objects);
 		return queryForObject(sql, createJdbcMapper(rowMapper), objects);
 	}
 
@@ -73,28 +74,43 @@ public abstract class JdbcSqlObjectQueryExecutor implements SqlQueryExecutor {
 	@Override
 	public <T> Optional<T> queryForOptional(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects) {
 		logSql(sql, objects);
+		nullify(objects);
 		return queryForOptional(sql, createJdbcMapper(rowMapper), objects);
 	}
 	
 	@Override
 	public <T> List<T> queryForList(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects) {
 		logSql(sql, objects);
+		nullify(objects);
 		return queryForList(sql, createJdbcMapper(rowMapper), objects);
 	}
 	
 	public <T> T queryForObject(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
 		logSql(sql, objects);
+		nullify(objects);
 		return doQueryForObject(sql, rowMapper, objects);
 	}
 
 	public <T> Optional<T> queryForOptional(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
 		logSql(sql, objects);
+		nullify(objects);
 		return doQueryForOptional(sql, rowMapper, objects);
 	}
 	
 	public <T> List<T> queryForList(String sql, JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
 		logSql(sql, objects);
+		nullify(objects);
 		return doQueryForList(sql, rowMapper, objects);
+	}
+	
+	protected void nullify(Object[] objects) {
+		for (int i = 0; i < objects.length; i++) {
+			Object o = objects[i];
+			if (o instanceof Optional) {
+				Optional<?> opt = (Optional<?>) o;
+				objects[i] = opt.orNull();
+			}
+		}
 	}
 
 	

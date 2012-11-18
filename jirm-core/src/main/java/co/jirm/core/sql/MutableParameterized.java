@@ -17,7 +17,11 @@ package co.jirm.core.sql;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import co.jirm.core.util.JirmPrecondition;
+
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -39,13 +43,19 @@ public abstract class MutableParameterized<T> implements ParametersBuilder<T> {
 	}
 	@Override
 	public T bind(String key, Object value) {
+		JirmPrecondition.check.argument(
+				value != null, "Null is not allowed use Guava's Optional. Key: {}", key);
 		nameParameters.put(key, value);
 		return getSelf();
 	}
 	@Override
 	public T with(Object ... value) {
+		int i = 0;
 		for (Object v : value) {
+			JirmPrecondition.check.argument(
+					v != null, "Null is not allowed use Guava's Optional. Index: {}", i);
 			parameters.add(v);
+			i++;
 		}
 		return getSelf();
 	}
@@ -53,13 +63,20 @@ public abstract class MutableParameterized<T> implements ParametersBuilder<T> {
 	protected abstract T getSelf();
 		
 	public T addAll(Parameters p) {
-		if (p == this) throw new IllegalArgumentException("don't do that");
+		JirmPrecondition.check.argument(p != this, "Cannot pass 'this' object into its own addAll");
 		this.nameParameters.putAll(p.getNameParameters());
 		this.parameters.addAll(p.mergedParameters());
 		return getSelf();
 	}
 	
 	public T bindAll(Map<String,Object> m) {
+		for (Entry<String, Object> e : m.entrySet()) {
+			Object o = e.getValue();
+			if (o == null) {
+				o = Optional.absent();
+			}
+			this.nameParameters.put(e.getKey(), o);
+		}
 		this.nameParameters.putAll(m);
 		return getSelf();
 	}

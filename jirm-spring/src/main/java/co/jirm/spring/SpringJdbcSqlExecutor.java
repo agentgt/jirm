@@ -91,12 +91,16 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 
 	@Override
 	public int[] batchUpdate(String sql, List<Object[]> objects) {
+		for (Object[] os : objects) {
+			nullify(os);
+		}
 		return jdbcTemplate.batchUpdate(sql, objects);
 	}
 
 	@Override
 	public int update(String sql, Object[] objects) {
 		logSql(sql, objects);
+		nullify(objects);
 		return jdbcTemplate.update(sql, objects);
 	}
 

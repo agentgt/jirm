@@ -20,6 +20,8 @@ import static com.google.common.base.Strings.nullToEmpty;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.base.Optional;
+
 
 public class SetClauseBuilder<I> extends AbstractSqlParameterizedUpdateClause<SetClauseBuilder<I>, I> {
 	
@@ -49,6 +51,9 @@ public class SetClauseBuilder<I> extends AbstractSqlParameterizedUpdateClause<Se
 	public SetClauseBuilder<I> setAll(Map<String,Object> m) {
 		boolean first = true;
 		StringBuilder sb = new StringBuilder();
+		/*
+		 * TODO Clean this up as its nasty.
+		 */
 		for(Entry<String,Object> e : m.entrySet()) {
 			if (first) { 
 				first = false;
@@ -60,8 +65,12 @@ public class SetClauseBuilder<I> extends AbstractSqlParameterizedUpdateClause<Se
 			else {
 				sb.append(", ");
 			}
-			_writeProperty(sb, e.getKey(), e.getValue());
-			with(e.getValue());
+			_writeProperty(sb, e.getKey());
+			Object o = e.getValue();
+			if (o == null) {
+				o = Optional.absent();
+			}
+			with(o);
 		}
 		setSql(sb.toString());
 		return getSelf();
@@ -72,13 +81,13 @@ public class SetClauseBuilder<I> extends AbstractSqlParameterizedUpdateClause<Se
 		if (! nullToEmpty(getSql()).isEmpty()) {
 			sb.append(getSql()).append(", ");
 		}
-		_writeProperty(sb, property, value);
+		_writeProperty(sb, property);
 		with(value);
 		setSql(sb.toString());
 		return getSelf();
 	}
 	
-	private static void _writeProperty(StringBuilder sb, String property, Object value) {
+	private static void _writeProperty(StringBuilder sb, String property) {
 		sb.append("{{").append(property).append("}} = ").append("?");
 	}
 	
