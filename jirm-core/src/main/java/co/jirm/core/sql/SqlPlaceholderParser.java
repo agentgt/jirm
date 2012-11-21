@@ -253,8 +253,13 @@ public class SqlPlaceholderParser {
 						"Expecting already included JDBC placeholders: {} in sql:", parameters, this);
 				return parameters.getParameters();
 			}
+			else if (this.getPlaceHolders().isEmpty() && ! parameters.getNameParameters().isEmpty()) {
+				throw JirmPrecondition.check.stateInvalid("Name parameters bound but not defined in sql template " +
+						" sql: {}, parameters: {}", this, parameters);
+			}
 			else if (! allType.isPresent() ){
-				throw JirmPrecondition.check.stateInvalid("Mixing of name and positional parameters in parsed sql: {}", this);
+				throw JirmPrecondition.check.stateInvalid("Mixing of name and positional parameters in parsed" +
+						" sql: {}, parameters: {}", this, parameters);
 			}
 			else if ( allType.get() == PlaceHolderType.POSITION && ! parameters.getNameParameters().isEmpty() ) {
 				throw JirmPrecondition.check.stateInvalid("Expected positional parameters in: {} but was passed name parameters: {}", 

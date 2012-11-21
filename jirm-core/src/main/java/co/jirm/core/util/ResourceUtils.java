@@ -33,14 +33,28 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 
 public class ResourceUtils {
 	
+	public static long expire = 10;
+	
+	public static void setCacheExpire(long expire) {
+		ResourceUtils.expire = expire;
+	}
+	
 	private final static Supplier<Cache<ClasspathResourceKey, String>> cacheSupplier = 
 			Suppliers.memoize(new Supplier<Cache<ClasspathResourceKey, String>>() {
 				@Override
 				public Cache<ClasspathResourceKey, String> get() {
-					return CacheBuilder.newBuilder().maximumSize(100).expireAfterAccess(10000, TimeUnit.SECONDS).build();
+					return CacheBuilder.newBuilder().maximumSize(100).expireAfterAccess(expire, TimeUnit.SECONDS).build();
 				}
 			});
 	
+	public static String getClasspathResourceAsString(final Class<?> klass, final String path, boolean cache) throws IOException {
+		if (cache) {
+			return getClasspathResourceAsString(klass, path);
+		}
+		else {
+			return _getClasspathResourceAsString(klass, path);
+		}
+	}
 	public static String getClasspathResourceAsString(final Class<?> klass, final String path) throws IOException {
 		try {
 			return cacheSupplier.get().get(new ClasspathResourceKey(path, klass),  new Callable<String>() {

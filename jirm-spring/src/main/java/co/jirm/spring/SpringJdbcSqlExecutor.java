@@ -81,12 +81,12 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 
 	@Override
 	public <T> List<T> doQueryForList(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
-		return jdbcTemplate.query(sql, new RowMapper<T> () {
+		return jdbcTemplate.query(sql, objects, new RowMapper<T> () {
 			@Override
 			public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return rowMapper.mapRow(rs, rowNum);
 			}		
-		}, objects);
+		});
 	}
 
 	@Override
