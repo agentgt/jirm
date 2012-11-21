@@ -59,19 +59,19 @@ public class SelectBuilderFactory<T> {
 	
 
 	public Long queryForLong(ParametersSql sql) {
-		return queryExecutor.queryForLong(sql.getSql(), sql.getParameters().toArray());
+		return queryExecutor.queryForLong(sql.getSql(), sql.mergedParameters().toArray());
 	}
 	
 	public List<T> queryForList(ParametersSql sql) {
-		return queryExecutor.queryForList(sql.getSql(), getObjectRowMapper(), sql.getParameters().toArray());
+		return queryExecutor.queryForList(sql.getSql(), getObjectRowMapper(), sql.mergedParameters().toArray());
 	}
 	
 	public T queryForObject(ParametersSql sql) {
-		return queryExecutor.queryForObject(sql.getSql(), getObjectRowMapper(), sql.getParameters().toArray());
+		return queryExecutor.queryForObject(sql.getSql(), getObjectRowMapper(), sql.mergedParameters().toArray());
 	}
 	
 	public Optional<T> queryForOptional(ParametersSql sql) {
-		return queryExecutor.queryForOptional(sql.getSql(), getObjectRowMapper(), sql.getParameters().toArray());
+		return queryExecutor.queryForOptional(sql.getSql(), getObjectRowMapper(), sql.mergedParameters().toArray());
 	}
 	
 	public SelectRootClauseBuilder<SelectObjectBuilder<T>> select() {

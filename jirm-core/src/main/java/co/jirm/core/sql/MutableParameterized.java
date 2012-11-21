@@ -64,7 +64,7 @@ public abstract class MutableParameterized<T> implements ParametersBuilder<T> {
 		
 	public T addAll(Parameters p) {
 		JirmPrecondition.check.argument(p != this, "Cannot pass 'this' object into its own addAll");
-		this.nameParameters.putAll(p.getNameParameters());
+		//this.nameParameters.putAll(p.getNameParameters());
 		this.parameters.addAll(p.mergedParameters());
 		return getSelf();
 	}
