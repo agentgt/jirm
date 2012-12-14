@@ -34,6 +34,7 @@ import co.jirm.orm.JirmFactory;
 import co.jirm.orm.dao.JirmDao;
 import co.jirm.orm.dao.JirmOptimisticLockException;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -150,6 +151,24 @@ public class JirmDaoIntegrationTest {
 		dao.update(lockBean).execute();
 		//This will fail because we have to reload.
 		dao.update(lockBean).execute();
+	}
+	
+	@Test
+	public void testSingleValue() throws Exception {
+		List<String> ids = dao.getSelectBuilderFactory()
+			.sql("select string_prop from test_bean")
+			.query().forListOf(String.class);
+		assertNotNull(ids);
+	}
+	
+	@Test
+	public void testSingleOptional() throws Exception {
+		Optional<String> id = dao.getSelectBuilderFactory()
+			.sql("select string_prop from test_bean where string_prop = ?")
+			.with("BLAHBLAH")
+			.query().forOptionalOf(String.class);
+		assertNotNull(id);
+		assertTrue(! id.isPresent());
 	}
 	
 	public static String randomId() {
