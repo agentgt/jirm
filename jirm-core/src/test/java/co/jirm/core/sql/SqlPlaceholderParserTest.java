@@ -121,7 +121,7 @@ public class SqlPlaceholderParserTest {
 			PlainSql.parse(sql);
 		}
 		
-		assertTrue("Should be faster",sw.stop().elapsedMillis() < 3000);
+		assertTrue("Should be faster",sw.stop().elapsedMillis() < 5000);
 	}
 	
 	@Test
@@ -131,7 +131,7 @@ public class SqlPlaceholderParserTest {
 			PlainSql.fromResource(getClass(), "search-recruiting-name.sql");
 		}
 		
-		assertTrue("Should be faster",sw.stop().elapsedMillis() < 3000);
+		assertTrue("Should be faster",sw.stop().elapsedMillis() < 5000);
 	}
 	
 	@Test
