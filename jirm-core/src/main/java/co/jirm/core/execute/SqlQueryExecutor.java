@@ -22,11 +22,17 @@ import com.google.common.base.Optional;
 
 public interface SqlQueryExecutor {
 	
-	<T> T queryForObject(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects);
+	<T> T queryForObject(String sql, SqlMultiValueRowMapper<T> rowMapper, Object[] objects);
 	
-	<T> Optional<T> queryForOptional(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects);
+	<T> Optional<T> queryForOptional(String sql, SqlMultiValueRowMapper<T> rowMapper, Object[] objects);
 	
-	<T> List<T> queryForList(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects);
+	<T> List<T> queryForList(String sql, SqlMultiValueRowMapper<T> rowMapper, Object[] objects);
+	
+	<T> T queryForObject(String sql, SqlSingleValueRowMapper rowMapper, Class<T> type, Object[] objects);
+	
+	<T> Optional<T> queryForOptional(String sql, SqlSingleValueRowMapper rowMapper, Class<T> type, Object[] objects);
+	
+	<T> List<T> queryForList(String sql, SqlSingleValueRowMapper rowMapper, Class<T> type, Object[] objects);
 	
 //	Map<String, Object> queryForObjectMap(
 //			String sql, 

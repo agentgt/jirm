@@ -17,13 +17,13 @@ package co.jirm.mapper;
 
 import java.util.Map;
 
-import co.jirm.core.execute.SqlExecutorRowMapper;
+import co.jirm.core.execute.SqlMultiValueRowMapper;
 import co.jirm.core.util.JirmPrecondition;
 import co.jirm.mapper.converter.SqlObjectConverter;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 
 
-public class SqlObjectExecutorRowMapper<T> implements SqlExecutorRowMapper<T> {
+public class SqlObjectExecutorRowMapper<T> implements SqlMultiValueRowMapper<T> {
 	
 	private final SqlObjectDefinition<T> objectDefinition;
 	private final SqlObjectConverter objectConverter;

@@ -25,7 +25,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import co.jirm.core.execute.SqlExecutorRowMapper;
+import co.jirm.core.execute.SqlMultiValueRowMapper;
 import co.jirm.core.execute.SqlQueryExecutor;
 import co.jirm.core.util.ObjectMapUtils;
 import co.jirm.mapper.SqlObjectConfig;
@@ -45,7 +45,7 @@ public abstract class JdbcSqlObjectQueryExecutor implements SqlQueryExecutor {
 		this.objectConfig = objectConfig;
 	}
 
-	protected <T> JdbcResultSetRowMapper<T> createJdbcMapper(final SqlExecutorRowMapper<T> rowMapper) {
+	protected <T> JdbcResultSetRowMapper<T> createJdbcMapper(final SqlMultiValueRowMapper<T> rowMapper) {
 		final SqlObjectDefinition<T> objectDefinition = 
 				objectConfig.resolveObjectDefinition(rowMapper.getObjectType());
 		return new JdbcResultSetRowMapper<T>() {
@@ -59,7 +59,7 @@ public abstract class JdbcSqlObjectQueryExecutor implements SqlQueryExecutor {
 	}
 
 	@Override
-	public <T> T queryForObject(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects) {
+	public <T> T queryForObject(String sql, SqlMultiValueRowMapper<T> rowMapper, Object[] objects) {
 		logSql(sql, objects);
 		nullify(objects);
 		return queryForObject(sql, createJdbcMapper(rowMapper), objects);
@@ -72,14 +72,14 @@ public abstract class JdbcSqlObjectQueryExecutor implements SqlQueryExecutor {
 	}
 
 	@Override
-	public <T> Optional<T> queryForOptional(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects) {
+	public <T> Optional<T> queryForOptional(String sql, SqlMultiValueRowMapper<T> rowMapper, Object[] objects) {
 		logSql(sql, objects);
 		nullify(objects);
 		return queryForOptional(sql, createJdbcMapper(rowMapper), objects);
 	}
 	
 	@Override
-	public <T> List<T> queryForList(String sql, SqlExecutorRowMapper<T> rowMapper, Object[] objects) {
+	public <T> List<T> queryForList(String sql, SqlMultiValueRowMapper<T> rowMapper, Object[] objects) {
 		logSql(sql, objects);
 		nullify(objects);
 		return queryForList(sql, createJdbcMapper(rowMapper), objects);

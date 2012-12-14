@@ -24,11 +24,14 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
 
 import co.jirm.core.execute.SqlExecutor;
+import co.jirm.core.execute.SqlSingleValueRowMapper;
 import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.jdbc.JdbcResultSetRowMapper;
 import co.jirm.mapper.jdbc.JdbcSqlObjectQueryExecutor;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 
 public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements SqlExecutor {
@@ -86,6 +89,35 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 			public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return rowMapper.mapRow(rs, rowNum);
 			}		
+		});
+	}
+	
+	
+	@Override
+	public <T> T queryForObject(String sql, SqlSingleValueRowMapper rowMapper, Class<T> type, Object[] objects) {
+		T o = jdbcTemplate.queryForObject(sql, objects, type);
+		return rowMapper.mapRow(type, o, 0);
+	}
+
+	@Override
+	public <T> Optional<T> queryForOptional(String sql, SqlSingleValueRowMapper rowMapper, Class<T> type,
+			Object[] objects) {
+		try {
+			T o = jdbcTemplate.queryForObject(sql, objects, type);
+			return Optional.fromNullable(rowMapper.mapRow(type, o, 0));
+		} catch (EmptyResultDataAccessException e) {
+			return Optional.absent();
+		}
+	}
+
+	@Override
+	public <T> List<T> queryForList(final String sql, final SqlSingleValueRowMapper rowMapper, final Class<T> type, Object[] objects) {
+		List<T> list = jdbcTemplate.queryForList(sql, objects, type);
+		return Lists.transform(list, new Function<T, T>() {
+			int i = 0;
+			public T apply(T input) {
+				return rowMapper.mapRow(type, input, i++); 
+			};
 		});
 	}
 

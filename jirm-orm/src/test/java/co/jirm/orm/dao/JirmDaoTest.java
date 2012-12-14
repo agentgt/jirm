@@ -27,13 +27,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import co.jirm.core.execute.SqlExecutor;
-import co.jirm.core.execute.SqlExecutorRowMapper;
+import co.jirm.core.execute.SqlMultiValueRowMapper;
 import co.jirm.orm.OrmConfig;
 public class JirmDaoTest {
 
 	private JirmDao<TestBean> dao;
 	private SqlExecutor mock;
-	private SqlExecutorRowMapper<TestBean> rowMapper;
+	private SqlMultiValueRowMapper<TestBean> rowMapper;
 	
 	@Before
 	public void setUp() throws Exception {

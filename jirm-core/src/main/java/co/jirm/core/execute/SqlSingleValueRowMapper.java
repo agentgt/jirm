@@ -15,10 +15,16 @@
  */
 package co.jirm.core.execute;
 
-import java.util.Map;
 
 
-public interface SqlExecutorRowMapper<T> {
-	Class<T> getObjectType();
-	T mapRow(Map<String, Object> row, int rowNum);
+public interface SqlSingleValueRowMapper {
+	<T> T mapRow(Class<T> type, Object row, int rowNum);
+	
+	public static final SqlSingleValueRowMapper DEFAULT = new SqlSingleValueRowMapper() {
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T mapRow(Class<T> type, Object row, int rowNum) {
+			return (T) row;
+		}
+	};
 }

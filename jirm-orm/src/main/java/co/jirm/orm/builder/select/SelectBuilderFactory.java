@@ -18,8 +18,9 @@ package co.jirm.orm.builder.select;
 import java.util.List;
 
 import co.jirm.core.builder.QueryFor;
-import co.jirm.core.execute.SqlExecutorRowMapper;
+import co.jirm.core.execute.SqlMultiValueRowMapper;
 import co.jirm.core.execute.SqlQueryExecutor;
+import co.jirm.core.execute.SqlSingleValueRowMapper;
 import co.jirm.core.sql.MutableParameterizedSql;
 import co.jirm.core.sql.ParametersSql;
 import co.jirm.mapper.SqlObjectExecutorRowMapper;
@@ -35,23 +36,25 @@ public class SelectBuilderFactory<T> {
 	
 	private final SqlQueryExecutor queryExecutor;
 	private final SqlObjectDefinition<T> definition;
-	private final SqlExecutorRowMapper<T> objectRowMapper;
+	private final SqlMultiValueRowMapper<T> objectRowMapper;
+	private final SqlSingleValueRowMapper singleValueRowMapper;
 	private final SqlWriterStrategy writerStrategy;
-	
+	 
 	private SelectBuilderFactory(
 			SqlQueryExecutor queryExecutor, 
 			SqlObjectDefinition<T> definition,
-			SqlExecutorRowMapper<T> objectRowMapper,
+			SqlMultiValueRowMapper<T> objectRowMapper,
 			SqlWriterStrategy writerStrategy) {
 		super();
 		this.queryExecutor = queryExecutor;
 		this.definition = definition;
 		this.objectRowMapper = objectRowMapper;
 		this.writerStrategy = writerStrategy;
+		this.singleValueRowMapper = SqlSingleValueRowMapper.DEFAULT;
 	}
 	
 	public static <T> SelectBuilderFactory<T> newInstance(SqlObjectDefinition<T> definition, OrmConfig ormConfig) {
-		SqlExecutorRowMapper<T> objectRowMapper = 
+		SqlMultiValueRowMapper<T> objectRowMapper = 
 				SqlObjectExecutorRowMapper.newInstance(definition, ormConfig.getSqlObjectConfig().getObjectMapper());
 		SelectBuilderFactory<T> bf = new SelectBuilderFactory<T>(ormConfig.getSqlExecutor(), definition, objectRowMapper, ormConfig.getSqlWriterStrategy());
 		return bf;
@@ -72,6 +75,18 @@ public class SelectBuilderFactory<T> {
 	
 	public Optional<T> queryForOptional(ParametersSql sql) {
 		return queryExecutor.queryForOptional(sql.getSql(), getObjectRowMapper(), sql.mergedParameters().toArray());
+	}
+	
+	public <O> List<O> queryForListOf(ParametersSql sql, Class<O> type) {
+		return queryExecutor.queryForList(sql.getSql(), singleValueRowMapper, type, sql.mergedParameters().toArray());
+	}
+	
+	public <O> O queryForObjectOf(ParametersSql sql, Class<O> type) {
+		return queryExecutor.queryForObject(sql.getSql(), singleValueRowMapper, type, sql.mergedParameters().toArray());
+	}
+	
+	public <O> Optional<O> queryForOptionalOf(ParametersSql sql, Class<O> type) {
+		return queryExecutor.queryForOptional(sql.getSql(), singleValueRowMapper, type, sql.mergedParameters().toArray());
 	}
 	
 	public SelectRootClauseBuilder<SelectObjectBuilder<T>> select() {
@@ -148,6 +163,7 @@ public class SelectBuilderFactory<T> {
 		public Optional<T> forOptional() {
 			return queryTemplate.queryForOptional(this);
 		}
+		
 	}
 	
 	public final static class SelectObjectBuilder<T> extends AbstractSelectObjectBuilder<SelectObjectBuilder<T>, T> {
@@ -169,6 +185,18 @@ public class SelectBuilderFactory<T> {
 		@Override
 		protected SelectBuilder<T> getSelf() {
 			return this;
+		}
+		
+		public <O> List<O> forListOf(Class<O> k) { 
+			return queryTemplate.queryForListOf(this, k);
+		}
+		
+		public <O> O forObjectOf(Class<O> k) {
+			return queryTemplate.queryForObjectOf(this, k);
+		}
+		
+		public <O> Optional<O> forOptionalOf(Class<O> k) {
+			return queryTemplate.queryForOptionalOf(this, k);
 		}
 		
 		@Override
@@ -236,7 +264,7 @@ public class SelectBuilderFactory<T> {
 	}
 	
 	
-	public SqlExecutorRowMapper<T> getObjectRowMapper() {
+	public SqlMultiValueRowMapper<T> getObjectRowMapper() {
 		return objectRowMapper;
 	}
 
