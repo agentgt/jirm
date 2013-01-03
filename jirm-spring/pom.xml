@@ -26,7 +26,7 @@
   	<dependency>
   		<groupId>co.jirm</groupId>
   		<artifactId>jirm-core</artifactId>
-  		<version>0.0.4-SNAPSHOT</version>
+  		<version>0.0.5-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>co.jirm</groupId>
