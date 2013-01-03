@@ -15,6 +15,9 @@
  */
 package co.jirm.orm.builder;
 
+import static java.util.Arrays.asList;
+import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,8 +35,10 @@ public class ImmutableConditionTest {
 	public void testWhereString() {
 		ImmutableCondition c = ImmutableCondition.where("kyle=?")
 				.and("stuff=?").with("crap")
-				.or("bingo=?").with("blah")
-				.or("blah=?").with("kingo")
+				.or("bingo=?").with("blah");
+		
+		c=		c.or("blah=?");
+		c=		c.with("kingo")
 				.and("blah=?").with("kingo");
 		final StringBuilder sb = new StringBuilder();
 		
@@ -50,6 +55,37 @@ public class ImmutableConditionTest {
 		c.accept(v);
 		System.out.println(sb.toString());
 		System.out.println(mp.getParameters());
+		assertEquals(asList("crap", "blah", "kingo", "kingo"), mp.getParameters());
+		
+		
+	}
+	
+	@Test
+	public void testMoreComplicated() {
+		ImmutableCondition c = ImmutableCondition.where("kyle=?").with("0")
+				.and("stuff=?").with("1")
+				.or("bingo=?").with("2")
+				.or("blah=?").with("3")
+				.and("four=?").with("4")
+				.and("five=?").with("5")
+				.and("six=?").with("6")
+				.or("seven=?").with("7");
+		final StringBuilder sb = new StringBuilder();
+		
+		final MutableParameters mp = new MutableParameters();
+		
+		c.accept(new ParametersConditionVisitor() {
+			@Override
+			public void doParameters(Parameters ps) {
+				mp.addAll(ps);
+			}
+		});
+		
+		ConditionVisitor v = ConditionVisitors.conditionVisitor(sb);
+		c.accept(v);
+		System.out.println(sb.toString());
+		System.out.println(mp.getParameters());
+		assertEquals(asList("0","1", "2","3","4","5","6","7"), mp.getParameters());
 		
 		
 	}

@@ -16,10 +16,10 @@
 package co.jirm.orm.builder;
 
 import static com.google.common.base.Strings.nullToEmpty;
-
 import co.jirm.core.util.JirmPrecondition;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 
 
@@ -39,6 +39,13 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
 		return new NoOp();
 	}
 	
+	
+	ImmutableCondition(ImmutableList<Object> parameters, ImmutableMap<String, Object> nameParameters,
+			ConditionType conditionType) {
+		super(parameters, nameParameters);
+		this.conditionType = conditionType;
+	}
+
 	ImmutableCondition(ImmutableCondition child, Object value) {
 		super(child, value);
 		this.conditionType = child.conditionType;
@@ -58,7 +65,7 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
 			return this;
 		if (isNoOp())
 			return other;
-		return new CombinedCondition(this, CombineType.AND, other);
+		return CombinedCondition.newInstance(this, CombineType.AND, other);
 	}
 	public ImmutableCondition and(String sql) {
 		if (isNoOp())
@@ -76,7 +83,7 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
     public ImmutableCondition or(String sql) {
 		if (isNoOp())
 			return where(sql);
-		return new CombinedCondition(this, CombineType.OR, new CustomCondition(sql));
+		return CombinedCondition.newInstance(this, CombineType.OR, new CustomCondition(sql));
     }
     
     public ImmutableCondition not() {
@@ -93,27 +100,46 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
     	
     	private final ImmutableList<ImmutableCondition> conditions;
     	
-    	private CombinedCondition(ImmutableCondition lh, CombineType operator, ImmutableCondition rh) {
-    		super(operator == CombineType.AND ? ConditionType.AND : ConditionType.OR);
-    		if (this.conditionType == lh.conditionType && this.conditionType == rh.conditionType) {
-    			this.conditions = ImmutableList.<ImmutableCondition>builder()
+    	public static CombinedCondition newInstance(ImmutableCondition lh, CombineType operator, ImmutableCondition rh) {
+    		ConditionType conditionType = operator == CombineType.AND ? ConditionType.AND : ConditionType.OR;
+    		final ImmutableList<ImmutableCondition> conditions;
+    		final ImmutableList<Object> parameters;
+    		final ImmutableMap<String, Object> nameParameters;
+    		
+    		if (conditionType == lh.conditionType && conditionType == rh.conditionType) {
+    			conditions = ImmutableList.<ImmutableCondition>builder()
     					.addAll(((CombinedCondition)lh).conditions)
     					.addAll(((CombinedCondition)rh).conditions).build();
+    			parameters = ImmutableList.<Object>builder().addAll(lh.getParameters()).addAll(rh.getParameters()).build();
+    			nameParameters = ImmutableMap.<String, Object>builder()
+    					.putAll(lh.getNameParameters()).putAll(rh.getNameParameters()).build();
     		}
-    		else if (this.conditionType == lh.conditionType && ! rh.conditionType.isCombine()) {
-    			this.conditions = ImmutableList.<ImmutableCondition>builder()
+    		else if (conditionType == lh.conditionType && ! rh.conditionType.isCombine()) {
+    			conditions = ImmutableList.<ImmutableCondition>builder()
     					.addAll(((CombinedCondition)lh).conditions).add(rh).build();
+    			parameters = ImmutableList.copyOf(lh.getParameters());
+    			nameParameters = ImmutableMap.copyOf(lh.getNameParameters());
     		}
-    		else if (this.conditionType == rh.conditionType && ! lh.conditionType.isCombine()) {
-    			this.conditions = ImmutableList.<ImmutableCondition>builder()
+    		else if (conditionType == rh.conditionType && ! lh.conditionType.isCombine()) {
+    			conditions = ImmutableList.<ImmutableCondition>builder()
     					.addAll(((CombinedCondition)rh).conditions).add(lh).build();
+    			parameters = ImmutableList.copyOf(rh.getParameters());
+    			nameParameters = ImmutableMap.copyOf(rh.getNameParameters());
     		}
     		else {
-    			this.conditions = ImmutableList.<ImmutableCondition>builder().add(lh).add(rh).build();
+    			conditions = ImmutableList.<ImmutableCondition>builder().add(lh).add(rh).build();
+    			parameters = ImmutableList.of();
+    			nameParameters = ImmutableMap.of();
     		}
+    		return new CombinedCondition(parameters, nameParameters, conditionType, conditions);
     	}
     	
-
+    	private CombinedCondition(ImmutableList<Object> parameters, ImmutableMap<String, Object> nameParameters,
+				ConditionType conditionType, ImmutableList<ImmutableCondition> conditions) {
+			super(parameters, nameParameters, conditionType);
+			this.conditions = conditions;
+    	}
+    	
     	@Override
     	public void accept(ConditionVisitor v) {
     		if (this.conditionType == ConditionType.AND)
