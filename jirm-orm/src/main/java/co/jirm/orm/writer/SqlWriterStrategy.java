@@ -180,7 +180,10 @@ public class SqlWriterStrategy {
 		StrLookup<String> lookup = new StrLookup<String>() {
 			@Override
 			public String lookup(String key) {
-				return parameterPathToSql(definition,key).orNull();
+				Optional<String> p = parameterPathToSql(definition,key);
+				JirmPrecondition.check.state(p.isPresent(),
+						"Invalid object path: {}", key);
+				return p.get();
 			}
 		};
 		StrSubstitutor s = new StrSubstitutor(lookup, "{{", "}}", '$');
