@@ -22,7 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.mapper.copy.AbstractCopyBuilder;
 import co.jirm.mapper.definition.SqlParameterDefinition;
 import co.jirm.orm.dao.JirmOptimisticLockException;
@@ -63,7 +63,7 @@ public class UpdateObjectBuilder<T> extends AbstractCopyBuilder<UpdateObjectBuil
 
 	private void checkProperties(String... properties) {
 		for (String p : properties) {
-			JirmPrecondition.check.argument(
+			check.argument(
 					updateBuilderFactory.getDefinition().getParameters().containsKey(p), 
 					"Property {} not found for object: {}", p, updateBuilderFactory.getDefinition().getObjectType());
 		}
@@ -83,7 +83,7 @@ public class UpdateObjectBuilder<T> extends AbstractCopyBuilder<UpdateObjectBuil
 				}
 				else if (p.get().isVersion()) {
 					Object o = e.getValue();
-					JirmPrecondition.check.state(o instanceof Number, 
+					check.state(o instanceof Number, 
 							"Property: {}, @Version only supports numerics", e.getKey());
 					Number n = (Number) o;
 					where.put(e.getKey(), n.intValue());
@@ -97,7 +97,7 @@ public class UpdateObjectBuilder<T> extends AbstractCopyBuilder<UpdateObjectBuil
 				}
 			}
 		}
-		JirmPrecondition.check.state(!where.isEmpty(), "where should not be empty");
+		check.state(!where.isEmpty(), "where should not be empty");
 		int results = update(m, where);
 		if (results < 1) {
 			throw new JirmOptimisticLockException("Failed to update object: {}, where: {}", 

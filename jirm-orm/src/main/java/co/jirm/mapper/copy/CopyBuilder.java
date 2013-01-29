@@ -17,7 +17,7 @@ package co.jirm.mapper.copy;
 
 import java.util.LinkedHashMap;
 
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.mapper.converter.SqlObjectConverter;
 
 
@@ -37,7 +37,7 @@ public class CopyBuilder<T> extends AbstractCopyBuilder<CopyBuilder<T>> {
 	}
 
 	public T copy(T newObject, T original) { 
-		JirmPrecondition.check.argument(newObject != null && original != null, 
+		check.argument(newObject != null && original != null, 
 				"new and original must not be null");
 		LinkedHashMap<String, Object> n = converter.convertObjectToSqlMap(newObject);
 		LinkedHashMap<String, Object> o = converter.convertObjectToSqlMap(original);

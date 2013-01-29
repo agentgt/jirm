@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -43,7 +43,7 @@ public abstract class MutableParameterized<T> implements ParametersBuilder<T> {
 	}
 	@Override
 	public T bind(String key, Object value) {
-		JirmPrecondition.check.argument(
+		check.argument(
 				value != null, "Null is not allowed use Guava's Optional. Key: {}", key);
 		nameParameters.put(key, value);
 		return getSelf();
@@ -52,7 +52,7 @@ public abstract class MutableParameterized<T> implements ParametersBuilder<T> {
 	public T with(Object ... value) {
 		int i = 0;
 		for (Object v : value) {
-			JirmPrecondition.check.argument(
+			check.argument(
 					v != null, "Null is not allowed use Guava's Optional. Index: {}", i);
 			parameters.add(v);
 			i++;
@@ -63,7 +63,7 @@ public abstract class MutableParameterized<T> implements ParametersBuilder<T> {
 	protected abstract T getSelf();
 		
 	public T addAll(Parameters p) {
-		JirmPrecondition.check.argument(p != this, "Cannot pass 'this' object into its own addAll");
+		check.argument(p != this, "Cannot pass 'this' object into its own addAll");
 		//this.nameParameters.putAll(p.getNameParameters());
 		this.parameters.addAll(p.mergedParameters());
 		return getSelf();

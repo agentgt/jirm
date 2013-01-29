@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import co.jirm.core.execute.SqlExecutor;
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.core.util.ObjectMapUtils;
 import co.jirm.core.util.ObjectMapUtils.NestedKeyValue;
 import co.jirm.mapper.SqlObjectConfig;
@@ -129,7 +129,7 @@ public final class JirmDao<T> {
 			 * Order and the number of parameters is really important for bulk insert.
 			 */
 			for(SqlParameterDefinition pd : definition.getParameters().values()) {
-				JirmPrecondition.check.state(m.containsKey(pd.getParameterName()), 
+				check.state(m.containsKey(pd.getParameterName()), 
 						"Missing parameter for bulk insert: {}", pd.getParameterName());
 				Object o = m.get(pd.getParameterName());
 				copy.put(pd.getParameterName(), o);
@@ -145,7 +145,7 @@ public final class JirmDao<T> {
 	}
 	
 	protected SqlParameterDefinition idParameter() {
-		JirmPrecondition.check.state(definition.idParameter().isPresent(), "No id parameter for : {}", 
+		check.state(definition.idParameter().isPresent(), "No id parameter for : {}", 
 				definition.getObjectType());
 		return this.definition.idParameter().get();
 	}
@@ -214,7 +214,7 @@ public final class JirmDao<T> {
 	public T reload(T t) {
 		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false);
 		Optional<SqlParameterDefinition> id = definition.idParameter();
-		JirmPrecondition.check.state(id.isPresent(), "No id definition");
+		check.state(id.isPresent(), "No id definition");
 		Optional<Object> o = id.get().valueFrom(m);
 		return findById(o.get());
 	}
@@ -248,7 +248,7 @@ public final class JirmDao<T> {
 			final List<Object[]> batchValues = Lists.newArrayListWithExpectedSize(batch.size());
 			for (Map<String,Object> b : batch) {
 				ImmutableList<String> actualKeys = ImmutableList.copyOf(b.keySet());
-				JirmPrecondition.check.state(actualKeys.equals(keys), "Keys don't match up to {} for {}", keys, actualKeys);
+				check.state(actualKeys.equals(keys), "Keys don't match up to {} for {}", keys, actualKeys);
 				batchValues.add(writerStrategy.fillValues(definition, b).toArray());
 			}
 			/*

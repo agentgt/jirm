@@ -16,7 +16,7 @@
 package co.jirm.orm.builder;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -337,22 +337,22 @@ public abstract class ImmutableCondition extends ImmutableParameterized<Immutabl
 
 		private NoOp(ImmutableCondition child, Object value) {
 			super(child, value);
-			throw JirmPrecondition.check.stateInvalid("Cannot set parameters on this condition.");
+			throw check.stateInvalid("Cannot set parameters on this condition.");
 		}
 
 		private NoOp(ImmutableCondition child, String key, Object value) {
 			super(child, key, value);
-			throw JirmPrecondition.check.stateInvalid("Cannot set parameters on this condition.");
+			throw check.stateInvalid("Cannot set parameters on this condition.");
 		}
 
 		@Override
 		public ImmutableCondition bind(String key, Object value) {
-			throw JirmPrecondition.check.stateInvalid("Cannot set parameters on this condition.");
+			throw check.stateInvalid("Cannot set parameters on this condition.");
 		}
 
 		@Override
 		public ImmutableCondition with(Object ... value) {
-			throw JirmPrecondition.check.stateInvalid("Cannot set parameters on this condition.");
+			throw check.stateInvalid("Cannot set parameters on this condition.");
 		}
     	
     }

@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.persistence.Table;
 
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.mapper.SqlObjectConfig;
 
 import com.google.common.base.Objects;
@@ -157,7 +157,7 @@ public class SqlObjectDefinition<T> {
 			String pathPart = it.next();
 			Optional<SqlParameterDefinition> p = currentObject.resolveParameter(pathPart);
 			if ( ! p.isPresent() ) return emptyList();
-			JirmPrecondition.check.state( ! ( it.hasNext() && ! p.get().isComplex()), "Bad path parts references a simple parameter: {}", parameterDotPath);
+			check.state( ! ( it.hasNext() && ! p.get().isComplex()), "Bad path parts references a simple parameter: {}", parameterDotPath);
 			r.add(p.get());
 			if (it.hasNext())
 				currentObject = p.get().getObjectDefinition().get().getObjectDefintion();

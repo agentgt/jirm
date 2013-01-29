@@ -15,7 +15,7 @@
  */
 package co.jirm.core.sql;
 
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -46,7 +46,7 @@ public abstract class ImmutableParameterized<T> implements ParametersBuilder<T> 
 	}
 
 	protected static ImmutableMap<String, Object> addParameter(ImmutableParameterized<?> child, String key, Object value) {
-		JirmPrecondition.check.argument( ! child.parameters.contains(key), 
+		check.argument( ! child.parameters.contains(key), 
 				"parameter has already been set: {}", key);
 		return ImmutableMap.<String,Object>builder()
 				.putAll(child.nameParameters).put(key, value).build();

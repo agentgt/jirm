@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
 import co.jirm.mapper.definition.SqlParameterObjectDefinition;
@@ -143,7 +143,7 @@ public class SqlWriterStrategy {
 		List<String> equalsKeys = new ArrayList<String>();
 		for (Entry<String, Object> e : m.entrySet()) {
 			Optional<String> sqlName = definition.parameterNameToSql(e.getKey());
-			JirmPrecondition.check.state(sqlName.isPresent(), 
+			check.state(sqlName.isPresent(), 
 					"Property: {} not found in object.", e.getKey());
 			equalsKeys.add(sqlName.get());
 		}
@@ -181,7 +181,7 @@ public class SqlWriterStrategy {
 			@Override
 			public String lookup(String key) {
 				Optional<String> p = parameterPathToSql(definition,key);
-				JirmPrecondition.check.state(p.isPresent(),
+				check.state(p.isPresent(),
 						"Invalid object path: {}", key);
 				return p.get();
 			}
@@ -196,7 +196,7 @@ public class SqlWriterStrategy {
 			@Override
 			public String lookup(String key) {
 				Optional<String> sqlName = definition.parameterNameToSql(key);
-				JirmPrecondition.check.state(sqlName.isPresent(), "Property: {} not found in object.", key);
+				check.state(sqlName.isPresent(), "Property: {} not found in object.", key);
 				return sqlName.get();
 			}
 		};

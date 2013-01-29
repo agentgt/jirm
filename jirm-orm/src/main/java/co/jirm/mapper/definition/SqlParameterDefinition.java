@@ -37,7 +37,7 @@ import javax.persistence.Version;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.converter.SqlParameterConverter;
 
@@ -136,7 +136,7 @@ public class SqlParameterDefinition {
 			}
 			break;
 		}
-		JirmPrecondition.check.argument(! parameters.isEmpty(), 
+		check.argument(! parameters.isEmpty(), 
 				"No SQL columns/parameters found for: {}", k);
 		return parameters;
 	}

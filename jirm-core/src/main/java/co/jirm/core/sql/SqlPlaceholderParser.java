@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
@@ -80,9 +80,9 @@ public class SqlPlaceholderParser {
 			if (m.matches()) {
 				String leftHand = m.group(1);
 				int start = m.start(1);
-				JirmPrecondition.check.state(start == 0, "start should be 0");
+				check.state(start == 0, "start should be 0");
 				int[] ind = parseForReplacement(leftHand);
-				JirmPrecondition.check.state(ind != null, "Problem parsing {}", line);
+				check.state(ind != null, "Problem parsing {}", line);
 				String before = leftHand.substring(0, ind[0]);
 				String after = leftHand.substring(ind[1], leftHand.length());
 				sb.append(before);
@@ -229,14 +229,14 @@ public class SqlPlaceholderParser {
 			return true;
 		}
 		public ImmutableList<Object> mergeParameters(Parameters parameters) {
-			JirmPrecondition.check.argument(parameters.getNameParameters().isEmpty() 
+			check.argument(parameters.getNameParameters().isEmpty() 
 					|| parameters.getParameters().isEmpty(), 
 					"Mixing of name and positional parameters not supported yet: {}", parameters);
 			Optional<PlaceHolderType> allType = allOfType();
 			if (parameters.getNameParameters().isEmpty() 
 					&& parameters.getParameters().isEmpty()
 					&& ! this.getPlaceHolders().isEmpty()) {
-				throw JirmPrecondition.check.argumentInvalid("ParsedSql expected arguments but got none: {}, {}", this, parameters);
+				throw check.argumentInvalid("ParsedSql expected arguments but got none: {}, {}", this, parameters);
 			}
 			else if (parameters.getNameParameters().isEmpty() 
 					&& parameters.getParameters().isEmpty()
@@ -249,24 +249,24 @@ public class SqlPlaceholderParser {
 				/*
 				 * The sql probably already contains JDBC placeholders.
 				 */
-				JirmPrecondition.check.state(this.getOriginalSql().contains("?"), 
+				check.state(this.getOriginalSql().contains("?"), 
 						"Expecting already included JDBC placeholders: {} in sql:", parameters, this);
 				return parameters.getParameters();
 			}
 			else if (this.getPlaceHolders().isEmpty() && ! parameters.getNameParameters().isEmpty()) {
-				throw JirmPrecondition.check.stateInvalid("Name parameters bound but not defined in sql template " +
+				throw check.stateInvalid("Name parameters bound but not defined in sql template " +
 						" sql: {}, parameters: {}", this, parameters);
 			}
 			else if (! allType.isPresent() ){
-				throw JirmPrecondition.check.stateInvalid("Mixing of name and positional parameters in parsed" +
+				throw check.stateInvalid("Mixing of name and positional parameters in parsed" +
 						" sql: {}, parameters: {}", this, parameters);
 			}
 			else if ( allType.get() == PlaceHolderType.POSITION && ! parameters.getNameParameters().isEmpty() ) {
-				throw JirmPrecondition.check.stateInvalid("Expected positional parameters in: {} but was passed name parameters: {}", 
+				throw check.stateInvalid("Expected positional parameters in: {} but was passed name parameters: {}", 
 						this, parameters);
 			}
 			else if ( allType.get() == PlaceHolderType.NAME && ! parameters.getParameters().isEmpty() ) {
-				JirmPrecondition.check.argument(parameters.getParameters().size() >= getPlaceHolders().size(), 
+				check.argument(parameters.getParameters().size() >= getPlaceHolders().size(), 
 						"Insufficient positional parameters: {} for ParsedSql name parameters: {}", parameters, this);
 				return parameters.getParameters();
 			}
@@ -275,7 +275,7 @@ public class SqlPlaceholderParser {
 				for (PlaceHolder ph : getPlaceHolders()) {
 					NamePlaceHolder np = ph.asName();
 					String name = np.getName();
-					JirmPrecondition.check.state(parameters.getNameParameters().containsKey(name), 
+					check.state(parameters.getNameParameters().containsKey(name), 
 							"ParsedSql wants parameter '{}' but name parameters do not have it: {}", name, parameters);
 					Object o = parameters.getNameParameters().get(name);
 					b.add(o);
@@ -283,12 +283,12 @@ public class SqlPlaceholderParser {
 				return b.build();
 			}
 			else if ( allType.get() == PlaceHolderType.POSITION && ! parameters.getParameters().isEmpty() ) {
-				JirmPrecondition.check.argument(parameters.getParameters().size() >= getPlaceHolders().size(), 
+				check.argument(parameters.getParameters().size() >= getPlaceHolders().size(), 
 						"Insufficient positional parameters: {} for ParsedSql parameters: {}", parameters, this);
 				return parameters.getParameters();
 			}
 			else {
-				throw JirmPrecondition.check.stateInvalid("Programming error parsed: {}, parameters: {}", this, parameters);
+				throw check.stateInvalid("Programming error parsed: {}, parameters: {}", this, parameters);
 			}
 			
 			

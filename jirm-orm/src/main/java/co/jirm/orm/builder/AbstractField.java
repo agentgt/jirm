@@ -15,7 +15,7 @@
  */
 package co.jirm.orm.builder;
 
-import co.jirm.core.util.JirmPrecondition;
+import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.orm.builder.Condition.CombineType;
 
 
@@ -26,7 +26,7 @@ public abstract class AbstractField<T extends Condition<T>> {
 	
 	protected AbstractField(String propertyPath, T condition, CombineType combineType) {
 		super();
-		JirmPrecondition.check.argument(propertyPath != null && 
+		check.argument(propertyPath != null && 
 				! propertyPath.trim().isEmpty(), "propertyPath should not be null or blank");
 		this.propertyPath = propertyPath;
 		this.condition = condition;
@@ -68,8 +68,8 @@ public abstract class AbstractField<T extends Condition<T>> {
 	protected abstract String sqlPath();
 
 	private T doAndOr(String s, Object o) {
-		JirmPrecondition.check.argument(o != null, "parameter object should not be null");
-		JirmPrecondition.check.argument(s != null, "operator should not be null");
+		check.argument(o != null, "parameter object should not be null");
+		check.argument(s != null, "operator should not be null");
 		if (combineType == CombineType.AND) {
 			return condition.and(s).with(o);
 		}
@@ -79,7 +79,7 @@ public abstract class AbstractField<T extends Condition<T>> {
 	}
 	
 	private T doAndOr(String s) {
-		JirmPrecondition.check.argument(s != null, "operator should not be null");
+		check.argument(s != null, "operator should not be null");
 		if (combineType == CombineType.AND) {
 			return condition.and(s);
 		}
