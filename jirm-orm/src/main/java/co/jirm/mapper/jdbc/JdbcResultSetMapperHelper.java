@@ -15,7 +15,7 @@
  */
 package co.jirm.mapper.jdbc;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static co.jirm.core.util.Precondition.check;
 
 import java.sql.Blob;
 import java.sql.Clob;
@@ -70,7 +70,7 @@ public class JdbcResultSetMapperHelper {
 
 	protected String getColumnKey(SqlObjectDefinition<?> definition, ResultSetMetaData rsmd, int i) throws SQLException {
 		String columnName = lookupColumnName(rsmd, i);
-		return checkNotNull(definition.resolveParameter(columnName).orNull(), columnName).getParameterName();
+		return check.notNull(definition.resolveParameter(columnName).orNull(), columnName).getParameterName();
 	}
 	
 	protected Map<String, Object> createColumnMap(int columnCount) {

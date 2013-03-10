@@ -34,7 +34,18 @@ public abstract class Precondition<ARG extends IllegalArgumentException, STATE e
 			return new IllegalStateException(message);
 		}
 	};
+
+	public final <T> T notNull(T o, @Nullable Object errorMessage) {
+		argument(o != null, errorMessage);
+		return o;
+	}
 	
+	public final <T> T notNull(T o, @Nullable String errorMessageTemplate,
+			@Nullable Object... errorMessageArgs) {
+		argument(o != null, errorMessageTemplate, errorMessageArgs);
+		return o;
+	}
+
 	public final void argument(boolean expression, @Nullable Object errorMessage) {
 		if (!expression) {
 			throw argumentException(String.valueOf(errorMessage));
