@@ -311,6 +311,12 @@ public class JirmDaoTest {
 				"ORDER BY test_bean.long_prop ASC, test_bean.string_prop DESC"
 				, rowMapper, new Object[] {1L});
 	}
+	
+	@Test
+	public void testCustomSqlIssue12() throws Exception {
+		dao.getUpdateBuilderFactory().sql("UPDATE stuff set a = '1' where b = '2'").execute();
+		verify(mock).update("UPDATE stuff set a = '1' where b = '2'", new Object[] {}); 
+	}
 
 
 }
