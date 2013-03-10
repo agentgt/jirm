@@ -59,7 +59,7 @@ public class UpdateRootClauseBuilder<I> implements UpdateClause<I> {
 		return addClause(UpdateCustomClauseBuilder.newInstance(this, sql));
 	}
 	
-	public UpdateCustomClauseBuilder<I> sqlFromResource(Class<?> k, String resource) {
+	protected UpdateCustomClauseBuilder<I> sqlFromResource(Class<?> k, String resource) {
 		return addClause(UpdateCustomClauseBuilder.newInstance(this, "").useResource(k, resource));
 	}
 	

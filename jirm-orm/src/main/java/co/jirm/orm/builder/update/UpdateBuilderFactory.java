@@ -57,7 +57,7 @@ public class UpdateBuilderFactory<T> {
 		});
 	}
 	public UpdateCustomClauseBuilder<Integer> sql(final String sql) {
-		return UpdateRootClauseBuilder.newInstance(new RootClauseHandoff(sql) {
+		return UpdateRootClauseBuilder.newInstance(new RootClauseHandoff(null) {
 			@Override
 			protected Integer execute(String sql, Object[] values) {
 				return updateExecutor.update(sql, values);
