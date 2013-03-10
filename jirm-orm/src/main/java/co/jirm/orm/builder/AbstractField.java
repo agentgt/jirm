@@ -46,11 +46,11 @@ public abstract class AbstractField<T extends Condition<T>> {
 	}
 	
 	public T lessThen(Object o) {
-		return op(">", o);
+		return op("<", o);
 	}
 	
 	public T lessThenEq(Object o) {
-		return op(">", o);
+		return op("<=", o);
 	}
 	
 	public T isNull() {
