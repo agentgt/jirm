@@ -313,6 +313,30 @@ public class JirmDaoTest {
 	}
 	
 	@Test
+	public void testLessThanIssue7() {
+		//Test for issue #7 lessThan
+		dao.select().where()
+			.property("longProp").lessThen(7)
+			.query().forObject();
+		
+		verify(mock).queryForObject("SELECT test_bean.string_prop, test_bean.long_prop, test_bean.timets " +
+				"FROM test_bean WHERE test_bean.long_prop < ?"
+				, rowMapper, new Object[] {7});
+	}
+	
+	@Test
+	public void testLessThanEqIssue7() {
+		//Test for issue #7 lessThan
+		dao.select().where()
+			.property("longProp").lessThenEq(7)
+			.query().forObject();
+		
+		verify(mock).queryForObject("SELECT test_bean.string_prop, test_bean.long_prop, test_bean.timets " +
+				"FROM test_bean WHERE test_bean.long_prop <= ?"
+				, rowMapper, new Object[] {7});
+	}
+	
+	@Test
 	public void testCustomSqlIssue12() throws Exception {
 		dao.getUpdateBuilderFactory().sql("UPDATE stuff set a = '1' where b = '2'").execute();
 		verify(mock).update("UPDATE stuff set a = '1' where b = '2'", new Object[] {}); 
