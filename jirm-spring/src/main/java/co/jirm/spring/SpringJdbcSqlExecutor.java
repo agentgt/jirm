@@ -48,17 +48,17 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 	}
 
 	@Override
-	public long queryForLong(String sql, Object[] objects) {
+	protected long doQueryForLong(String sql, Object[] objects) {
 		return jdbcTemplate.queryForLong(sql, objects);
 	}
 
 	@Override
-	public int queryForInt(String sql, Object[] objects) {
+	protected int doQueryForInt(String sql, Object[] objects) {
 		return jdbcTemplate.queryForInt(sql, objects);
 	}
 
 	@Override
-	public <T> T doQueryForObject(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
+	protected <T> T doQueryForObject(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
 		return jdbcTemplate.queryForObject(sql, new RowMapper<T> () {
 			@Override
 			public T mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -68,7 +68,7 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 	}
 
 	@Override
-	public <T> Optional<T> doQueryForOptional(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
+	protected <T> Optional<T> doQueryForOptional(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
 		try {
 			T object = jdbcTemplate.queryForObject(sql, new RowMapper<T> () {
 				@Override
@@ -83,7 +83,7 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 	}
 
 	@Override
-	public <T> List<T> doQueryForList(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
+	protected <T> List<T> doQueryForList(String sql, final JdbcResultSetRowMapper<T> rowMapper, Object[] objects) {
 		return jdbcTemplate.query(sql, objects, new RowMapper<T> () {
 			@Override
 			public T mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -94,18 +94,14 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 	
 	
 	@Override
-	public <T> T queryForObject(String sql, SqlSingleValueRowMapper rowMapper, Class<T> type, Object[] objects) {
-		logSql(sql, objects);
-		nullify(objects);
+	protected <T> T doQueryForObject(String sql, SqlSingleValueRowMapper rowMapper, Class<T> type, Object[] objects) {
 		T o = jdbcTemplate.queryForObject(sql, objects, type);
 		return rowMapper.mapRow(type, o, 0);
 	}
 
 	@Override
-	public <T> Optional<T> queryForOptional(String sql, SqlSingleValueRowMapper rowMapper, Class<T> type,
+	protected <T> Optional<T> doQueryForOptional(String sql, SqlSingleValueRowMapper rowMapper, Class<T> type,
 			Object[] objects) {
-		logSql(sql, objects);
-		nullify(objects);
 		try {
 			T o = jdbcTemplate.queryForObject(sql, objects, type);
 			return Optional.fromNullable(rowMapper.mapRow(type, o, 0));
@@ -115,9 +111,7 @@ public class SpringJdbcSqlExecutor extends JdbcSqlObjectQueryExecutor implements
 	}
 
 	@Override
-	public <T> List<T> queryForList(final String sql, final SqlSingleValueRowMapper rowMapper, final Class<T> type, Object[] objects) {
-		logSql(sql, objects);
-		nullify(objects);
+	protected <T> List<T> doQueryForList(final String sql, final SqlSingleValueRowMapper rowMapper, final Class<T> type, Object[] objects) {
 		List<T> list = jdbcTemplate.queryForList(sql, objects, type);
 		return Lists.transform(list, new Function<T, T>() {
 			int i = 0;
