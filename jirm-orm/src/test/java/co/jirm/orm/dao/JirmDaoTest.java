@@ -29,6 +29,7 @@ import org.junit.Test;
 import co.jirm.core.execute.SqlExecutor;
 import co.jirm.core.execute.SqlMultiValueRowMapper;
 import co.jirm.orm.OrmConfig;
+import co.jirm.orm.dao.EnumBean.MyEnum;
 public class JirmDaoTest {
 
 	private JirmDao<TestBean> dao;
@@ -340,6 +341,18 @@ public class JirmDaoTest {
 	public void testCustomSqlIssue12() throws Exception {
 		dao.getUpdateBuilderFactory().sql("UPDATE stuff set a = '1' where b = '2'").execute();
 		verify(mock).update("UPDATE stuff set a = '1' where b = '2'", new Object[] {}); 
+	}
+	
+	@Test
+	public void testEnumIssue4() throws Exception {
+		
+		JirmDao<EnumBean> edao = JirmDao.newInstance(EnumBean.class, OrmConfig.newInstance(mock));
+		EnumBean b = new EnumBean("blah", MyEnum.BAR);
+		edao.insert(b);
+		
+		verify(mock).update("INSERT INTO enum_bean (id, my_enum) VALUES (?, ?)", 
+				new Object[] {"blah", 1});
+		
 	}
 
 
