@@ -15,13 +15,17 @@
  */
 package co.jirm.core.util;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static co.jirm.core.util.JirmPrecondition.check;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+
+import co.jirm.core.JirmIllegalArgumentException;
 
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
@@ -53,6 +57,34 @@ public class ObjectMapUtils {
 		}
 		sb.append("]");
 		return sb;
+	}
+	
+	//TODO cache
+	private static Enum<?>[] _enumValues(Class<?> enumClass) throws SecurityException, NoSuchMethodException, 
+		IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		Method m = enumClass.getMethod("values");
+		return (Enum<?>[]) m.invoke((Object) null);
+	}
+	
+	public static Enum<?>[] enumValues(Class<?> enumClass) {
+		try {
+			return _enumValues(enumClass);
+		} catch (Exception e) {
+			throw new JirmIllegalArgumentException("Cannot dynamically resolve enum values for:" + enumClass, e);
+		}
+	}
+	
+	public static Enum<?> enumFrom(Class<?> enumClass, int oridinal) {
+		return enumValues(enumClass)[oridinal];
+	}
+	public static Enum<?> enumFrom(Class<?> enumClass, String name) {
+		Enum<?>[] enums = enumValues(enumClass);
+		for (Enum<?> e : enums) {
+			if (e.name().equals(name)) {
+				return e;
+			}
+		}
+		throw check.argumentInvalid("name: {} is not valid for: {}", name, enumClass);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -87,7 +119,7 @@ public class ObjectMapUtils {
 	@SuppressWarnings("unchecked")
 	private static <T> NestedKeyValue<T> _getNestedKeyValue(final Map<?,?> m, final List<?> l, final Class<T> c, Object... keys) {
 		Object t = null;
-		checkArgument(m == null || l == null, "Either m or l should be null");
+		check.argument(m == null || l == null, "Either m or l should be null");
 		Map<?,?> tm = m;
 		List<?> tl = l;
 		

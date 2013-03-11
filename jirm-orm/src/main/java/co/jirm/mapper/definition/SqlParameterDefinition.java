@@ -27,6 +27,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.persistence.Column;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -51,6 +52,7 @@ public class SqlParameterDefinition {
 	private final boolean id;
 	private final boolean version;
 	private final boolean generated;
+	private final Optional<Enumerated> enumerated;
 	private final Optional<SqlParameterObjectDefinition> objectDefinition;
 	private final SqlParameterConverter parameterConverter;
 	
@@ -58,44 +60,34 @@ public class SqlParameterDefinition {
 	
 	private SqlParameterDefinition(
 			SqlParameterConverter parameterConverter, String parameterName, String sqlName, Class<?> parameterType, int order,
-			boolean id, boolean version, boolean generated,
+			boolean id, boolean version, boolean generated, Optional<Enumerated> enumerated,
 			Optional<SqlParameterObjectDefinition> objectDefinition) {
 		super();
-		this.parameterName = parameterName;
-		this.sqlName = sqlName;
-		this.parameterType = parameterType;
+		this.parameterName = check.notNull(parameterName, "parameterName");
+		this.sqlName = check.notNull(sqlName, "sqlName");
+		this.parameterType = check.notNull(parameterType, "parameterType");
 		this.order = order;
 		this.id = id;
 		this.version = version;
-		this.objectDefinition = objectDefinition;
-		this.parameterConverter = parameterConverter;
+		this.enumerated = check.notNull(enumerated, "enumerated");
+		this.objectDefinition = check.notNull(objectDefinition, "objectDefinition");
+		this.parameterConverter = check.notNull(parameterConverter, "parameterConverter");
 		this.generated = generated;
 	}
 	
 	static SqlParameterDefinition newSimpleInstance(
 			SqlParameterConverter parameterConverter, 
 			String parameterName, Class<?> parameterType, 
-			int order, String sqlName, boolean id, boolean version, boolean generated) {
+			int order, String sqlName, boolean id, boolean version, boolean generated, Optional<Enumerated> enumerated) {
 		Optional<SqlParameterObjectDefinition> objectDefinition = Optional.absent();
-		return new SqlParameterDefinition(parameterConverter, parameterName, sqlName, parameterType, order, id, version, generated, objectDefinition);
+		return new SqlParameterDefinition(parameterConverter, 
+				parameterName, 
+				sqlName, 
+				parameterType, 
+				order, 
+				id, version, generated, enumerated, objectDefinition);
 	}
 	
-	private SqlParameterDefinition(
-			SqlParameterConverter parameterConverter,
-			String parameterName,
-			@Nonnull
-			SqlParameterObjectDefinition objDef, 
-			int order, String sqlName) {
-		this.objectDefinition = Optional.<SqlParameterObjectDefinition>of(objDef);
-		this.parameterName = parameterName;
-		this.parameterType = objectDefinition.get().getObjectDefintion().getObjectType();
-		this.order = order;
-		this.sqlName = sqlName;
-		this.id = false;
-		this.parameterConverter = parameterConverter;
-		this.version = false;
-		this.generated = false;
-	}
 	
 	static SqlParameterDefinition newComplexInstance(
 			SqlParameterConverter parameterConverter,
@@ -103,7 +95,20 @@ public class SqlParameterDefinition {
 			@Nonnull
 			SqlParameterObjectDefinition objDef, 
 			int order, String sqlName) {
-		return new SqlParameterDefinition(parameterConverter, parameterName, objDef, order, sqlName);
+		
+		Optional<SqlParameterObjectDefinition> objectDefinition = Optional.<SqlParameterObjectDefinition>of(objDef);
+		Class<?> parameterType = objectDefinition.get().getObjectDefintion().getObjectType();
+		boolean id = false;
+		boolean version = false;
+		boolean generated = false;
+		Optional<Enumerated> enumerated = Optional.absent();
+		
+		return new SqlParameterDefinition(parameterConverter, 
+				parameterName, 
+				sqlName, 
+				parameterType, 
+				order, 
+				id, version, generated, enumerated, objectDefinition);
 	}
 	
 	public Object convertToSql(Object original) {
@@ -183,6 +188,7 @@ public class SqlParameterDefinition {
 			Id id = getAnnotation(objectType, parameterName, Id.class);
 			Version version = getAnnotation(objectType, parameterName, Version.class);
 			GeneratedValue generated = getAnnotation(objectType, parameterName, GeneratedValue.class);
+			Enumerated enumerated = getAnnotation(objectType, parameterName, Enumerated.class);
 			
 			boolean idFlag = id != null;
 			boolean versionFlag = version != null;
@@ -190,7 +196,7 @@ public class SqlParameterDefinition {
 			if (sn == null)
 				sn = config.getNamingStrategy().propertyToColumnName(parameterName);
 			definition = SqlParameterDefinition.newSimpleInstance(config.getConverter(), parameterName, 
-					parameterType, order, sn, idFlag, versionFlag, generatedFlag);
+					parameterType, order, sn, idFlag, versionFlag, generatedFlag, Optional.fromNullable(enumerated));
 		}
 		return definition;
 	}
@@ -236,6 +242,10 @@ public class SqlParameterDefinition {
 	}
 	public boolean isGenerated() {
 		return generated;
+	}
+	
+	public Optional<Enumerated> getEnumerated() {
+		return enumerated;
 	}
 	
 	//@SuppressWarnings("unchecked")

@@ -150,7 +150,7 @@ public class SqlWriterStrategy {
 		return equalsKeys;
 	}
 	
-	public void appendValues(final SqlObjectDefinition<?> definition, List<Object> values, Map<String, Object> keysAndValues) {
+	public void appendValues(List<Object> values, final SqlObjectDefinition<?> definition, Map<String, Object> keysAndValues) {
 		for (Entry<String, Object> e : keysAndValues.entrySet()) {
 			SqlParameterDefinition d = definition.getParameters().get(e.getKey());
 			if (d == null) {
@@ -164,7 +164,7 @@ public class SqlWriterStrategy {
 	
 	public List<Object> fillValues(final SqlObjectDefinition<?> definition, Map<String, Object> keysAndValues) {
 		List<Object> values = Lists.newArrayListWithCapacity(keysAndValues.size());
-		appendValues(definition, values, keysAndValues);
+		appendValues(values, definition, keysAndValues);
 		return values;
 	}
 	

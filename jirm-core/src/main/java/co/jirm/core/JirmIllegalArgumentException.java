@@ -20,4 +20,9 @@ public class JirmIllegalArgumentException extends IllegalArgumentException {
 	public JirmIllegalArgumentException(String s) {
 		super(s);
 	}
+
+	public JirmIllegalArgumentException(String message, Throwable cause) {
+		super(message, cause);
+	}
+	
 }

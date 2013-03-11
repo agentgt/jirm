@@ -15,11 +15,17 @@
  */
 package co.jirm.mapper.converter;
 
+import static co.jirm.core.util.JirmPrecondition.check;
+
 import java.sql.Date;
 import java.util.Calendar;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
 import org.joda.time.DateTime;
 
+import co.jirm.core.util.ObjectMapUtils;
 import co.jirm.mapper.definition.SqlParameterDefinition;
 
 
@@ -32,6 +38,43 @@ public class DefaultParameterConverter implements SqlParameterConverter {
 		}
 		else if (Calendar.class.isAssignableFrom(parameterDefinition.getParameterType())) {
 			return new DateTime(original).toCalendar(null);
+		}
+		else if (parameterDefinition.getEnumerated().isPresent() 
+				&& Enum.class.isAssignableFrom(parameterDefinition.getParameterType())) {
+			Enumerated anno = check.notNull(parameterDefinition.getEnumerated().orNull(),
+					"Required @Enumerated annotation for enum arguments: {}", 
+					parameterDefinition.getParameterName());
+			if (original instanceof String) {
+				if (anno.value() == EnumType.ORDINAL) {
+					return ObjectMapUtils.enumFrom(parameterDefinition.getParameterType(), 
+							(String)original).ordinal();
+				}
+				else {
+					return original;
+				}
+			}
+			else if (original instanceof Integer) {
+				if (anno.value() == EnumType.STRING) {
+					return ObjectMapUtils.enumFrom(parameterDefinition.getParameterType(), 
+							(Integer)original).name();
+				}
+				else {
+					return original;
+				}				
+			}
+			else if (original.getClass().isAssignableFrom(parameterDefinition.getParameterType())) {
+				Enum<?> e = (Enum<?>) original;
+				if (anno.value() == EnumType.ORDINAL) {
+					return e.ordinal();
+				}
+				else {
+					return e.name();
+				}
+			}
+			else {
+				throw check.argumentInvalid("enum object: {} is not valid for: {}", 
+						original, parameterDefinition.getParameterName());
+			}
 		}
 		else {
 			return original;
