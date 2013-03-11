@@ -15,8 +15,10 @@
  */
 package co.jirm.spring;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Calendar;
 import java.util.List;
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import co.jirm.core.JirmIllegalArgumentException;
 import co.jirm.orm.JirmFactory;
 import co.jirm.orm.dao.JirmDao;
 import co.jirm.orm.dao.JirmOptimisticLockException;
@@ -169,6 +172,21 @@ public class JirmDaoIntegrationTest {
 			.query().forOptionalOf(String.class);
 		assertNotNull(id);
 		assertTrue(! id.isPresent());
+	}
+	
+	@Test
+	public void testErrorMessageForIssue8() throws Exception {
+		try {
+			dao.getSelectBuilderFactory()
+				.sql("select string_prop as poop from test_bean")
+				.query()
+				.forList();
+		} catch (JirmIllegalArgumentException e) {
+			assertEquals("The column name or label: 'poop' did not match any properties " +
+					"for the object definition: class co.jirm.spring.TestBean", e.getMessage());
+			return;
+		}
+		fail("Exception should have been thrown");
 	}
 	
 	public static String randomId() {
