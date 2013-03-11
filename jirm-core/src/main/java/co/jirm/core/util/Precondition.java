@@ -24,17 +24,6 @@ import java.lang.IllegalStateException;
 
 public abstract class Precondition<ARG extends IllegalArgumentException, STATE extends IllegalStateException> {
 
-	public static Precondition<IllegalArgumentException, IllegalStateException> check = 
-			new Precondition<IllegalArgumentException, IllegalStateException>() {
-		protected IllegalArgumentException argumentException(String message) {
-			return new IllegalArgumentException(message);
-		}
-		
-		protected IllegalStateException stateException(String message) {
-			return new IllegalStateException(message);
-		}
-	};
-
 	public final <T> T notNull(T o, @Nullable Object errorMessage) {
 		argument(o != null, errorMessage);
 		return o;
