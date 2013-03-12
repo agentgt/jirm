@@ -35,8 +35,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import co.jirm.core.JirmIllegalArgumentException;
 import co.jirm.orm.JirmFactory;
+import co.jirm.orm.JirmOptimisticLockException;
 import co.jirm.orm.dao.JirmDao;
-import co.jirm.orm.dao.JirmOptimisticLockException;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;

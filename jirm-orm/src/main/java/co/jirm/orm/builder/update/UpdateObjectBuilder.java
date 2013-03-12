@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.mapper.copy.AbstractCopyBuilder;
 import co.jirm.mapper.definition.SqlParameterDefinition;
-import co.jirm.orm.dao.JirmOptimisticLockException;
+import co.jirm.orm.JirmOptimisticLockException;
 
 import com.google.common.base.Optional;
 
