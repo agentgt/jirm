@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import java.util.Calendar;
 import java.util.List;
@@ -176,6 +177,7 @@ public class JirmDaoIntegrationTest {
 	
 	@Test
 	public void testErrorMessageForIssue8() throws Exception {
+		assumeTrue(! isTravis() );
 		try {
 			dao.getSelectBuilderFactory()
 				.sql("select string_prop as poop from test_bean")
@@ -191,6 +193,11 @@ public class JirmDaoIntegrationTest {
 	
 	public static String randomId() {
 		return UUID.randomUUID().toString().replaceAll("-", "");
+	}
+	
+	private boolean isTravis() {
+		String e = System.getenv("TRAVIS");
+		return e != null && ! "false".equals(e);
 	}
 	
 }
