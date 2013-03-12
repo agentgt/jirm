@@ -57,6 +57,10 @@ public class SelectWhereClauseBuilder<I> extends AbstractWhereClauseBuilder<Sele
 	public OffsetClauseBuilder<I> offset(Number i) {
 		return addClause(OffsetClauseBuilder.newInstanceWithOffset(this, i));
 	}
+	
+	public ForUpdateClauseBuilder<I> forUpdate() {
+		return addClause(ForUpdateClauseBuilder.newInstance(this));
+	}
 
 	@Override
 	protected SelectWhereClauseBuilder<I> getSelf() {

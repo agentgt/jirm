@@ -16,23 +16,36 @@
 package co.jirm.orm.builder.select;
 
 
-public enum SelectClauseType {
+
+
+public class ForUpdateClauseBuilder<I> extends AbstractSqlParameterizedSelectClause<ForUpdateClauseBuilder<I>, I> {
 	
-	ROOT(null),
-	CUSTOM(""),
-	WHERE("WHERE"),
-	ORDERBY("ORDER BY"),
-	LIMIT("LIMIT"),
-	OFFSET("OFFSET"),
-	FORUPDATE("FOR UPDATE");
-	
-	private final String sql;
-	
-	private SelectClauseType(String sql) {
-		this.sql = sql;
+	private ForUpdateClauseBuilder(SelectClause<I> parent) {
+		super(parent, SelectClauseType.FORUPDATE, "");
 	}
 	
-	public String getSql() {
-		return sql;
+	static <I> ForUpdateClauseBuilder<I> newInstance(SelectClause<I> parent) {
+		return new ForUpdateClauseBuilder<I>(parent);
 	}
+
+	@Override
+	protected ForUpdateClauseBuilder<I> getSelf() {
+		return this;
+	}
+	
+	@Override
+	public <C extends SelectClauseVisitor> C accept(C visitor) {
+		visitor.visit(this);
+		for (SelectClause<I> k : children) {
+			k.accept(visitor);
+		}
+		return visitor;
+	}
+	
+	@Override
+	public boolean isNoOp() {
+		return false;
+	}
+	
+	
 }

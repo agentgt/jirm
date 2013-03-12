@@ -366,4 +366,18 @@ public class JirmDaoTest {
 				, rowMapper, new Object[] {7});
 	}
 
+	
+	@Test
+	public void testForUpdateIssue10() {
+		dao.select().where()
+			.property("longProp").notEq(7)
+			.forUpdate()
+			.query().forObject();
+		
+		verify(mock).queryForObject("SELECT " +
+				"test_bean.string_prop, " +
+				"test_bean.long_prop, test_bean.timets " +
+				"FROM test_bean WHERE test_bean.long_prop != ? FOR UPDATE"
+				, rowMapper, new Object[] {7});
+	}
 }

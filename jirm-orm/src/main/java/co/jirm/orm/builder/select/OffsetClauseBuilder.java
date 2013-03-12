@@ -31,6 +31,10 @@ public class OffsetClauseBuilder<I> extends AbstractSqlParameterizedSelectClause
 	static <I> OffsetClauseBuilder<I> newInstanceWithOffset(SelectClause<I> parent, Number i) {
 		return new OffsetClauseBuilder<I>(parent, "?").with(i.longValue());
 	}
+	
+	public ForUpdateClauseBuilder<I> forUpdate() {
+		return addClause(ForUpdateClauseBuilder.newInstance(this));
+	}
 
 	@Override
 	protected OffsetClauseBuilder<I> getSelf() {

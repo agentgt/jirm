@@ -205,6 +205,20 @@ public class JirmDaoIntegrationTest {
 		
 	}
 	
+	@Test
+	public void testForUpdateIssue10() throws Exception {
+		TestBean t = new TestBean(randomId(), 2L, Calendar.getInstance());
+		dao.insert(t);
+		List<TestBean> list = 
+				dao.select().where()
+					.property("stringProp").eq("hello")
+					.forUpdate()
+					.query()
+					.forList();
+		assertNotNull(list);
+		
+	}
+	
 	public static String randomId() {
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}

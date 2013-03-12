@@ -39,6 +39,10 @@ public class LimitClauseBuilder<I> extends AbstractSqlParameterizedSelectClause<
 		return addClause(OffsetClauseBuilder.newInstanceWithOffset(getSelf(), i));
 	}
 	
+	public ForUpdateClauseBuilder<I> forUpdate() {
+		return addClause(ForUpdateClauseBuilder.newInstance(this));
+	}
+	
 	@Override
 	protected LimitClauseBuilder<I> getSelf() {
 		return this;

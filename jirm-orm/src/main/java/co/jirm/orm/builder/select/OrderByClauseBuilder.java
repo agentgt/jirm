@@ -73,6 +73,9 @@ public class OrderByClauseBuilder<I> extends AbstractSqlParameterizedSelectClaus
 	public OffsetClauseBuilder<I> offset(Number i) {
 		return addClause(OffsetClauseBuilder.newInstanceWithOffset(getSelf(), i));
 	}
+	public ForUpdateClauseBuilder<I> forUpdate() {
+		return addClause(ForUpdateClauseBuilder.newInstance(this));
+	}
 
 	//@Override
 	public OrderByClauseBuilder<I> asc() {
