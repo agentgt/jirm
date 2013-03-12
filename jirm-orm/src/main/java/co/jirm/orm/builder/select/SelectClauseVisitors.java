@@ -58,6 +58,11 @@ public class SelectClauseVisitors {
 			doVisit(clauseBuilder);
 		}
 		
+		@Override
+		public void visit(ForShareClauseBuilder<?> clauseBuilder) {
+			doVisit(clauseBuilder);
+		}
+		
 	}
 	
 	public abstract static class ParametersClauseVisitor extends SelectClauseVisitor {
@@ -96,6 +101,10 @@ public class SelectClauseVisitors {
 		
 		@Override
 		public void visit(ForUpdateClauseBuilder<?> clauseBuilder) {
+			//NOOP
+		}
+		@Override
+		public void visit(ForShareClauseBuilder<?> clauseBuilder) {
 			//NOOP
 		}
 
@@ -160,7 +169,8 @@ public class SelectClauseVisitors {
 				}
 				if (k.getType() != SelectClauseType.CUSTOM) {
 					sb.append(k.getType().getSql());
-					if (k.getType() != SelectClauseType.FORUPDATE)
+					if (k.getType() != SelectClauseType.FORUPDATE && 
+							k.getType() != SelectClauseType.FORSHARE)
 						sb.append(" ");
 				}
 				return true;

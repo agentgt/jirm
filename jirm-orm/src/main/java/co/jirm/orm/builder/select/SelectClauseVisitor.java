@@ -24,6 +24,7 @@ public abstract class SelectClauseVisitor {
 	public abstract void visit(LimitClauseBuilder<?> limitClauseBuilder);
 	public abstract void visit(OffsetClauseBuilder<?> clauseBuilder);
 	public abstract void visit(ForUpdateClauseBuilder<?> clauseBuilder);
+	public abstract void visit(ForShareClauseBuilder<?> clauseBuilder);
 	public abstract void visit(SelectCustomClauseBuilder<?> clauseBuilder);
 
 	

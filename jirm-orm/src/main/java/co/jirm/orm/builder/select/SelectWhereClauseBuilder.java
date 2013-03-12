@@ -61,6 +61,10 @@ public class SelectWhereClauseBuilder<I> extends AbstractWhereClauseBuilder<Sele
 	public ForUpdateClauseBuilder<I> forUpdate() {
 		return addClause(ForUpdateClauseBuilder.newInstance(this));
 	}
+	
+	public ForShareClauseBuilder<I> forShare() {
+		return addClause(ForShareClauseBuilder.newInstance(this));
+	}
 
 	@Override
 	protected SelectWhereClauseBuilder<I> getSelf() {

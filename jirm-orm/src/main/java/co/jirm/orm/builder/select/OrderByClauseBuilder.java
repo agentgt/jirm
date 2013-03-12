@@ -76,6 +76,9 @@ public class OrderByClauseBuilder<I> extends AbstractSqlParameterizedSelectClaus
 	public ForUpdateClauseBuilder<I> forUpdate() {
 		return addClause(ForUpdateClauseBuilder.newInstance(this));
 	}
+	public ForShareClauseBuilder<I> forShare() {
+		return addClause(ForShareClauseBuilder.newInstance(this));
+	}
 
 	//@Override
 	public OrderByClauseBuilder<I> asc() {

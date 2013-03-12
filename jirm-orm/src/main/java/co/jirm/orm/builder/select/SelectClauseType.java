@@ -24,7 +24,8 @@ public enum SelectClauseType {
 	ORDERBY("ORDER BY"),
 	LIMIT("LIMIT"),
 	OFFSET("OFFSET"),
-	FORUPDATE("FOR UPDATE");
+	FORUPDATE("FOR UPDATE"), 
+	FORSHARE("FOR SHARE");
 	
 	private final String sql;
 	

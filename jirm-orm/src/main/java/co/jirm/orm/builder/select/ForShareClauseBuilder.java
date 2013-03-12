@@ -18,29 +18,18 @@ package co.jirm.orm.builder.select;
 
 
 
-public class OffsetClauseBuilder<I> extends AbstractSqlParameterizedSelectClause<OffsetClauseBuilder<I>, I> {
+public class ForShareClauseBuilder<I> extends AbstractSqlParameterizedSelectClause<ForShareClauseBuilder<I>, I> {
 	
-	private OffsetClauseBuilder(SelectClause<I> parent, String sql) {
-		super(parent, SelectClauseType.OFFSET, sql);
+	private ForShareClauseBuilder(SelectClause<I> parent) {
+		super(parent, SelectClauseType.FORSHARE, "");
 	}
 	
-	static <I> OffsetClauseBuilder<I> newInstance(SelectClause<I> parent, String sql) {
-		return new OffsetClauseBuilder<I>(parent, sql);
-	}
-	
-	static <I> OffsetClauseBuilder<I> newInstanceWithOffset(SelectClause<I> parent, Number i) {
-		return new OffsetClauseBuilder<I>(parent, "?").with(i.longValue());
-	}
-	
-	public ForUpdateClauseBuilder<I> forUpdate() {
-		return addClause(ForUpdateClauseBuilder.newInstance(this));
-	}
-	public ForShareClauseBuilder<I> forShare() {
-		return addClause(ForShareClauseBuilder.newInstance(this));
+	static <I> ForShareClauseBuilder<I> newInstance(SelectClause<I> parent) {
+		return new ForShareClauseBuilder<I>(parent);
 	}
 
 	@Override
-	protected OffsetClauseBuilder<I> getSelf() {
+	protected ForShareClauseBuilder<I> getSelf() {
 		return this;
 	}
 	
@@ -51,6 +40,11 @@ public class OffsetClauseBuilder<I> extends AbstractSqlParameterizedSelectClause
 			k.accept(visitor);
 		}
 		return visitor;
+	}
+	
+	@Override
+	public boolean isNoOp() {
+		return false;
 	}
 	
 	

@@ -42,6 +42,9 @@ public class LimitClauseBuilder<I> extends AbstractSqlParameterizedSelectClause<
 	public ForUpdateClauseBuilder<I> forUpdate() {
 		return addClause(ForUpdateClauseBuilder.newInstance(this));
 	}
+	public ForShareClauseBuilder<I> forShare() {
+		return addClause(ForShareClauseBuilder.newInstance(this));
+	}
 	
 	@Override
 	protected LimitClauseBuilder<I> getSelf() {
