@@ -191,6 +191,20 @@ public class JirmDaoIntegrationTest {
 		fail("Exception should have been thrown");
 	}
 	
+	@Test
+	public void testNotEqIssue5() throws Exception {
+		TestBean t = new TestBean(randomId(), 2L, Calendar.getInstance());
+		dao.insert(t);
+		List<TestBean> list = 
+				dao.select().where()
+					.property("stringProp").notEq("hello")
+					.limit(2)
+					.query()
+					.forList();
+		assertNotNull(list);
+		
+	}
+	
 	public static String randomId() {
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}

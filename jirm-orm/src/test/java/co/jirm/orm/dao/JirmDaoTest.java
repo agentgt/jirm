@@ -15,11 +15,10 @@
  */
 package co.jirm.orm.dao;
 
-import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
 
@@ -354,6 +353,17 @@ public class JirmDaoTest {
 				new Object[] {"blah", 1});
 		
 	}
-
+	
+	
+	@Test
+	public void testNotEqIssue5() {
+		dao.select().where()
+			.property("longProp").notEq(7)
+			.query().forObject();
+		
+		verify(mock).queryForObject("SELECT test_bean.string_prop, test_bean.long_prop, test_bean.timets " +
+				"FROM test_bean WHERE test_bean.long_prop != ?"
+				, rowMapper, new Object[] {7});
+	}
 
 }

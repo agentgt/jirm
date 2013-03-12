@@ -37,6 +37,10 @@ public abstract class AbstractField<T extends Condition<T>> {
 		return op("=", o);
 	}
 	
+	public T notEq(Object o) {
+		return op("!=", o);
+	}
+	
 	public T greaterThen(Object o) {
 		return op(">", o);
 	}
