@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>co.jirm</groupId>
   <artifactId>jirm-parent</artifactId>
-  <version>0.0.6</version>
+  <version>0.0.7-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>jirm</name>
@@ -40,7 +40,7 @@
     <connection>scm:git:git@github.com:agentgt/jirm.git</connection>
     <developerConnection>scm:git:git@github.com:agentgt/jirm.git</developerConnection>
     <url>scm:git:git@github.com:agentgt/jirm.git</url>
-    <tag>jirm-parent-0.0.6</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <distributionManagement>
