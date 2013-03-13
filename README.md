@@ -78,7 +78,7 @@ Now you can create a *threadsafe* `JirmDao` for your Immutable POJO like:
 JirmDao
 -------
 
-The `JirmDao` allows you to CRUD immutable POJO's. Immutable POJO's have all of there member fields 
+The `JirmDao` allows you to CRUD immutable POJO's. Immutable POJO's have all of their member fields 
 `final` and the fields themselves should be immutable objects. Immutable POJO's require a constructor to instantiate
 their member fields.
 
