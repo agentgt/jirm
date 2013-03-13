@@ -33,7 +33,7 @@ http://stackoverflow.com/questions/2698665/orm-supporting-immutable-classes
 Install
 -------
 
-The current version of jirm in the maven central repository is: `0.0.5`
+The current version of jirm in the maven central repository is: `0.0.6`
 
 If you would like full usage of the ORM, Spring is *currently* the only JDBC Wrapper supported.
 
