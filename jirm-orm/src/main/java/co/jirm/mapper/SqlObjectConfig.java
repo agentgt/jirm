@@ -32,14 +32,14 @@ public class SqlObjectConfig {
 	private final NamingStrategy namingStrategy;
 	private final SqlParameterConverter converter;
 	private final SqlObjectConverter objectMapper;
-	private final transient Cache<String, SqlObjectDefinition<?>> cache;
+	private final transient Cache<Class<?>, SqlObjectDefinition<?>> cache;
 	private final int maximumLoadDepth = 4;
 	
 	private SqlObjectConfig(
 			NamingStrategy namingStrategy, 
 			SqlObjectConverter objectMapper, 
 			SqlParameterConverter converter, 
-			Cache<String, SqlObjectDefinition<?>> cache) {
+			Cache<Class<?>, SqlObjectDefinition<?>> cache) {
 		super();
 		this.namingStrategy = namingStrategy;
 		this.converter = converter;
@@ -69,14 +69,16 @@ public class SqlObjectConfig {
 		return maximumLoadDepth;
 	}
 	
-	public Cache<String, SqlObjectDefinition<?>> getCache() {
+	public Cache<Class<?>, SqlObjectDefinition<?>> getCache() {
 		return cache;
 	}
 	
 	public static SqlObjectConfig DEFAULT = 
 			new SqlObjectConfig(DefaultNamingStrategy.INSTANCE,
-			new JacksonSqlObjectConverter(), new DefaultParameterConverter(), CacheBuilder.newBuilder()
+			new JacksonSqlObjectConverter(), new DefaultParameterConverter(), 
+			CacheBuilder.newBuilder()
+			.weakKeys()
 			.maximumSize(1000)
-			.<String, SqlObjectDefinition<?>>build());
+			.<Class<?>, SqlObjectDefinition<?>>build());
 
 }

@@ -98,9 +98,8 @@ public class SqlObjectDefinition<T> {
 	@SuppressWarnings("unchecked")
 	public static <T> SqlObjectDefinition<T> 
 		fromClass(final Class<T> objectType, final SqlObjectConfig config) {
-		String name = "CLASS:" + objectType.getCanonicalName();
 		try {
-			return (SqlObjectDefinition<T>) config.getCache().get(name, new Callable<SqlObjectDefinition<?>>() {
+			return (SqlObjectDefinition<T>) config.getCache().get(objectType, new Callable<SqlObjectDefinition<?>>() {
 				@Override
 				public SqlObjectDefinition<?> call() throws Exception {
 					return SqlObjectDefinition._fromClass(objectType, config);
