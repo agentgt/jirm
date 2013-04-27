@@ -75,7 +75,7 @@ public class SqlPlaceholderParser {
 		
 		while ( (line = lr.readLine()) != null) {
 			if (first) first = false;
-			else sb.append("\n");
+			else if (! config.isStripNewLines()) sb.append("\n");
 			Matcher m = tokenPattern.matcher(line);
 			if (m.matches()) {
 				String leftHand = m.group(1);
@@ -103,8 +103,7 @@ public class SqlPlaceholderParser {
 				++position;
 			}
 			else {
-				if (! config.isStripNewLines() )
-					sb.append(line);
+				sb.append(line);
 			}
 		}
 		if (sql.endsWith("\r\n") || sql.endsWith("\n") || sql.endsWith("\r")) {
