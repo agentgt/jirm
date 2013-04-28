@@ -15,13 +15,9 @@
  */
 package co.jirm.core.sql;
 
-import java.io.IOException;
-
 import co.jirm.core.sql.SqlPlaceholderParser.ParsedSql;
-import co.jirm.core.util.ResourceUtils;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 
 
@@ -48,11 +44,7 @@ public abstract class MutableParameterizedSql<T> extends MutableParameterized<T>
 	}
 	
 	public T useResource(Class<?> k, String resource) {
-		try {
-			return setSql(ResourceUtils.getClasspathResourceAsString(k, resource));
-		} catch (IOException e) {
-			throw Throwables.propagate(e);
-		}
+		return setSql(SqlPartialParser.parseFromPath(k, resource));
 	}
 
 	@Override

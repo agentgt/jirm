@@ -17,7 +17,6 @@ package co.jirm.core.sql;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,29 +25,11 @@ import co.jirm.core.sql.SqlPlaceholderParser.ParsedSql;
 import co.jirm.core.sql.SqlPlaceholderParser.PlaceHolderType;
 import co.jirm.core.util.ResourceUtils;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
-
 
 public class SqlPlaceholderParserTest {
 
 	@Before
 	public void setUp() throws Exception {}
-	
-	
-	@Test
-	public void testBasic() throws Exception {
-	
-		PlainSql sql = PlainSql.fromResource(getClass(), "select-test-bean.sql")
-				.bind("name", "Adam")
-				.bind("limit", 1);
-		System.out.println(sql.toString());
-		assertEquals(ImmutableList.<Object>of("Adam", 1), sql.mergedParameters());
-		assertEquals(
-				"SELECT * from test_bean\n" + 
-				"WHERE stringProp like ? \n" + 
-				"LIMIT ? ", sql.getSql());
-	}
 	
 	@Test
 	public void test() throws Exception {
@@ -100,51 +81,7 @@ public class SqlPlaceholderParserTest {
 		
 	}
 	
-	@Test
-	public void testNameParameters() throws Exception {
-		PlainSql sql = PlainSql.parse(ResourceUtils.getClasspathResourceAsString(getClass(), "search-recruiting-name.sql"));
-		sql.with("1", "2", "3", "4");
-		assertEquals(ImmutableList.<Object>of("1","2","3", "4"), sql.mergedParameters());
-		sql = PlainSql.parse(ResourceUtils.getClasspathResourceAsString(getClass(), "search-recruiting-name.sql"));
-		sql
-			.bind("now", "1")
-			.bind("limit", "10")
-			.bind("offset", "100");
-		assertEquals(ImmutableList.<Object>of("1","1","10", "100"), sql.mergedParameters());
-	}
-	
-	@Test
-	public void testPerformance() throws Exception {
-		Stopwatch sw = new Stopwatch().start();
-		String sql = ResourceUtils.getClasspathResourceAsString(getClass(), "search-recruiting-name.sql");
-		for (int i = 0; i < 300000; i++) {
-			PlainSql.parse(sql);
-		}
-		
-		assertTrue("Should be faster",sw.stop().elapsedMillis() < 5000);
-	}
-	
-	@Test
-	public void testPerformanceFromClasspath() throws Exception {
-		Stopwatch sw = new Stopwatch().start();
-		for (int i = 0; i < 300000; i++) {
-			PlainSql.fromResource(getClass(), "search-recruiting-name.sql");
-		}
-		
-		assertTrue("Should be faster",sw.stop().elapsedMillis() < 5000);
-	}
-	
-	@Test
-	public void testApos() throws Exception {
-		PlainSql sql = PlainSql.fromResource(getClass(), "select-test-bean.sql");
-		String result = sql
-				.bind("name", "Adam")
-				.bind("limit", 1).getSql();
-		assertEquals(
-				"SELECT * from test_bean\n" + 
-				"WHERE stringProp like ? \n" + 
-				"LIMIT ? ", result);
-	}
+
 	
 	@Test
 	public void testMultiApos() throws Exception {

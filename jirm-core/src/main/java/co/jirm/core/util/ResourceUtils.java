@@ -71,13 +71,67 @@ public class ResourceUtils {
 		}
 	}
 	
+	public static String getClasspathResourceAsString(final String path) throws IOException {
+		try {
+			return cacheSupplier.get().get(new ClasspathResourceKey(path),  new Callable<String>() {
+				@Override
+				public String call() throws Exception {
+					return _getClasspathResourceAsString(path);
+				}
+				
+			});
+		} catch (ExecutionException e) {
+			throw new IOException(e);
+		} catch (UncheckedExecutionException e) {
+			throw Throwables.propagate(Objects.firstNonNull(e.getCause(), e));
+		}
+	}
+	
 	private static String _getClasspathResourceAsString(Class<?> k, String path) throws IOException {
 		return Resources.toString(Resources.getResource(k, path), Charsets.UTF_8);
+	}
+	
+	public static String resolvePath(Class<?> c, String path) {
+		return resolveName(c, path);
+	}
+	
+	/*
+    * Add a package name prefix if the name is not absolute Remove leading "/"
+    * if name is absolute
+    */
+   private static String resolveName(Class<?> c, String name) {
+       if (name == null) {
+           return name;
+       }
+       if (!name.startsWith("/")) {
+           while (c.isArray()) {
+               c = c.getComponentType();
+           }
+           String baseName = c.getName();
+           int index = baseName.lastIndexOf('.');
+           if (index != -1) {
+               name = baseName.substring(0, index).replace('.', '/')
+                   +"/"+name;
+           }
+       } else {
+           name = name.substring(1);
+       }
+       return name;
+   }
+	
+	private static String _getClasspathResourceAsString(String path) throws IOException {
+		return Resources.toString(Resources.getResource(path), Charsets.UTF_8);
 	}
 	
 	private static class ClasspathResourceKey {
 		private final String path;
 		private final String klassName;
+		
+		private ClasspathResourceKey(String path) {
+			super();
+			this.path = path;
+			this.klassName = "";
+		}
 		
 		private ClasspathResourceKey(String path, Class<?> klass) {
 			super();

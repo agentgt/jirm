@@ -4,6 +4,7 @@ import static co.jirm.core.util.JirmPrecondition.check;
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -11,14 +12,21 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import co.jirm.core.sql.SqlPartialParser.ResourceLoader.CachedResourceLoader;
 import co.jirm.core.util.JirmUrlEncodedUtils;
+import co.jirm.core.util.ResourceUtils;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -372,7 +380,7 @@ public class SqlPartialParser {
 	
 	protected static interface ResourceLoader {
 		public String load(String path);
-		public static ResourceLoader DEFAULT = new ResourceLoader() {
+		public static ResourceLoader DEFAULT_LOADER = new ResourceLoader() {
 			@Override
 			public String load(String path) {
 				try {
@@ -386,6 +394,58 @@ public class SqlPartialParser {
 				}
 			}
 		};
+		
+		public static class CachedResourceLoader implements ResourceLoader {
+			@Override
+			public String load(String path) {
+				try {
+					String p = check.notNull(path, "path is null");
+					check.state(p.startsWith("/"), "path should start with '/' but was: {}", path);
+					p = p.substring(1);
+					return ResourceUtils.getClasspathResourceAsString(p);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		
+		public static ResourceLoader CACHED_LOADER = new CachedResourceLoader();
+	}
+	
+	private static Cache<String, ExpandedSql> fromPathCache = CacheBuilder.newBuilder()
+			.maximumSize(100)
+			.expireAfterAccess(ResourceUtils.expire, TimeUnit.SECONDS)
+			.build();
+	
+	private static Cache<String, String> fromPathToStringCache = CacheBuilder.newBuilder()
+			.maximumSize(100)
+			.expireAfterAccess(ResourceUtils.expire, TimeUnit.SECONDS)
+			.build();
+	
+	public static String parseFromPath(final String path) {
+		try {
+			return fromPathToStringCache.get(path, new Callable<String>() {
+				@Override
+				public String call() throws Exception {
+					return _parseFromPath(path);
+				}
+			});
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private static String _parseFromPath(final String path) {
+		Map<String, ExpandedSql> c = newLinkedHashMap(fromPathCache.asMap());
+		Parser p = new Parser(CachedResourceLoader.CACHED_LOADER, c);
+		fromPathCache.asMap().putAll(c);
+		return p.expand(path).join();
+	}
+	
+	public static String parseFromPath(Class<?> k , final String path) {
+		String resolved;
+		resolved = "/" + check.notNull(ResourceUtils.resolvePath(k, path), "bug path failed: {}", path);
+		return parseFromPath(resolved);
 	}
 	
 	public static class Parser {
@@ -400,7 +460,7 @@ public class SqlPartialParser {
 		}
 		
 		public static Parser create() {
-			return new Parser(ResourceLoader.DEFAULT, Maps.<String, ExpandedSql> newLinkedHashMap());
+			return new Parser(ResourceLoader.DEFAULT_LOADER, Maps.<String, ExpandedSql> newLinkedHashMap());
 		}
 
 		public ExpandedSql expand(String path) {
