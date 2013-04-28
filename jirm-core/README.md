@@ -106,8 +106,63 @@ VALUES (?,?,?,?,?,?)
 
 Better count those '?' carefully :)
 
+## Partial template expansion
 
-### Parser Spec
+*[new in 0.0.7](https://github.com/agentgt/jirm/issues/9)*
+
+JIRM also supports referencing blocks of SQL from the same or different files and 
+logic-less template expansion which is somewhat akin to Mustache's partial support.
+
+Also allow creating partial blocks like:
+
+In `A.sql` :
+
+```sql
+SELECT from blah
+-- {#fields}
+blah as "stuff.blah",
+foo as "fooBar"
+-- {/fields}
+where blah.id = 1 -- {}
+
+-- {#byId}
+SELECT from blah
+-- {> #fields}
+-- {<}
+where blah.id = 1 -- {}
+-- {/byId}
+```
+
+You can now have multile SELECT queries in one file and you can reference `#byId` like:
+
+```java
+PlainSql sql = PlainSql.fromResource(Blah.class, "A.sql#byId")
+    .with("Adam")
+    .with(1);
+```
+
+You can also reference SQL blocks from other SQL files like.
+
+For example in `B.sql` (that is in the same Java package as `A.sql`) you might have.
+
+```sql
+SELECT from blah
+-- { > A.sql#fields same=true }
+blah as "stuff.blah",
+foo as "fooBar"
+-- { < }
+where blah ....
+```
+
+Notice `same=true` will make sure that the SQL thats within the `>` `<` matches the SQL in 
+the `#fields` block declaration. This is useful to make sure that the SQL you are 
+playing with actually is the same that will get executed. Remember JIRM's goal is for you to
+be able to copy'n paste your SQL effortlessly to and from your database query analyzer/executor/workbench.
+
+You can disambiguate relative and fully qualify paths with a leading `/`.
+
+
+### Placeholder Parser Spec
 
 **To formalize what the parser is doing:**
 
