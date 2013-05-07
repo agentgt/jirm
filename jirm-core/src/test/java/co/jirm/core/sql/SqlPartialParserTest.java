@@ -17,6 +17,7 @@ package co.jirm.core.sql;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -88,23 +89,30 @@ public class SqlPartialParserTest {
 	@Test(expected=JirmIllegalStateException.class)
 	public void testValidate() throws Exception {
 		Parser p = SqlPartialParser.Parser.create();
-		ExpandedSql e = p.expand("/co/jirm/core/sql/partial-test-validate.sql#other");
-		String actual = e.join();
-		assertEquals("SELECT\n" + 
-				"c.id, c.name, c.tags, c.category, c.description, \n" + 
-				"c.division, c.experience_level as \"experienceLevel\", \n" + 
-				"c.locations, c.type, c.parent_id as \"parentId\", \n" + 
-				"g.latitude as \"latitude\", g.longitude as \"longitude\"\n" + 
-				"FROM campaign c\n" + 
-				"LEFT OUTER JOIN \n" + 
-				"	(SELECT DISTINCT cg.campaign, geo.latitude, geo.longitude from campaign_geo cg\n" + 
-				"	INNER JOIN geo geo on geo.id = cg.geo \n" + 
-				"	WHERE geo.latitude IS NOT NULL AND geo.longitude IS NOT NULL AND cg.createts < now() -- {}\n" + 
-				"	) g on g.campaign = c.id\n" + 
-				"ORDER BY c.createts ASC, c.id, g.latitude, g.longitude\n" + 
-				"LIMIT 100 -- {}\n" + 
-				"OFFSET 1 -- {}", actual);
-		
+		p.expand("/co/jirm/core/sql/partial-test-validate.sql#other");
+	}
+	
+	@Test
+	public void testIssue25ValidateErrorMessage() throws Exception {
+		try {
+			SqlPartialParser.parseFromPath("/co/jirm/core/sql/partial-test-validate.sql#other");
+			fail("Should have thrown an exception");
+		}
+		catch (JirmIllegalStateException e) {
+			assertEquals("Reference '> #stuff' in /co/jirm/core/sql/partial-test-validate.sql at line: 44 does" +
+					"\nNOT MATCH declaration /co/jirm/core/sql/partial-test-validate.sql#stuff at line: 1\n" + 
+					"REFERENCE:\n" + 
+					"c.id, c.name, c.tags, c.category, c.description\n" + 
+					"DECLARATION:\n" + 
+					"c.id, c.name, c.tags, c.category, c.description, \n" + 
+					"c.division, c.experience_level as \"experienceLevel\", \n" + 
+					"c.locations, c.type, c.parent_id as \"parentId\", \n" + 
+					"g.latitude as \"latitude\", g.longitude as \"longitude\"\n" + 
+					"", e.getMessage());
+		}
+		catch (Exception e) {
+			fail("should have thrown the right exception");
+		}
 	}
 	
 	@Test

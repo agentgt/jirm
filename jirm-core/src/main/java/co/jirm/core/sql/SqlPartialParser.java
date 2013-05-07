@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import co.jirm.core.JirmIllegalArgumentException;
+import co.jirm.core.JirmIllegalStateException;
 import co.jirm.core.sql.SqlPartialParser.ResourceLoader.CachedResourceLoader;
 import co.jirm.core.util.JirmUrlEncodedUtils;
 import co.jirm.core.util.ResourceUtils;
@@ -49,6 +51,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.LineReader;
 import com.google.common.io.Resources;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 
 public class SqlPartialParser {
@@ -463,8 +466,16 @@ public class SqlPartialParser {
 					return _parseFromPath(path);
 				}
 			});
-		} catch (ExecutionException e) {
+		} 
+		catch (ExecutionException e) {
 			throw new RuntimeException(e);
+		}
+		catch (UncheckedExecutionException e) {
+			if (e.getCause() instanceof JirmIllegalStateException 
+					|| e.getCause() instanceof JirmIllegalArgumentException) {
+				throw (RuntimeException) e.getCause();
+			}
+			throw e;
 		}
 	}
 	
@@ -565,17 +576,20 @@ public class SqlPartialParser {
 				DeclarationSql ds = e.getDeclaration();
 				boolean validate = ! r.isSame() || ds.getDeclaredSql().equals(r.getDeclaredSql());
 				check.state(validate, 
-						"Reference '> {}' in {}" +
-						" does NOT MATCH declaration {}" +
+						"Reference '> {}' in {} at line: {}" +
+						" does" +
+						"\nNOT MATCH declaration {} at line: {}" +
 						"\nREFERENCE:" +
 						"\n{}\n" +
 						"DECLARATION:" +
 						"\n{}\n",
-						r.getReferencePath().getFullPath(), 
-						r.getCurrentPath().getFullPath(), 
+						r.getReferencePath().getFullPath(),
+						r.getCurrentPath().getFullPath(),
+						r.getStartIndex(),
 						ds.getPath().getFullPath(),
-						r.getDeclaredSql(), 
-						ds.getDeclaredSql());
+						ds.getStartIndex(),
+						r.join(), 
+						ds.join());
 				byLine.put(r.getStartIndex(), e);
 				referenceSql.put(r.getStartIndex(), r);
 			}
@@ -667,7 +681,7 @@ public class SqlPartialParser {
 			String tag;
 			if (m.matches() && (tag = m.group(1)) != null && ! (tag = tag.trim()).isEmpty()) {
 				if (tag != null && tag.startsWith("#")) {
-					check.state(state != PSTATE.HASH, PE + "Cannot hash within hash at line {}.", path, lineIndex);
+					check.state(state != PSTATE.HASH, PE + "Cannot hash within hash at line: {}.", path, lineIndex);
 					state = PSTATE.HASH;
 					hashContent = ImmutableList.builder();
 					hashReferences = ImmutableList.builder();
@@ -675,7 +689,7 @@ public class SqlPartialParser {
 					HashDeclarationSql existing = nameToHash.get(currentHash);
 					if (existing != null) {
 						throw check.stateInvalid( 
-								PE + "Hash: '#{}' already defined line: {}, new definition at line: {}",
+								PE + "Hash: '#{}' already defined at line: {}, new definition at line: {}",
 								path,
 								currentHash, existing.getStartIndex(), lineIndex);
 					}
@@ -683,7 +697,7 @@ public class SqlPartialParser {
 					hashStartIndex = lineIndex;
 				}
 				else if (tag != null && tag.startsWith(">")) {
-					check.state(state != PSTATE.REFERENCE, PE + "Cannot reference within reference line {}.", path, lineIndex);
+					check.state(state != PSTATE.REFERENCE, PE + "Cannot reference within reference at line: {}.", path, lineIndex);
 					previousState = state;
 					state = PSTATE.REFERENCE;
 					referenceContent = ImmutableList.builder();
@@ -727,7 +741,7 @@ public class SqlPartialParser {
 					hashes.put(currentHash, hash);
 				}
 				else {
-					throw check.stateInvalid(PE + "Looks like a bad --{} at line: {}", path, lineIndex);
+					throw check.stateInvalid(PE + "Malformed hash or reference: {} at line: {}", path, tag, lineIndex);
 				}
 			}
 			else {
