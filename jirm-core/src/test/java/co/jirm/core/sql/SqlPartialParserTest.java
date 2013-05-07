@@ -87,9 +87,14 @@ public class SqlPartialParserTest {
 	}
 	
 	@Test(expected=JirmIllegalStateException.class)
-	public void testValidate() throws Exception {
+	public void testValidateInvalid() throws Exception {
 		Parser p = SqlPartialParser.Parser.create();
 		p.expand("/co/jirm/core/sql/partial-test-validate.sql#other");
+	}
+	
+	@Test
+	public void testIssue26ValidateValid() throws Exception {
+		SqlPartialParser.parseFromPath("/co/jirm/core/sql/issue26-partial-test-validate.sql#other");
 	}
 	
 	@Test

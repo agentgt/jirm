@@ -574,7 +574,7 @@ public class SqlPartialParser {
 				r.getStartIndex();
 				
 				DeclarationSql ds = e.getDeclaration();
-				boolean validate = ! r.isSame() || ds.getDeclaredSql().equals(r.getDeclaredSql());
+				boolean validate = ! r.isSame() || ds.inner().equals(r.inner());
 				check.state(validate, 
 						"Reference '> {}' in {} at line: {}" +
 						" does" +
