@@ -135,6 +135,42 @@ public class SqlPartialParserTest {
 		p.expand("/co/jirm/core/sql/partial-test-ref.sql#other");
 		
 	}
-
+	
+	
+	@Test
+	public void testIssue24HashDeclarationRemoval() throws Exception {
+		Parser p = SqlPartialParser.Parser.create();
+		ExpandedSql e = p.expand("/co/jirm/core/sql/issue24-hash-issue.sql");
+		String actual = e.join();
+		assertEquals("SELECT\n" + 
+				"c.id, c.name, c.tags, c.category, c.description, \n" + 
+				"c.division, c.experience_level as \"experienceLevel\", \n" + 
+				"c.locations, c.type, c.parent_id as \"parentId\", \n" + 
+				"g.latitude as \"latitude\", g.longitude as \"longitude\"\n" + 
+				"FROM campaign c\n" + 
+				"WHERE \n" + 
+				"c.type = 'JOBPAGE' AND c.createts < now() -- {}\n" + 
+				"ORDER BY c.createts\n" + 
+				"LIMIT 100 -- {}\n" + 
+				"OFFSET 1 -- {}", actual);
+	}
+	
+	@Test
+	public void testIssue24HashWithRefRemoval() throws Exception {
+		Parser p = SqlPartialParser.Parser.create();
+		ExpandedSql e = p.expand("/co/jirm/core/sql/issue24-hash-issue-with-ref.sql");
+		String actual = e.join();
+		assertEquals("SELECT\n" + 
+				"c.id, c.name, c.tags, c.category, c.description, \n" + 
+				"c.division, c.experience_level as \"experienceLevel\", \n" + 
+				"c.locations, c.type, c.parent_id as \"parentId\", \n" + 
+				"g.latitude as \"latitude\", g.longitude as \"longitude\"\n" + 
+				"FROM campaign c\n" + 
+				"WHERE \n" + 
+				"c.type = 'JOBPAGE' AND c.createts < now() -- {}\n" + 
+				"ORDER BY c.createts\n" + 
+				"LIMIT 100 -- {}\n" + 
+				"OFFSET 1 -- {}", actual);
+	}
 
 }

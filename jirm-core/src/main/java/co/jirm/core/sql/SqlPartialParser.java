@@ -44,6 +44,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.LineReader;
@@ -89,14 +90,16 @@ public class SqlPartialParser {
 		
 		public abstract boolean isHash();
 		
+		public abstract boolean isFile();
+		
 		public abstract int getStartIndex();
 		
-		public List<String> innerExpanded() {
+		public List<String> inner() {
 			return isHash() ? declaredSql.subList(1, declaredSql.size() - 1) : declaredSql;
 		}
 		
 		public String join() {
-			return Joiner.on("\n").join(innerExpanded());
+			return Joiner.on("\n").join(inner());
 		}
 		
 	}
@@ -123,6 +126,10 @@ public class SqlPartialParser {
 			return false;
 		}
 		
+		public boolean isFile() {
+			return true;
+		}
+		
 	}
 	
 	protected static class HashDeclarationSql extends DeclarationSql {
@@ -130,8 +137,8 @@ public class SqlPartialParser {
 		private final int startIndex;
 		private final int length;
 		
-		private HashDeclarationSql(String path, List<String> declardSql, List<ReferenceSql> references, int startIndex, int length) {
-			super(path, declardSql, references);
+		private HashDeclarationSql(String path, List<String> declaredSql, List<ReferenceSql> references, int startIndex, int length) {
+			super(path, declaredSql, references);
 			this.startIndex = startIndex;
 			this.length = length;
 		}
@@ -147,6 +154,17 @@ public class SqlPartialParser {
 		@Override
 		public boolean isHash() {
 			return true;
+		}
+		public boolean isFile() {
+			return false;
+		}
+		
+		public String header() {
+			return getDeclaredSql().get(0);
+		}
+		
+		public String footer() {
+			return getDeclaredSql().get(getDeclaredSql().size() - 1);
 		}
 		
 	}
@@ -274,12 +292,12 @@ public class SqlPartialParser {
 			return true;
 		}
 		
-		public List<String> innerExpanded() {
+		public List<String> inner() {
 			return declaredSql.subList(1, declaredSql.size() - 1);
 		}
 		
 		public String join() {
-			return Joiner.on("\n").join(innerExpanded());
+			return Joiner.on("\n").join(inner());
 		}
 		
 	}
@@ -306,12 +324,12 @@ public class SqlPartialParser {
 			return declaration;
 		}
 		
-		public List<String> innerExpanded() {
+		public List<String> inner() {
 			return declaration.isHash() ? expanded.subList(1, expanded.size() - 1) : expanded;
 		}
 		
 		public String join() {
-			return Joiner.on("\n").join(innerExpanded());
+			return Joiner.on("\n").join(inner());
 		}
 
 		@Override
@@ -557,19 +575,39 @@ public class SqlPartialParser {
 						r.getCurrentPath().getFullPath(), 
 						ds.getPath().getFullPath(),
 						r.getDeclaredSql(), 
-						 
 						ds.getDeclaredSql());
 				byLine.put(r.getStartIndex(), e);
 				referenceSql.put(r.getStartIndex(), r);
 			}
 			
+			
+			final Set<String> hashLinesToRemove;
+			if (f.isFile()) {
+				FileDeclarationSql fd = (FileDeclarationSql) f;
+				hashLinesToRemove = Sets.newHashSetWithExpectedSize(fd.getHashDeclarations().size() * 2);
+				for (HashDeclarationSql hd : fd.getHashDeclarations().values()) {
+					hashLinesToRemove.add(hd.header());
+					hashLinesToRemove.add(hd.footer());
+				}
+			}
+			else {
+				hashLinesToRemove = ImmutableSet.<String>of();
+			}
+			
+			/*
+			 * Replace the reference SQL with the expanded SQL
+			 */
 			for (int i = 0; i < lines.size();) {
 				ExpandedSql e = byLine.get(i + f.getStartIndex());
 				ReferenceSql r = referenceSql.get(i + f.getStartIndex());
+				
 				String line = lines.get(i);
 				if (e != null) {
-					sb.addAll(e.innerExpanded());
+					sb.addAll(e.inner());
 					i += r.getLength();
+				}
+				else if (hashLinesToRemove.contains(line)) {
+					i++;
 				}
 				else {
 					sb.add(line);
