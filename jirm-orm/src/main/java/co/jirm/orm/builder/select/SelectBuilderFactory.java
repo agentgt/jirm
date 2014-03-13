@@ -17,7 +17,8 @@ package co.jirm.orm.builder.select;
 
 import java.util.List;
 
-import co.jirm.core.builder.QueryFor;
+import co.jirm.core.builder.QueryForNumber;
+import co.jirm.core.builder.TypedQueryFor;
 import co.jirm.core.execute.SqlMultiValueRowMapper;
 import co.jirm.core.execute.SqlQueryExecutor;
 import co.jirm.core.execute.SqlSingleValueRowMapper;
@@ -89,18 +90,18 @@ public class SelectBuilderFactory<T> {
 		return queryExecutor.queryForOptional(sql.getSql(), singleValueRowMapper, type, sql.mergedParameters().toArray());
 	}
 	
-	public SelectRootClauseBuilder<SelectObjectBuilder<T>> select() {
+	public SelectRootClauseBuilder<? extends TypedQueryFor<T>> select() {
 		StringBuilder sb = new StringBuilder();
 		writerStrategy.selectStatementBeforeWhere(sb, definition);
-		return SelectRootClauseBuilder.newInstance(new RootClauseHandoff<SelectObjectBuilder<T>>(sb.toString()) {
+		return SelectRootClauseBuilder.newInstance(new RootClauseHandoff<SelectBuilder<T>>(sb.toString()) {
 			@Override
-			protected SelectObjectBuilder<T> createBuilder(String sql) {
-				return new SelectObjectBuilder<T>(SelectBuilderFactory.this, sql);
+			protected SelectBuilder<T> createBuilder(String sql) {
+				return new SelectBuilder<T>(SelectBuilderFactory.this, sql);
 			}
 		});
 	}
 	
-	public SelectCustomClauseBuilder<SelectBuilder<T>> sql(String sql) {
+	public SelectCustomClauseBuilder<? extends TypedQueryFor<T>> sql(String sql) {
 		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.newInstance(new RootClauseHandoff<SelectBuilder<T>>(null) {
 			@Override
 			protected SelectBuilder<T> createBuilder(String sql) {
@@ -110,7 +111,7 @@ public class SelectBuilderFactory<T> {
 		return root.sql(sql);
 	}
 	
-	public SelectCustomClauseBuilder<SelectBuilder<T>> sqlFromResource(String resource) {
+	public SelectCustomClauseBuilder<? extends TypedQueryFor<T>> sqlFromResource(String resource) {
 		SelectRootClauseBuilder<SelectBuilder<T>> root = SelectRootClauseBuilder.newInstance(new RootClauseHandoff<SelectBuilder<T>>(null) {
 			@Override
 			protected SelectBuilder<T> createBuilder(String sql) {
@@ -121,13 +122,13 @@ public class SelectBuilderFactory<T> {
 	}
 	
 	//FIXME This may not work.
-	public SelectRootClauseBuilder<CountBuilder<T>> count() {
+	public SelectRootClauseBuilder<? extends QueryForNumber> count() {
 		//TODO its hard to know whether or not to innerjoin to get an accurate count here.
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT count(*)");
 		sb.append(" FROM ").append(definition.getSqlName());
 		//definition.innerJoin(sb);
-		return SelectRootClauseBuilder.newInstance(new RootClauseHandoff<CountBuilder<T>>(sb.toString()) {
+		SelectRootClauseBuilder<? extends QueryForNumber> r = SelectRootClauseBuilder.newInstance(new RootClauseHandoff<CountBuilder<T>>(sb.toString()) {
 			@Override
 			protected CountBuilder<T> createBuilder(String sql) {
 				return new CountBuilder<T>(SelectBuilderFactory.this, sql);
@@ -140,6 +141,7 @@ public class SelectBuilderFactory<T> {
 			}
 			
 		});
+		return r;
 	}
 	
 
@@ -166,18 +168,7 @@ public class SelectBuilderFactory<T> {
 		
 	}
 	
-	public final static class SelectObjectBuilder<T> extends AbstractSelectObjectBuilder<SelectObjectBuilder<T>, T> {
-
-		private SelectObjectBuilder(SelectBuilderFactory<T> queryTemplate, String sql) {
-			super(queryTemplate, sql);
-		}
-		@Override
-		protected SelectObjectBuilder<T> getSelf() {
-			return this;
-		}
-	}
-	
-	public final static class SelectBuilder<T> extends AbstractSelectObjectBuilder<SelectBuilder<T>, T> implements QueryFor {
+	public final static class SelectBuilder<T> extends AbstractSelectObjectBuilder<SelectBuilder<T>, T> implements TypedQueryFor<T> {
 		
 		private SelectBuilder(SelectBuilderFactory<T> queryTemplate, String sql) {
 			super(queryTemplate, sql);
@@ -210,7 +201,7 @@ public class SelectBuilderFactory<T> {
 		
 	}
 	
-	public static class CountBuilder<T> extends MutableParameterizedSql<CountBuilder<T>> {
+	public static class CountBuilder<T> extends MutableParameterizedSql<CountBuilder<T>> implements QueryForNumber {
 		
 		private final SelectBuilderFactory<T> queryTemplate;
 		
@@ -224,8 +215,13 @@ public class SelectBuilderFactory<T> {
 			return this;
 		}
 		
-		public Long forLong() { 
+		public long forLong() { 
 			return queryTemplate.queryForLong(this);
+		}
+
+		@Override
+		public int forInt() {
+			throw new UnsupportedOperationException("forInt is not yet supported");
 		}
 		
 	}

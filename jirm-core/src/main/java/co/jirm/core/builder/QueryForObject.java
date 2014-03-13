@@ -15,11 +15,18 @@
  */
 package co.jirm.core.builder;
 
+import java.util.List;
+
+import com.google.common.base.Optional;
 
 
-public interface QueryFor {
 
-	int forInt();
-	long forLong();
+public interface QueryForObject {
+
+	public <O> List<O> forListOf(Class<O> k);
+	
+	public <O> O forObjectOf(Class<O> k);
+	
+	public <O> Optional<O> forOptionalOf(Class<O> k);
 
 }

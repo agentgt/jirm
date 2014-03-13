@@ -15,6 +15,7 @@
  */
 package co.jirm.orm.dao;
 
+import static co.jirm.core.util.JirmPrecondition.check;
 import static com.google.common.collect.Iterators.partition;
 import static com.google.common.collect.Iterators.peekingIterator;
 
@@ -24,8 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import co.jirm.core.builder.QueryForNumber;
+import co.jirm.core.builder.TypedQueryFor;
 import co.jirm.core.execute.SqlExecutor;
-import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.core.util.ObjectMapUtils;
 import co.jirm.core.util.ObjectMapUtils.NestedKeyValue;
 import co.jirm.mapper.SqlObjectConfig;
@@ -36,8 +38,6 @@ import co.jirm.orm.OrmConfig;
 import co.jirm.orm.builder.delete.DeleteBuilderFactory;
 import co.jirm.orm.builder.delete.DeleteRootClauseBuilder;
 import co.jirm.orm.builder.select.SelectBuilderFactory;
-import co.jirm.orm.builder.select.SelectBuilderFactory.CountBuilder;
-import co.jirm.orm.builder.select.SelectBuilderFactory.SelectObjectBuilder;
 import co.jirm.orm.builder.select.SelectRootClauseBuilder;
 import co.jirm.orm.builder.update.UpdateBuilderFactory;
 import co.jirm.orm.builder.update.UpdateObjectBuilder;
@@ -150,11 +150,11 @@ public final class JirmDao<T> {
 		return this.definition.idParameter().get();
 	}
 	
-	public SelectRootClauseBuilder<SelectObjectBuilder<T>> select() {
+	public SelectRootClauseBuilder<? extends TypedQueryFor<T>> select() {
 		return selectBuilderFactory.select();
 	}
 	
-	public SelectRootClauseBuilder<CountBuilder<T>> count() {
+	public SelectRootClauseBuilder<? extends QueryForNumber> count() {
 		return selectBuilderFactory.count();
 	}
 	
