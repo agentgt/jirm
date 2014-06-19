@@ -69,13 +69,6 @@
       </dependency>
 
 
-      <!-- Jackson 1.x -->
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>${jackson-version}</version>
-      </dependency>
-
       <!-- Jackson 2.x -->
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
@@ -286,6 +279,5 @@
     <!-- Encoding UTF-8 -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jackson2-version>2.0.5</jackson2-version>
-    <jackson-version>1.9.9</jackson-version>
   </properties>
 </project>
