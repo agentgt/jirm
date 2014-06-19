@@ -9,3 +9,7 @@ target
 *.jar
 *.war
 *.ear
+
+# IDEA-related project files
+/.idea
+*.iml
