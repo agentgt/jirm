@@ -35,7 +35,7 @@ public class SqlObjectConfig {
 	private final transient Cache<Class<?>, SqlObjectDefinition<?>> cache;
 	private final int maximumLoadDepth = 4;
 	
-	private SqlObjectConfig(
+	protected SqlObjectConfig(
 			NamingStrategy namingStrategy, 
 			SqlObjectConverter objectMapper, 
 			SqlParameterConverter converter, 
