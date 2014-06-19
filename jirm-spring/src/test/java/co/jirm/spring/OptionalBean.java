@@ -20,8 +20,8 @@ import java.util.Calendar;
 import javax.persistence.Column;
 import javax.persistence.Id;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.google.common.base.Optional;
 
