@@ -13,3 +13,6 @@ target
 # IDEA-related project files
 /.idea
 *.iml
+
+# Manifests
+MANIFEST.MF
