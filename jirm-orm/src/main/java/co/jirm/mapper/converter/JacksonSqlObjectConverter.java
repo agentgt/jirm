@@ -18,7 +18,7 @@ package co.jirm.mapper.converter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 

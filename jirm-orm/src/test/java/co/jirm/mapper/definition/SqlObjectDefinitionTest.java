@@ -20,8 +20,8 @@ import static org.junit.Assert.*;
 import javax.persistence.Column;
 import javax.persistence.Id;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.Before;
 import org.junit.Test;
 
