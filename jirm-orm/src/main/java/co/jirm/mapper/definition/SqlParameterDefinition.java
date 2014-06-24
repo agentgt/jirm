@@ -15,7 +15,6 @@
  */
 package co.jirm.mapper.definition;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -161,7 +160,11 @@ public class SqlParameterDefinition {
 		String sn = null;
 		ManyToOne manyToOne = getAnnotation(objectType, parameterName, ManyToOne.class);
 		if (manyToOne != null) {
-			Class<?> subK = checkNotNull(manyToOne.targetEntity(), "targetEntity not set");
+			Class<?> subK = manyToOne.targetEntity();
+			if (subK == null || subK.equals(void.class)) {
+				subK = parameterType;
+			}
+
 			JoinColumn joinColumn = getAnnotation(objectType, parameterName, JoinColumn.class);
 			SqlObjectDefinition<?> od = SqlObjectDefinition.fromClass(subK, config);
 			checkState( ! od.getIdParameters().isEmpty(), "No id parameters");
