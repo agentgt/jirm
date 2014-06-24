@@ -61,6 +61,7 @@ public final class JirmDao<T> {
 	private final UpdateBuilderFactory<T> updateBuilderFactory;
 	private final DeleteBuilderFactory<T> deleteBuilderFactory;
 	private final SqlWriterStrategy writerStrategy;
+    private final Optional<DaoHooks> daoHooks;
 	
 	private JirmDao(
 			SqlExecutor sqlExecutor, 
@@ -69,7 +70,8 @@ public final class JirmDao<T> {
 			SqlWriterStrategy writerStrategy, 
 			SelectBuilderFactory<T> selectBuilderFactory,
 			UpdateBuilderFactory<T> updateBuilderFactory,
-			DeleteBuilderFactory<T> deleteBuilderFactory) {
+			DeleteBuilderFactory<T> deleteBuilderFactory,
+			Optional<DaoHooks> daoHooks) {
 		super();
 		this.sqlExecutor = sqlExecutor;
 		this.config = config;
@@ -78,6 +80,7 @@ public final class JirmDao<T> {
 		this.selectBuilderFactory = selectBuilderFactory;
 		this.updateBuilderFactory = updateBuilderFactory;
 		this.deleteBuilderFactory = deleteBuilderFactory;
+        this.daoHooks = daoHooks;
 	}
 	
 	public static <T> JirmDao<T> newInstance(Class<T> type, OrmConfig config) {
@@ -90,7 +93,8 @@ public final class JirmDao<T> {
 				config.getSqlExecutor(), 
 				config.getSqlObjectConfig(), 
 				definition, config.getSqlWriterStrategy(), 
-				selectBuilderFactory, updateBuilderFactory, deleteBuilderFactory);
+				selectBuilderFactory, updateBuilderFactory, deleteBuilderFactory,
+				config.getDaoHooks());
 	}
 
 	private LinkedHashMap<String, Object> toLinkedHashMap(T t, boolean bulkInsert) {
@@ -220,6 +224,10 @@ public final class JirmDao<T> {
 	}
 	
 	public void insert(Map<String,Object> values) {
+		if (daoHooks.isPresent()) {
+			daoHooks.get().beforeInsert(definition, values);
+		}
+
 		StringBuilder qb = new StringBuilder();
 		writerStrategy.insertStatement(qb, definition, values);
 		sqlExecutor.update(qb.toString(), writerStrategy.fillValues(definition, values).toArray());
