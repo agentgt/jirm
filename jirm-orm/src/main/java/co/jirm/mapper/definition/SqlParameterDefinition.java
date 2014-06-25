@@ -36,7 +36,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.mapper.SqlObjectConfig;
@@ -117,6 +119,24 @@ public class SqlParameterDefinition {
 	
 	static Map<String, SqlParameterDefinition> getSqlBeanParameters(Class<?> k, SqlObjectConfig config) {
 		Map<String, SqlParameterDefinition> parameters = new LinkedHashMap<String, SqlParameterDefinition>();
+
+		final JsonIdentityInfo classIdentityInfo = k.getAnnotation(JsonIdentityInfo.class);
+		if (classIdentityInfo != null && classIdentityInfo.generator() == ObjectIdGenerators.IntSequenceGenerator.class) {
+			final String idName = classIdentityInfo.property();
+			final SqlParameterDefinition parameterDefinition = newSimpleInstance(
+					config.getConverter(),
+					idName,
+					Integer.class,
+					-1,
+					config.getNamingStrategy().propertyToColumnName(idName.replaceAll("^@", "meta_")),
+					true,
+					false,
+					true,
+					Optional.<Enumerated>absent());
+
+			parameters.put(idName, parameterDefinition);
+		}
+
 		Constructor<?> cons[] = k.getDeclaredConstructors();
 		for (Constructor<?> c : cons) {
 			JsonCreator jc = c.getAnnotation(JsonCreator.class);
