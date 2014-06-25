@@ -34,6 +34,7 @@ import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.copy.CopyBuilder;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
+import co.jirm.orm.JirmFactory;
 import co.jirm.orm.OrmConfig;
 import co.jirm.orm.builder.delete.DeleteBuilderFactory;
 import co.jirm.orm.builder.delete.DeleteRootClauseBuilder;
@@ -62,6 +63,7 @@ public final class JirmDao<T> {
 	private final DeleteBuilderFactory<T> deleteBuilderFactory;
 	private final SqlWriterStrategy writerStrategy;
     private final Optional<DaoHooks> daoHooks;
+    private final Optional<JirmFactory> jirmFactory;
 	
 	private JirmDao(
 			SqlExecutor sqlExecutor, 
@@ -71,7 +73,8 @@ public final class JirmDao<T> {
 			SelectBuilderFactory<T> selectBuilderFactory,
 			UpdateBuilderFactory<T> updateBuilderFactory,
 			DeleteBuilderFactory<T> deleteBuilderFactory,
-			Optional<DaoHooks> daoHooks) {
+			Optional<DaoHooks> daoHooks,
+			Optional<JirmFactory> jirmFactory) {
 		super();
 		this.sqlExecutor = sqlExecutor;
 		this.config = config;
@@ -81,9 +84,14 @@ public final class JirmDao<T> {
 		this.updateBuilderFactory = updateBuilderFactory;
 		this.deleteBuilderFactory = deleteBuilderFactory;
         this.daoHooks = daoHooks;
+        this.jirmFactory = jirmFactory;
 	}
-	
+
 	public static <T> JirmDao<T> newInstance(Class<T> type, OrmConfig config) {
+		return newInstance(type, config, Optional.<JirmFactory>absent());
+	}
+
+	public static <T> JirmDao<T> newInstance(Class<T> type, OrmConfig config, Optional<JirmFactory> jirmFactory) {
 		SqlObjectDefinition<T> definition = config.getSqlObjectConfig().resolveObjectDefinition(type);
 		SelectBuilderFactory<T> selectBuilderFactory = SelectBuilderFactory.newInstance(definition, config);
 		UpdateBuilderFactory<T> updateBuilderFactory = UpdateBuilderFactory.newInstance(definition, config);
@@ -94,7 +102,8 @@ public final class JirmDao<T> {
 				config.getSqlObjectConfig(), 
 				definition, config.getSqlWriterStrategy(), 
 				selectBuilderFactory, updateBuilderFactory, deleteBuilderFactory,
-				config.getDaoHooks());
+				config.getDaoHooks(),
+				jirmFactory);
 	}
 
 	private LinkedHashMap<String, Object> toLinkedHashMap(T t, boolean bulkInsert) {
