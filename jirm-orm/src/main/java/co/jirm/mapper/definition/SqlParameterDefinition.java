@@ -157,7 +157,6 @@ public class SqlParameterDefinition {
 			Class<?> parameterType, int order) {
 		
 		final SqlParameterDefinition definition;
-		String sn = null;
 		ManyToOne manyToOne = getAnnotation(objectType, parameterName, ManyToOne.class);
 		if (manyToOne != null) {
 			Class<?> subK = manyToOne.targetEntity();
@@ -168,6 +167,7 @@ public class SqlParameterDefinition {
 			JoinColumn joinColumn = getAnnotation(objectType, parameterName, JoinColumn.class);
 			SqlObjectDefinition<?> od = SqlObjectDefinition.fromClass(subK, config);
 			checkState( ! od.getIdParameters().isEmpty(), "No id parameters");
+			String sn = null;
 			if (joinColumn != null)
 				sn = joinColumn.name();
 			if (sn == null)
@@ -185,6 +185,7 @@ public class SqlParameterDefinition {
 			definition = SqlParameterDefinition.newComplexInstance(config.getConverter(), parameterName, sod, order, sn);
 		}
 		else {
+			String sn = null;
 			Column col = getAnnotation(objectType, parameterName, Column.class);
 			if (col != null && ! isNullOrEmpty(col.name()))
 				sn = col.name();
