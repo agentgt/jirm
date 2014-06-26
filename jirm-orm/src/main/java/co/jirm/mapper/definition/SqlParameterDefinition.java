@@ -35,6 +35,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static co.jirm.core.util.JirmPrecondition.check;
@@ -144,7 +145,26 @@ public class SqlParameterDefinition {
 				"No SQL columns/parameters found for: {}", k);
 		return parameters;
 	}
-	
+
+	static boolean isClassComplex(final Class<?> k) {
+		if (k.isAnnotationPresent(JsonIdentityInfo.class)) {
+			return true;
+		} else {
+			for (final Constructor<?> c : k.getDeclaredConstructors()) {
+				if (c.isAnnotationPresent(JsonCreator.class)) {
+					for (final Annotation[] as : c.getParameterAnnotations()) {
+						for (final Annotation a : as) {
+							if (JsonProperty.class.equals(a.annotationType())) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+
+			return false;
+		}
+	}
 	
 	public Optional<SqlParameterObjectDefinition> getObjectDefinition() {
 		return objectDefinition;
@@ -157,22 +177,44 @@ public class SqlParameterDefinition {
 			Class<?> parameterType, int order) {
 		
 		final SqlParameterDefinition definition;
-		ManyToOne manyToOne = getAnnotation(objectType, parameterName, ManyToOne.class);
-		if (manyToOne != null) {
-			Class<?> subK = manyToOne.targetEntity();
-			if (subK == null || subK.equals(void.class)) {
-				subK = parameterType;
-			}
 
+		final Class<?> manyToOneClass; // if manyToOneClass == null ==> this parameter is simple; it's complex otherwise.
+		final FetchType fetch;
+		{
+			final ManyToOne manyToOne = getAnnotation(objectType, parameterName, ManyToOne.class);
+			if (manyToOne != null) {
+				Class<?> subK = manyToOne.targetEntity();
+				// void.class is the default; the documentation forces usage of the the parameter type in the default case.
+				if (subK == null || subK.equals(void.class)) {
+					subK = parameterType;
+				}
+
+				manyToOneClass = subK;
+				fetch = manyToOne.fetch();
+			} else if (config.doAutoDetermineManyToOne() && isClassComplex(parameterType)) {
+				final SqlObjectDefinition<?> pd = SqlObjectDefinition.fromClass(parameterType, config);
+				if (!pd.getIdParameters().isEmpty()) {
+					manyToOneClass = parameterType;
+					fetch = FetchType.EAGER; // todo probably the fetch type should be configurable.
+				} else {
+					manyToOneClass = null;
+					fetch = null;
+				}
+			} else {
+				manyToOneClass = null;
+				fetch = null;
+			}
+		}
+
+		if (manyToOneClass != null) {
 			JoinColumn joinColumn = getAnnotation(objectType, parameterName, JoinColumn.class);
-			SqlObjectDefinition<?> od = SqlObjectDefinition.fromClass(subK, config);
+			SqlObjectDefinition<?> od = SqlObjectDefinition.fromClass(manyToOneClass, config);
 			checkState( ! od.getIdParameters().isEmpty(), "No id parameters");
 			String sn = null;
 			if (joinColumn != null)
 				sn = joinColumn.name();
 			if (sn == null)
 				sn = config.getNamingStrategy().propertyToColumnName(parameterName);
-			FetchType fetch = manyToOne.fetch();
 			int depth;
 			if (FetchType.LAZY == fetch) {
 				depth = 1;
