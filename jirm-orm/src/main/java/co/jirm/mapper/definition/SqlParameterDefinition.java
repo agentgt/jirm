@@ -201,14 +201,33 @@ public class SqlParameterDefinition {
 		return definition;
 	}
 
+    private static Field getDeclaredFieldInclParents(final Class<?> k, String fieldName) throws NoSuchFieldException {
+        Class<?> curr = k;
+
+        NoSuchFieldException firstEx = null;
+        while (curr != null) {
+            try {
+                return curr.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException ex) {
+                if (firstEx == null) {
+                    firstEx = ex;
+                }
+            }
+
+            curr = curr.getSuperclass();
+        }
+
+        throw firstEx;
+    }
+
 	private static <T extends Annotation> T getAnnotation(Class<?> k, String value, Class<T> a) {
 		try {
-			Field f = k.getDeclaredField(value);
+			Field f = getDeclaredFieldInclParents(k, value);
 			return f.getAnnotation(a);
 		} catch (SecurityException e) {
 			throw new RuntimeException(e);
 		} catch (NoSuchFieldException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("Annotation getting of a class " + k + " has problems", e);
 		}
 	}
 	
