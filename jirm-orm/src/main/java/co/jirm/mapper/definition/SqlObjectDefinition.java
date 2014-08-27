@@ -82,7 +82,7 @@ public class SqlObjectDefinition<T> {
 			sqlName = t.name();
 		}
 		else {
-			sqlName = config.getNamingStrategy().classToTableName(objectType.getSimpleName());
+			sqlName = config.getNamingStrategy().classToTableName(objectType.getName());
 		}
 	}
 	
