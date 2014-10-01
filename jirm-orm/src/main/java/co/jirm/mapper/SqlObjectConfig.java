@@ -34,17 +34,28 @@ public class SqlObjectConfig {
 	private final SqlObjectConverter objectMapper;
 	private final transient Cache<Class<?>, SqlObjectDefinition<?>> cache;
 	private final int maximumLoadDepth = 4;
-	
+	private final boolean autoManyToOneDetermination;
+
+	protected SqlObjectConfig(
+			NamingStrategy namingStrategy,
+			SqlObjectConverter objectMapper,
+			SqlParameterConverter converter,
+			Cache<Class<?>, SqlObjectDefinition<?>> cache) {
+		this(namingStrategy, objectMapper, converter, cache, false);
+	}
+
 	protected SqlObjectConfig(
 			NamingStrategy namingStrategy, 
 			SqlObjectConverter objectMapper, 
 			SqlParameterConverter converter, 
-			Cache<Class<?>, SqlObjectDefinition<?>> cache) {
+			Cache<Class<?>, SqlObjectDefinition<?>> cache,
+			boolean autoManyToOneDetermination) {
 		super();
 		this.namingStrategy = namingStrategy;
 		this.converter = converter;
 		this.objectMapper = objectMapper;
 		this.cache = cache;
+		this.autoManyToOneDetermination = autoManyToOneDetermination;
 	}
 	
 	
@@ -71,6 +82,10 @@ public class SqlObjectConfig {
 	
 	public Cache<Class<?>, SqlObjectDefinition<?>> getCache() {
 		return cache;
+	}
+
+	public boolean doAutoDetermineManyToOne() {
+		return autoManyToOneDetermination;
 	}
 	
 	public static SqlObjectConfig DEFAULT = 
