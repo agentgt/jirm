@@ -15,10 +15,12 @@
  */
 package co.jirm.mapper.definition;
 
+import static co.jirm.core.util.JirmPrecondition.check;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
+import java.beans.ConstructorProperties;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -35,13 +37,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import static co.jirm.core.util.JirmPrecondition.check;
 import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.converter.SqlParameterConverter;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
 
 public class SqlParameterDefinition {
@@ -119,35 +119,20 @@ public class SqlParameterDefinition {
 		Map<String, SqlParameterDefinition> parameters = new LinkedHashMap<String, SqlParameterDefinition>();
 		Constructor<?> cons[] = k.getDeclaredConstructors();
 		for (Constructor<?> c : cons) {
-			JsonCreator jc = c.getAnnotation(JsonCreator.class);
-			if (jc == null) continue;
-			Annotation[][] aas = c.getParameterAnnotations();
-			Class<?>[] pts = c.getParameterTypes();
-			if (aas == null || aas.length == 0) continue;
-			for (int i = 0; i < aas.length; i++) {
-				Annotation[] as = aas[i];
-				Class<?> parameterType = pts[i];
-				for (int j = 0; j < as.length; j++) {
-					Annotation a = as[j];
-					//TODO handle http://docs.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.html
-					//https://github.com/joshbeitelspacher/jackson-extensions/blob/master/src/main/java/com/netbeetle/jackson/ConstructorPropertiesAnnotationIntrospector.java
-					if (JsonProperty.class.equals(a.annotationType())) {
-						JsonProperty p = (JsonProperty) a;
-						String value = p.value();
-						final SqlParameterDefinition definition = parameterDef(config, k, value, parameterType, i);
-						parameters.put(value, definition);
-					}
-				}
+			if (c.isAnnotationPresent(JsonCreator.class)) {
+			  return getSqlBeanParametersFromJsonCreatorConstructor(c, config);
 			}
-			break;
+			
+			if (c.isAnnotationPresent(ConstructorProperties.class)) {
+			  return getSqlBeanParametersFromConstructorProperties(c, config);
+			}
 		}
 		check.argument(! parameters.isEmpty(), 
 				"No SQL columns/parameters found for: {}", k);
 		return parameters;
 	}
 	
-	
-	public Optional<SqlParameterObjectDefinition> getObjectDefinition() {
+  public Optional<SqlParameterObjectDefinition> getObjectDefinition() {
 		return objectDefinition;
 	}
 
@@ -307,4 +292,42 @@ public class SqlParameterDefinition {
 		return true;
 	}
 	
+	private static Map<String, SqlParameterDefinition> getSqlBeanParametersFromJsonCreatorConstructor(Constructor<?> c, SqlObjectConfig config) {
+	  Map<String, SqlParameterDefinition> parameters = new LinkedHashMap<String, SqlParameterDefinition>();
+    Annotation[][] aas = c.getParameterAnnotations();
+    Class<?>[] pts = c.getParameterTypes();
+    if (aas == null || aas.length == 0) {
+      return parameters;
+    }
+    
+    for (int i = 0; i < aas.length; i++) {
+      Annotation[] as = aas[i];
+      Class<?> parameterType = pts[i];
+      for (int j = 0; j < as.length; j++) {
+        Annotation a = as[j];
+        if (JsonProperty.class.equals(a.annotationType())) {
+          JsonProperty p = (JsonProperty) a;
+          String value = p.value();
+          final SqlParameterDefinition definition = parameterDef(config, c.getDeclaringClass(), value, parameterType, i);
+          parameters.put(value, definition);
+        }
+      }
+      
+    }
+    
+    return parameters;
+	}
+  
+  private static Map<String, SqlParameterDefinition> getSqlBeanParametersFromConstructorProperties(Constructor<?> c, SqlObjectConfig config) {
+    Map<String, SqlParameterDefinition> parameters = new LinkedHashMap<String, SqlParameterDefinition>();
+    
+    String[] constructorProperties = c.getAnnotation(ConstructorProperties.class).value();
+    Class<?>[] pts = c.getParameterTypes();
+
+    for (int i = 0; i < pts.length; i++) {
+      parameters.put(constructorProperties[i], parameterDef(config, c.getDeclaringClass(), constructorProperties[i], pts[i], i));
+    }
+    
+    return parameters;
+  }
 }

@@ -17,16 +17,19 @@ package co.jirm.mapper.definition;
 
 import static org.junit.Assert.*;
 
+import java.beans.ConstructorProperties;
+
 import javax.persistence.Column;
 import javax.persistence.Id;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.junit.Before;
-import org.junit.Test;
-
 import co.jirm.core.JirmIllegalArgumentException;
 import co.jirm.mapper.SqlObjectConfig;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.junit.Before;
+import org.junit.Test;
 
 
 public class SqlObjectDefinitionTest {
@@ -45,6 +48,14 @@ public class SqlObjectDefinitionTest {
 	@Test(expected=JirmIllegalArgumentException.class)
 	public void testNoDefinitionFailure() {
 		SqlObjectDefinition.fromClass(NoDef.class, SqlObjectConfig.DEFAULT);
+	}
+	
+	@Test
+	public void testConstructorProperties() {
+	  SqlObjectDefinition<ConstructorPropertiesTest> d = SqlObjectDefinition.fromClass(ConstructorPropertiesTest.class, SqlObjectConfig.DEFAULT);
+	  
+	  assertTrue(d.getIdParameters().containsKey("id"));
+	  assertEquals("name", d.getParameters().get("name").sqlName());
 	}
 	
 	public static class ProtectedConsTest {
@@ -74,5 +85,17 @@ public class SqlObjectDefinitionTest {
 	}
 	
 	public static class NoDef {}
+	
+	public static class ConstructorPropertiesTest {
+	  @Id
+	  private final Long id;
+    private final String name;
+	  
+	  @ConstructorProperties({ "id", "name" })
+	  public ConstructorPropertiesTest(Long id, String name) {
+      this.id = id;
+      this.name = name;
+	  }
+	}
 
 }
