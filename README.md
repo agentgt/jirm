@@ -12,22 +12,22 @@ Inspiration
 **How JIRM is different**
 
  1. CRUD truly **Immutable** POJOs. That is all fields are final with a constructor that fills them.
- 1. Uses [JPA annotations](https://github.com/agentgt/jirm/tree/master/jirm-orm#supported-jpa-annotations) to help map the SQL ResultSet to your POJOs 
- 1. READ's hiearchy of Immutable POJOs. That is `@ManyToOne` 's are loaded eagerly, but for WRITE we only write the top POJO.
+ 1. Uses [JPA annotations](https://github.com/agentgt/jirm/tree/master/jirm-orm#supported-jpa-annotations) to help map the SQL ResultSet to your POJOs.
+ 1. READs hierarchy of Immutable POJOs. That is `@ManyToOne`s are loaded eagerly, but for WRITE we only write the top POJO.
  1. Once the POJO is loaded there is no magic. It is not "enhanced". It is safe to deserialize or cache especially because they are immutable.
- 1. Manually do One to Many (ie collections) which IMHO is the right way to do it (because there is nothing worse than accidentally pulling 1000 items).
+ 1. Manually do one-to-many (i.e. collections) which IMHO is the right way to do it (because there is nothing worse than accidentally pulling 1000 items).
  1. No hidden lazy loading.
  1. Threadsafe - Most of the library is threadsafe.
- 1. Stateless (like Ajave EBean... ie no session factory).
- 1. Fluent API
+ 1. Stateless (like Ajave EBean... i.e. no session factory).
+ 1. Fluent API.
  1. Or you can use SQL with IMHO the best [**SQL Placeholder templates**](https://github.com/agentgt/jirm/tree/master/jirm-core#sql-placeholder-parser).
- 1. Sits nicely on top of other JDBC wrappers like [**Spring JDBC**](http://static.springsource.org/spring/docs/3.0.x/reference/jdbc.html)
+ 1. Sits nicely on top of other JDBC wrappers like [**Spring JDBC**](http://static.springsource.org/spring/docs/3.0.x/reference/jdbc.html).
  1. Let your JDBC wrapper handle transactions - e.g. compile time Transaction Support through AspectJ (Through Spring JDBC).
  
  
 **JIRM does all of this and more!**
 
-There was also some one looking for one here:
+There was also someone looking for one here:
 http://stackoverflow.com/questions/2698665/orm-supporting-immutable-classes
 
 Install
@@ -54,7 +54,7 @@ JirmFactory
 You need a JirmFactory to use Jirm. Right now Spring JDBC is the only implementation but it is 
 trivial to support other JDBC wrappers by implementing `SqlExecutor` interface.
 
-*Why choose Spring JDBC?* - Because its an extremly mature JDBC wrapper that does most things correctly 
+*Why choose Spring JDBC?* - Because it's an extremely mature JDBC wrapper that does most things correctly 
 (exception handling and transactions).
 
 Spring Config:
@@ -78,14 +78,14 @@ Now you can create a *threadsafe* `JirmDao` for your Immutable POJO like:
 JirmDao
 -------
 
-The `JirmDao` allows you to CRUD immutable POJO's. Immutable POJO's have all of their member fields 
-`final` and the fields themselves should be immutable objects. Immutable POJO's require a constructor to instantiate
+The `JirmDao` allows you to CRUD immutable POJOs. Immutable POJOs have all of their member fields 
+`final` and the fields themselves should be immutable objects. Immutable POJOs require a constructor to instantiate
 their member fields.
 
 Because immutable objects require constructor based loading of fields we need to make a constructor with all the 
-fields from table (and/or ManyToOne child tables... more on that later).
+fields from table (and/or many-to-one child tables... more on that later).
 
-Unfortuanately the JVM has some limitations on reflection of constructor based arguments so you will have to annotate
+Unfortunately the JVM has some limitations on reflection of constructor based arguments so you will have to annotate
 your constructor with either JDK's `@ConstructorProperties` or Jackson's `@JsonCreator` and `@JsonProperty`
 
 ```java
@@ -132,7 +132,7 @@ CREATE TABLE test_bean
 );
 ```
 
-Lets see some CRUD of our immutable `TestBean`
+Let's see some CRUD of our immutable `TestBean`
 
 ```java
 
@@ -174,7 +174,7 @@ dao.delete()
    .where().property("stringProp").eq(id)
    .execute();
 
-//Now lets select some TestBeans.
+//Now let's select some TestBeans.
 List<TestBean> list = 
     dao.select().where()
     .property("longProp", 1L)
@@ -208,7 +208,7 @@ public class ParentBean {
 }
 ```
 
-Now we can select `ParentBean` using plain SQL by making a SQL file in the classpath we'll call it `select-parent-bean.sql`.
+Now we can select `ParentBean` using plain SQL by making a SQL file in the class path we'll call it `select-parent-bean.sql`.
 
 ```sql
 SELECT parent_bean.id    AS "id", 
@@ -221,7 +221,7 @@ WHERE test.string_prop = 'test' -- {testName}
 AND test.long_prop = 100 -- {testAmount}
 ```
 
-Yes the above is real SQL with out any placeholders that would break normal SQL parsing.
+Yes the above is real SQL without any placeholders that would break normal SQL parsing.
 We use comments on the end of the line to indicate a place holder. You can read more about it
 [here](https://github.com/agentgt/jirm/tree/master/jirm-core#sql-placeholder-parser).
 
