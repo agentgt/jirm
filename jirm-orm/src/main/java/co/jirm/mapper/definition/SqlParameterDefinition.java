@@ -186,14 +186,74 @@ public class SqlParameterDefinition {
 		return definition;
 	}
 
+    private static Field getDeclaredFieldInclParents(final Class<?> k, String fieldName) throws NoSuchFieldException {
+        Class<?> curr = k;
+
+        NoSuchFieldException firstEx = null;
+        while (curr != null) {
+            try {
+                return curr.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException ex) {
+                if (firstEx == null) {
+                    firstEx = ex;
+                }
+            }
+
+            curr = curr.getSuperclass();
+        }
+
+        throw firstEx;
+    }
+
+    private static <T extends Annotation> T getAnnotationInMethod(Class<?> k, String value, Class<T> a) throws NoSuchMethodException {
+        if (value.isEmpty()) {
+            throw new IllegalArgumentException("Value must be a non-empty string");
+        }
+
+        final String baseMethodName = Character.toUpperCase(value.charAt(0)) + value.substring(1);
+
+        T res = null;
+        NoSuchMethodException firstEx = null;
+        boolean hasFoundMethod = false;
+        for (Class<?> curr = k; curr != null && res == null; curr = curr.getSuperclass()) {
+            try {
+                res = curr.getDeclaredMethod("get" + baseMethodName).getAnnotation(a);
+                hasFoundMethod = true;
+            } catch (NoSuchMethodException ex1) {
+                try {
+                    res = curr.getDeclaredMethod("is" + baseMethodName).getAnnotation(a);
+                    hasFoundMethod = true;
+                } catch (NoSuchMethodException ex2) {
+                    if (firstEx == null) {
+                        firstEx = ex2;
+                    }
+                }
+            }
+        }
+
+        if (hasFoundMethod) {
+            return res;
+        } else {
+            throw firstEx;
+        }
+    }
+
 	private static <T extends Annotation> T getAnnotation(Class<?> k, String value, Class<T> a) {
 		try {
-			Field f = k.getDeclaredField(value);
-			return f.getAnnotation(a);
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		} catch (NoSuchFieldException e) {
-			throw new RuntimeException(e);
+			try {
+				Field f = getDeclaredFieldInclParents(k, value);
+				return f.getAnnotation(a);
+			} catch (SecurityException e) {
+				throw new RuntimeException(e);
+			} catch (NoSuchFieldException e) {
+				throw new RuntimeException("Annotation getting of a class " + k + " has problems", e);
+			}
+		} catch (final RuntimeException rex) {
+			try {
+				return getAnnotationInMethod(k, value, a);
+			} catch (NoSuchMethodException e) {
+				throw rex;
+			}
 		}
 	}
 	
