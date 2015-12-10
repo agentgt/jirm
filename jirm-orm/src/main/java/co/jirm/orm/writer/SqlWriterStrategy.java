@@ -47,8 +47,12 @@ public class SqlWriterStrategy {
 		this.clauseSpaceSeparator = clauseSpaceSeparator;
 	}
 
+	protected SqlWriterStrategy(String sep) {
+		this(Joiner.on("," + sep), sep);
+	}
+
 	public static SqlWriterStrategy newInstance(String sep) {
-		return new SqlWriterStrategy(Joiner.on("," + sep),sep);
+		return new SqlWriterStrategy(sep);
 	}
 
 	public StringBuilder insertStatement(StringBuilder qb, final SqlObjectDefinition<?> definition, Map<String, Object> m) {

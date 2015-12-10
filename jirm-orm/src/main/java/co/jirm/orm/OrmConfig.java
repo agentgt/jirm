@@ -17,21 +17,29 @@ package co.jirm.orm;
 
 import co.jirm.core.execute.SqlExecutor;
 import co.jirm.mapper.SqlObjectConfig;
+import co.jirm.orm.dao.DaoHooks;
 import co.jirm.orm.writer.SqlWriterStrategy;
 
+import com.google.common.base.Optional;
 
 public class OrmConfig {
 	private final SqlExecutor sqlExecutor;
 	private final SqlObjectConfig sqlObjectConfig;
 	private final SqlWriterStrategy sqlWriterStrategy;
-	
-	private OrmConfig(SqlExecutor sqlExecutor, SqlObjectConfig sqlObjectConfig, SqlWriterStrategy sqlWriterStrategy) {
+	private final Optional<DaoHooks> daoHooks;
+
+	public OrmConfig(SqlExecutor sqlExecutor, SqlObjectConfig sqlObjectConfig, SqlWriterStrategy sqlWriterStrategy, Optional<DaoHooks> daoHooks) {
 		super();
 		this.sqlExecutor = sqlExecutor;
 		this.sqlObjectConfig = sqlObjectConfig;
 		this.sqlWriterStrategy = sqlWriterStrategy;
+		this.daoHooks = daoHooks;
 	}
-	
+
+	public OrmConfig(SqlExecutor sqlExecutor, SqlObjectConfig sqlObjectConfig, SqlWriterStrategy sqlWriterStrategy) {
+		this(sqlExecutor, sqlObjectConfig, sqlWriterStrategy, Optional.<DaoHooks>absent());
+	}
+
 	public static OrmConfig newInstance(SqlExecutor sqlExecutor, SqlObjectConfig objectConfig) {
 		return new OrmConfig(sqlExecutor, SqlObjectConfig.DEFAULT, SqlWriterStrategy.newInstance("\n"));
 	}
@@ -51,4 +59,8 @@ public class OrmConfig {
 	public SqlExecutor getSqlExecutor() {
 		return sqlExecutor;
 	}
+
+    public Optional<DaoHooks> getDaoHooks() {
+        return daoHooks;
+    }
 }
