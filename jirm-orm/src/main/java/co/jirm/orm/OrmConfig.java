@@ -25,7 +25,7 @@ public class OrmConfig {
 	private final SqlObjectConfig sqlObjectConfig;
 	private final SqlWriterStrategy sqlWriterStrategy;
 	
-	private OrmConfig(SqlExecutor sqlExecutor, SqlObjectConfig sqlObjectConfig, SqlWriterStrategy sqlWriterStrategy) {
+	public OrmConfig(SqlExecutor sqlExecutor, SqlObjectConfig sqlObjectConfig, SqlWriterStrategy sqlWriterStrategy) {
 		super();
 		this.sqlExecutor = sqlExecutor;
 		this.sqlObjectConfig = sqlObjectConfig;
