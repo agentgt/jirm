@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 
@@ -35,9 +36,14 @@ public class SpringJirmFactory implements JirmFactory {
 	private final JdbcTemplate jdbcTemplate;
 	private final Supplier<SqlExecutor> sqlExecutorSupplier;
 	private final Supplier<OrmConfig> ormConfigSupplier;
-	
+	private final boolean recursive;
+
 	@Autowired
 	public SpringJirmFactory(DataSource dataSource) {
+		this(dataSource, false);
+	}
+
+	public SpringJirmFactory(DataSource dataSource, boolean recursive) {
 		jdbcTemplate = new JdbcTemplate(dataSource);
 		ormConfigSupplier = Suppliers.memoize(new Supplier<OrmConfig>() {
 			@Override
@@ -51,10 +57,11 @@ public class SpringJirmFactory implements JirmFactory {
 				return SpringJirmFactory.this.createSqlExecutor();
 			}
 		});
+		this.recursive = recursive;
 	}
 	
 	public <T> JirmDao<T> daoFor(Class<T> k) {
-		return JirmDao.newInstance(k, ormConfigSupplier.get());
+		return JirmDao.newInstance(k, ormConfigSupplier.get(), recursive ? Optional.<JirmFactory>of(this) : Optional.<JirmFactory>absent());
 	}
 	
 	protected OrmConfig createOrmConfig() {

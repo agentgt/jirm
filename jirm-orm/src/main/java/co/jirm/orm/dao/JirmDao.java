@@ -34,6 +34,7 @@ import co.jirm.mapper.SqlObjectConfig;
 import co.jirm.mapper.copy.CopyBuilder;
 import co.jirm.mapper.definition.SqlObjectDefinition;
 import co.jirm.mapper.definition.SqlParameterDefinition;
+import co.jirm.orm.JirmFactory;
 import co.jirm.orm.OrmConfig;
 import co.jirm.orm.builder.delete.DeleteBuilderFactory;
 import co.jirm.orm.builder.delete.DeleteRootClauseBuilder;
@@ -61,6 +62,8 @@ public final class JirmDao<T> {
 	private final UpdateBuilderFactory<T> updateBuilderFactory;
 	private final DeleteBuilderFactory<T> deleteBuilderFactory;
 	private final SqlWriterStrategy writerStrategy;
+    private final Optional<DaoHooks> daoHooks;
+    private final Optional<JirmFactory> jirmFactory;
 	
 	private JirmDao(
 			SqlExecutor sqlExecutor, 
@@ -69,7 +72,9 @@ public final class JirmDao<T> {
 			SqlWriterStrategy writerStrategy, 
 			SelectBuilderFactory<T> selectBuilderFactory,
 			UpdateBuilderFactory<T> updateBuilderFactory,
-			DeleteBuilderFactory<T> deleteBuilderFactory) {
+			DeleteBuilderFactory<T> deleteBuilderFactory,
+			Optional<DaoHooks> daoHooks,
+			Optional<JirmFactory> jirmFactory) {
 		super();
 		this.sqlExecutor = sqlExecutor;
 		this.config = config;
@@ -78,9 +83,15 @@ public final class JirmDao<T> {
 		this.selectBuilderFactory = selectBuilderFactory;
 		this.updateBuilderFactory = updateBuilderFactory;
 		this.deleteBuilderFactory = deleteBuilderFactory;
+        this.daoHooks = daoHooks;
+        this.jirmFactory = jirmFactory;
 	}
-	
+
 	public static <T> JirmDao<T> newInstance(Class<T> type, OrmConfig config) {
+		return newInstance(type, config, Optional.<JirmFactory>absent());
+	}
+
+	public static <T> JirmDao<T> newInstance(Class<T> type, OrmConfig config, Optional<JirmFactory> jirmFactory) {
 		SqlObjectDefinition<T> definition = config.getSqlObjectConfig().resolveObjectDefinition(type);
 		SelectBuilderFactory<T> selectBuilderFactory = SelectBuilderFactory.newInstance(definition, config);
 		UpdateBuilderFactory<T> updateBuilderFactory = UpdateBuilderFactory.newInstance(definition, config);
@@ -90,10 +101,12 @@ public final class JirmDao<T> {
 				config.getSqlExecutor(), 
 				config.getSqlObjectConfig(), 
 				definition, config.getSqlWriterStrategy(), 
-				selectBuilderFactory, updateBuilderFactory, deleteBuilderFactory);
+				selectBuilderFactory, updateBuilderFactory, deleteBuilderFactory,
+				config.getDaoHooks(),
+				jirmFactory);
 	}
 
-	private LinkedHashMap<String, Object> toLinkedHashMap(T t, boolean bulkInsert) {
+	private LinkedHashMap<String, Object> toLinkedHashMap(T t, boolean bulkInsert, ForeignAct foreignAct) {
 		LinkedHashMap<String, Object> m = config.getObjectMapper().convertObjectToSqlMap(t);
 		/*
 		 * Replace the complex objects with there ids.
@@ -108,6 +121,8 @@ public final class JirmDao<T> {
 					/*
 					 * TODO: We only set it if the object is actually present. ie do you really want to set null?
 					 */
+					actForeign(pd.getParameterType(), m.get(pd.getParameterName()), foreignAct);
+
 					m.put(pd.getParameterName(), idDef.convertToSql(nkv.object));
 				}
 				else if (bulkInsert) {
@@ -139,7 +154,35 @@ public final class JirmDao<T> {
 		return m;
 				
 	}
-	
+
+	private void actForeign(final Class<?> clazz, final Object object, ForeignAct foreignAct) {
+		if (object != null && jirmFactory.isPresent()) {
+			@SuppressWarnings("unchecked")
+			final JirmDao<Object> foreignDao = ((JirmDao<Object>) jirmFactory.get().daoFor(clazz));
+
+			foreignAct.act(foreignDao, object);
+		}
+	}
+
+	private static interface ForeignAct {
+		public <T> void act(final JirmDao<T> dao, final T object);
+
+		public static final ForeignAct NO_ACT = new ForeignAct() {
+			@Override
+			public <T> void act(final JirmDao<T> dao, final T object) {
+			}
+		};
+	}
+
+	private static class ForeignInsert implements ForeignAct {
+		public static final ForeignInsert INSERT = new ForeignInsert();
+
+		@Override
+		public <T> void act(final JirmDao<T> dao, final T object) {
+			dao.insert(object);
+		}
+	}
+
 	public CopyBuilder<T> copyBuilder() {
 		return CopyBuilder.newInstance(definition.getObjectType(), config.getObjectMapper());
 	}
@@ -181,7 +224,7 @@ public final class JirmDao<T> {
 	}
 	
 	public void insert(T t) {
-		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false);
+		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false, ForeignInsert.INSERT);
 		Iterator<Entry<String, Object>> it = m.entrySet().iterator();
 		/*
 		 * Remove the null values that are to be generated.
@@ -207,12 +250,14 @@ public final class JirmDao<T> {
 	}
 	
 	public UpdateObjectBuilder<T> update(T t) {
-		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false);
+		// todo to probably change the foreign act (probably with the ForeignAct interface).
+		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false, ForeignAct.NO_ACT);
 		return updateBuilderFactory.update(m);
 	}
 
 	public T reload(T t) {
-		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false);
+        // todo to probably change the foreign act (probably with the ForeignAct interface).
+		LinkedHashMap<String, Object> m = toLinkedHashMap(t, false, ForeignAct.NO_ACT);
 		Optional<SqlParameterDefinition> id = definition.idParameter();
 		check.state(id.isPresent(), "No id definition");
 		Optional<Object> o = id.get().valueFrom(m);
@@ -220,6 +265,10 @@ public final class JirmDao<T> {
 	}
 	
 	public void insert(Map<String,Object> values) {
+		if (daoHooks.isPresent()) {
+			daoHooks.get().beforeInsert(definition, values);
+		}
+
 		StringBuilder qb = new StringBuilder();
 		writerStrategy.insertStatement(qb, definition, values);
 		sqlExecutor.update(qb.toString(), writerStrategy.fillValues(definition, values).toArray());
@@ -229,7 +278,7 @@ public final class JirmDao<T> {
 		Iterator<Map<String,Object>> t = Iterators.transform(values, new Function<T, Map<String,Object>>() {
 			@Override
 			public Map<String, Object> apply(T input) {
-				return toLinkedHashMap(input, true);
+				return toLinkedHashMap(input, true, ForeignInsert.INSERT);
 			}
 		});
 		insertMaps(t, batchSize);
