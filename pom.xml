@@ -131,6 +131,9 @@
           <excludes>
             <exclude>**/*BenchTest.java</exclude>
           </excludes>
+						<parallel>classes</parallel>
+						<useUnlimitedThreads>true</useUnlimitedThreads>
+
         </configuration>
       </plugin>
 
@@ -263,6 +266,9 @@
 							<database.url>jdbc:postgresql://127.0.0.1:5432/myapp_test</database.url>
 							<database.password />
 						</systemPropertyVariables>
+						<parallel>classes</parallel>
+						<useUnlimitedThreads>true</useUnlimitedThreads>
+
 					</configuration>
 				</plugin>
 			</plugins>
