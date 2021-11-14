@@ -131,6 +131,7 @@
           <excludes>
             <exclude>**/*BenchTest.java</exclude>
           </excludes>
+						<disableXmlReport>${closeTestReports}</disableXmlReport>
         </configuration>
       </plugin>
 
@@ -263,6 +264,7 @@
 							<database.url>jdbc:postgresql://127.0.0.1:5432/myapp_test</database.url>
 							<database.password />
 						</systemPropertyVariables>
+						<disableXmlReport>${closeTestReports}</disableXmlReport>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -279,5 +281,6 @@
     <!-- Encoding UTF-8 -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jackson2-version>2.0.5</jackson2-version>
+  	<closeTestReports>true</closeTestReports>
   </properties>
 </project>
